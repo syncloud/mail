@@ -19,7 +19,7 @@ if [ ! -z "$2" ]; then
     VERSION=$2
 fi
 
-#./coin_lib.sh
+./coin_lib.sh
 
 cp -r ${DIR}/src lib/syncloud-mail-${VERSION}
 
