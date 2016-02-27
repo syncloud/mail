@@ -126,8 +126,8 @@ def test_install(auth):
 def test_copy_logs():
     os.mkdir(LOG_DIR)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
-    run_ssh('ls -la /opt/app/diaspora/diaspora/log', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/app/diaspora/diaspora/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+    run_ssh('ls -la /opt/app/diaspora/mail/log', password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/app/mail/diaspora/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
@@ -137,6 +137,6 @@ def test_copy_logs():
 
 def __local_install(auth):
     email, password, domain, release, version, arch = auth
-    run_scp('{0}/../diaspora-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug install /diaspora-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+    run_scp('{0}/../mail-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /mail-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
     time.sleep(3)
