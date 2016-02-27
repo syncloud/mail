@@ -16,19 +16,19 @@ class Config:
         self.filename = filename
 
     def app_name(self):
-        return self.parser.get('diaspora', 'app_name')
+        return self.parser.get('mail', 'app_name')
 
     def install_path(self):
-        return self.parser.get('diaspora', 'install_path')
+        return self.parser.get('mail', 'install_path')
 
     def data_dir(self):
-        return self.parser.get('diaspora', 'data_dir')
+        return self.parser.get('mail', 'data_dir')
 
     def bin_dir(self):
-        return self.parser.get('diaspora', 'bin_dir')
+        return self.parser.get('mail', 'bin_dir')
 
     def root_path(self):
-        return self.parser.get('diaspora', 'root_path')
+        return self.parser.get('mail', 'root_path')
 
 
 
