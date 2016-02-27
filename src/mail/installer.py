@@ -3,6 +3,7 @@ from os.path import isdir, join
 import shutil
 from subprocess import check_output
 
+import pwd
 from syncloud_app import logger
 
 from syncloud_platform.systemd.systemctl import remove_service, add_service
@@ -36,6 +37,14 @@ class MailInstaller:
         if not isdir(join(app_data_dir, 'log')):
             app.create_data_dir(app_data_dir, 'log', self.config.app_name())
 
+        if not isdir(join(app_data_dir, 'spool')):
+            app.create_data_dir(app_data_dir, 'spool', self.config.app_name())
+
+        if not isdir(join(app_data_dir, 'data')):
+            app.create_data_dir(app_data_dir, 'data', self.config.app_name())
+
+        useradd('maildrop')
+
         print("setup systemd")
 
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
@@ -43,7 +52,7 @@ class MailInstaller:
 
         self.prepare_storage()
 
-        platform_app.register_app('diaspora', self.config.port())
+        # platform_app.register_app('mail', self.config.port())
 
     def remove(self):
 
@@ -53,11 +62,13 @@ class MailInstaller:
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
 
-
     def prepare_storage(self):
         storage.init(self.config.app_name(), self.config.app_name())
 
-    def update_domain(self):
-        self.update_configuraiton()
-        self.recompile_assets()
 
+def useradd(user):
+    try:
+        pwd.getpwnam(user)
+        return 'user {0} exists'.format(user)
+    except KeyError:
+        return check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(user), shell=True)

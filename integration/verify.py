@@ -67,6 +67,9 @@ def test_install(auth):
     __local_install(auth)
 
 
+def test_running_smtp():
+    print(check_output('nc -zv -w 1 localhost 25', shell=True))
+
 # def test_upload_profile_photo(diaspora_session, user_domain):
 #
 #     response = diaspora_session.get('https://127.0.0.1/profile/edit',
@@ -126,8 +129,10 @@ def test_install(auth):
 def test_copy_logs():
     os.mkdir(LOG_DIR)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
-    run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+
+    # No logs yet, need to embed rsyslog daemon
+    # run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
+    # run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
