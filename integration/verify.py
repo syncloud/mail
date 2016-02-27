@@ -126,8 +126,8 @@ def test_install(auth):
 def test_copy_logs():
     os.mkdir(LOG_DIR)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
-    run_ssh('ls -la /opt/app/diaspora/mail/log', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/app/mail/diaspora/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+    run_ssh('ls -la /opt/app/mail/log', password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/app/mail/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
