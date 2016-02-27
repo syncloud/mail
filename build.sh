@@ -21,7 +21,7 @@ fi
 
 #./coin_lib.sh
 
-#cp -r ${DIR}/src lib/syncloud-owncloud-${VERSION}
+cp -r ${DIR}/src lib/syncloud-mail-${VERSION}
 
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
@@ -34,9 +34,9 @@ coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postfix_${ARCH}/lastSucces
 #coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postgresql_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
 #coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
-#cp -r bin ${BUILD_DIR}
-#cp -r config ${BUILD_DIR}
-#cp -r lib ${BUILD_DIR}
+cp -r bin ${BUILD_DIR}
+cp -r config ${BUILD_DIR}
+cp -r lib ${BUILD_DIR}
 
 #mv ${BUILD_DIR}/owncloud/config ${BUILD_DIR}/owncloud/config.orig
 
