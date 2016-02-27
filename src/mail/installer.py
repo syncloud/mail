@@ -39,8 +39,7 @@ class MailInstaller:
         print("setup systemd")
 
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
-
- self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
+        self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
 
