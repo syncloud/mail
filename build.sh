@@ -30,8 +30,8 @@ mkdir -p ${BUILD_DIR}
 DOWNLOAD_URL=http://build.syncloud.org:8111/guestAuth/repository/download
 
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_postfix_${ARCH}/lastSuccessful/postfix-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_nginx_${ARCH}/lastSuccessful/dovecot-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_rsyslog_${ARCH}/lastSuccessful/postgresql-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_dovecot_${ARCH}/lastSuccessful/dovecot-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/thirdparty_rsyslog_${ARCH}/lastSuccessful/rsyslog-${ARCH}.tar.gz
 #coin --to ${BUILD_DIR} raw https://download.owncloud.org/community/${NAME}-${OWNCLOUD_VERSION}.tar.bz2
 
 cp -r bin ${BUILD_DIR}
