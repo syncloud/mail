@@ -16,6 +16,7 @@ from mail.config import Config
 from mail.config import UserConfig
 
 SYSTEMD_POSTFIX = 'mail-postfix'
+SYSTEMD_DOVECOT = 'mail-dovecot'
 
 
 class MailInstaller:
@@ -47,6 +48,7 @@ class MailInstaller:
 
         print("setup systemd")
 
+        add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
@@ -58,6 +60,7 @@ class MailInstaller:
 
         platform_app.unregister_app('mail')
         remove_service(SYSTEMD_POSTFIX)
+        remove_service(SYSTEMD_DOVECOT)
         
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
