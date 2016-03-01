@@ -1,13 +1,11 @@
 [Unit]
-Description = Mail server
+Description = Mail Dovecot
 
 [Service]
-ExecStart  = /opt/app/mail/dovecot
-/sbin/dovecot -F -c /opt/app/mail/config/dovecot/dovecot.conf
-ExecReload = /opt/app/mail/dovecot/sbin/dovecot reload
-ExecStop = /opt/app/mail/dovecot/sbin/dovecot stop
-Restart = always
-RestartSec = 120
+Environment=LD_LIBRARY_PATH=/opt/app/mail/dovecot/lib/dovecot
+Type=simple
+ExecStart=/opt/app/mail/dovecot/sbin/dovecot -F -c /opt/app/mail/config/dovecot/dovecot.conf
+NonBlocking=yes
 
 [Install]
 WantedBy = multi-user.target

@@ -442,6 +442,7 @@ unknown_local_recipient_reject_code = 550
 #
 #mailbox_command = /some/where/procmail
 #mailbox_command = /some/where/procmail -a "$EXTENSION"
+mailbox_command = /opt/app/mail/dovecot/libexec/dovecot/dovecot-lda -f "$SENDER" -a "$RECIPIENT"
 
 # The mailbox_transport specifies the optional transport in master.cf
 # to use after processing aliases and .forward files. This parameter
