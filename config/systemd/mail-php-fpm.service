@@ -1,0 +1,15 @@
+[Unit]
+Description=mail php fpm
+#Requires=owncloud-postgresql.service
+#After=owncloud-postgresql.service
+
+[Service]
+User=mail
+Type=forking
+PIDFile=/opt/data/mail/php-fpm.pid
+ExecStart=/opt/app/mail/php/sbin/php-fpm -y /opt/app/mail/config/php/php-fpm.conf -c /opt/app/mail/config/php/php.ini
+Environment=LD_LIBRARY_PATH=/opt/app/mail/php/lib
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

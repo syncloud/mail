@@ -1,0 +1,16 @@
+[Unit]
+Description=mail nginx
+Requires=mail-php-fpm.service
+After=mail-php-fpm.service
+
+[Service]
+User=mail
+Type=forking
+PIDFile=/opt/app/mail/nginx/logs/nginx.pid
+ExecStartPre=/opt/app/mail/nginx/sbin/nginx -t -c /opt/app/mail/config/nginx/nginx.conf -p /opt/app/mail/nginx
+ExecStart=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -p /opt/app/mail/nginx
+ExecReload=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -s reload -p /opt/app/mail/nginx
+ExecStop=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -s stop -p /opt/app/mail/nginx
+
+[Install]
+WantedBy=multi-user.target

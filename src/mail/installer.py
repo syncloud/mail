@@ -17,6 +17,8 @@ from mail.config import UserConfig
 
 SYSTEMD_POSTFIX = 'mail-postfix'
 SYSTEMD_DOVECOT = 'mail-dovecot'
+SYSTEMD_NGINX = 'mail-nginx'
+SYSTEMD_PHP_FPM = 'mail-php-fpm'
 
 
 class MailInstaller:
@@ -50,23 +52,28 @@ class MailInstaller:
 
         add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
+        add_service(self.config.install_path(), SYSTEMD_PHP_FPM)
+        add_service(self.config.install_path(), SYSTEMD_NGINX)
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
 
-        # platform_app.register_app('mail', self.config.port())
+        platform_app.register_app('mail', self.config.port())
 
     def remove(self):
 
         platform_app.unregister_app('mail')
+        remove_service(SYSTEMD_NGINX)
+        remove_service(SYSTEMD_PHP_FPM)
         remove_service(SYSTEMD_POSTFIX)
         remove_service(SYSTEMD_DOVECOT)
-        
+
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
 
     def prepare_storage(self):
-        storage.init(self.config.app_name(), self.config.app_name())
+        app_storage_dir = storage.init(self.config.app_name(), self.config.app_name())
+        app.create_data_dir(app_storage_dir, 'tmp', self.config.app_name())
 
 
 def useradd(user):

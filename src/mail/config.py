@@ -30,6 +30,8 @@ class Config:
     def root_path(self):
         return self.parser.get('mail', 'root_path')
 
+    def port(self):
+        return self.parser.getint('mail', 'port')
 
 
 class UserConfig:
@@ -40,7 +42,6 @@ class UserConfig:
         self.filename = filename
         if not isfile(self.filename):
             self.parser.add_section('mail')
-            self.set_activated(False)
             self.__save()
         else:
             self.parser.read(self.filename)
