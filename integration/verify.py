@@ -65,6 +65,12 @@ def test_install(auth):
 def test_running_smtp():
     print(check_output('nc -zv -w 1 localhost 25', shell=True))
 
+
+
+def test_running_pop3():
+    print(check_output('nc -zv -w 1 localhost 110', shell=True))
+
+
 # def test_upload_profile_photo(diaspora_session, user_domain):
 #
 #     response = diaspora_session.get('https://127.0.0.1/profile/edit',
