@@ -57,11 +57,6 @@ def test_activate_device(auth):
     assert response.status_code == 200
 
 
-def test_enable_https(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/settings/set_protocol', params={'protocol': 'https'})
-    assert '"success": true' in response.text
-    assert response.status_code == 200
-
 
 def test_install(auth):
     __local_install(auth)
