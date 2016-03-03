@@ -14,6 +14,7 @@ from syncloud_platform.api import info
 from syncloud_platform.api import app as platform_app
 from mail.config import Config
 from mail.config import UserConfig
+from mail import postgres
 
 SYSTEMD_POSTFIX = 'mail-postfix'
 SYSTEMD_DOVECOT = 'mail-dovecot'
