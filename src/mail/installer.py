@@ -26,7 +26,6 @@ class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
-        self.user_config = UserConfig()
 
     def install(self):
 
@@ -49,8 +48,8 @@ class MailInstaller:
             app.create_data_dir(app_data_dir, 'data', self.config.app_name())
 
         useradd('maildrop')
-
-        if not self.user_config.is_installed():
+        user_config = UserConfig()
+        if not user_config.is_installed():
             self.initialize()
 
         print("setup systemd")
@@ -79,9 +78,11 @@ class MailInstaller:
             shutil.rmtree(self.config.install_path())
 
     def initialize(self):
-
-            print("initialization")
-            postgres.execute("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
+        print("initialization")
+        postgres.execute("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
+        user_config = UserConfig()
+        user_config.set_activated(True)
+ 
 
     def prepare_storage(self):
         app_storage_dir = storage.init(self.config.app_name(), self.config.app_name())
