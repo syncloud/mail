@@ -49,17 +49,18 @@ class MailInstaller:
             app.create_data_dir(app_data_dir, 'data', self.config.app_name())
 
         useradd('maildrop')
-        user_config = UserConfig()
-        if not user_config.is_activated():
-            self.initialize()
 
         print("setup systemd")
-
+        
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
         add_service(self.config.install_path(), SYSTEMD_PHP_FPM)
         add_service(self.config.install_path(), SYSTEMD_NGINX)
+
+        user_config = UserConfig()
+        if not user_config.is_activated():
+            self.initialize()
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
