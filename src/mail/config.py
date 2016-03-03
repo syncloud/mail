@@ -4,7 +4,7 @@ from os.path import isfile, join
 default_config_path = '/opt/app/mail/config'
 default_config_file = join(default_config_path, 'mail.cfg')
 
-default_user_config_path = '/opt/data/mail/config'
+default_user_config_path = '/opt/data/mail'
 default_user_config_file = join(default_user_config_path, 'user_mail.cfg')
 
 
