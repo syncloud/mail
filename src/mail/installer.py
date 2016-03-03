@@ -49,7 +49,7 @@ class MailInstaller:
 
         useradd('maildrop')
         user_config = UserConfig()
-        if not user_config.is_installed():
+        if not user_config.is_activated():
             self.initialize()
 
         print("setup systemd")
