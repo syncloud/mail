@@ -19,12 +19,14 @@ SYSTEMD_POSTFIX = 'mail-postfix'
 SYSTEMD_DOVECOT = 'mail-dovecot'
 SYSTEMD_NGINX = 'mail-nginx'
 SYSTEMD_PHP_FPM = 'mail-php-fpm'
+SYSTEMD_POSTGRES = 'mail-postgres'
 
 
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
+        self.user_config = UserConfig()
 
     def install(self):
 
@@ -48,8 +50,12 @@ class MailInstaller:
 
         useradd('maildrop')
 
+        if not self.user_config.is_installed():
+            self.initialize()
+
         print("setup systemd")
 
+        add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
         add_service(self.config.install_path(), SYSTEMD_PHP_FPM)
@@ -67,9 +73,15 @@ class MailInstaller:
         remove_service(SYSTEMD_PHP_FPM)
         remove_service(SYSTEMD_POSTFIX)
         remove_service(SYSTEMD_DOVECOT)
+        remove_service(SYSTEMD_POSTGRES)
 
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
+
+    def initialize(self):
+
+            print("initialization")
+            postgres.execute("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
 
     def prepare_storage(self):
         app_storage_dir = storage.init(self.config.app_name(), self.config.app_name())

@@ -33,6 +33,9 @@ class Config:
     def port(self):
         return self.parser.getint('mail', 'port')
 
+    def psql(self):
+        return self.parser.get('mail', 'psql')
+
 
 class UserConfig:
 
@@ -48,6 +51,17 @@ class UserConfig:
 
         if not self.parser.has_section('mail'):
             self.parser.add_section('mail')
+
+    def is_activated(self):
+        self.parser.read(self.filename)
+        if self.parser.has_option('mail', 'activated'):
+            return self.parser.getboolean('mail', 'activated')
+        return False
+
+    def set_activated(self, activated):
+        self.parser.read(self.filename)
+        self.parser.set('mail', 'activated', activated)
+        self.__save()
 
     def __save(self):
         with open(self.filename, 'wb') as f:
