@@ -40,6 +40,8 @@ coin --to ${BUILD_DIR} raw https://downloads.sourceforge.net/project/roundcubema
 
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
+cp ${DIR}/config/postgresql/postgresql.conf ${BUILD_DIR}/postgresql/share/postgresql.conf.sample
+
 cp -r bin ${BUILD_DIR}
 cp -r config ${BUILD_DIR}
 cp -r lib ${BUILD_DIR}
