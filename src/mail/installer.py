@@ -48,6 +48,9 @@ class MailInstaller:
         if not isdir(join(app_data_dir, 'data')):
             app.create_data_dir(app_data_dir, 'data', self.config.app_name())
 
+        if not isdir(join(app_data_dir, 'postgresql')):
+            app.create_data_dir(app_data_dir, 'postgresql', self.config.app_name())
+
         useradd('maildrop')
 
         print("setup systemd")
