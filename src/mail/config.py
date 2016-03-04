@@ -37,6 +37,10 @@ class Config:
         return self.parser.get('mail', 'psql')
 
 
+def dB_socket(self):
+        return self.parser.get('mail', 'db_socket')
+
+
 class UserConfig:
 
     def __init__(self, filename=default_user_config_file):
