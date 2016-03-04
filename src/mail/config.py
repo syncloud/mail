@@ -36,8 +36,7 @@ class Config:
     def psql(self):
         return self.parser.get('mail', 'psql')
 
-
-def dB_socket(self):
+    def db_socket(self):
         return self.parser.get('mail', 'db_socket')
 
 
