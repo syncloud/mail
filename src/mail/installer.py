@@ -85,6 +85,7 @@ class MailInstaller:
     def initialize(self):
         print("initialization")
         postgres.execute("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
+        postgres.execute("create database mail;", database="postgres")
         user_config = UserConfig()
         user_config.set_activated(True)
  
