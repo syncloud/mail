@@ -56,8 +56,8 @@ class MailInstaller:
         print("setup systemd")
         
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
-        add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
+        add_service(self.config.install_path(), SYSTEMD_DOVECOT)
         add_service(self.config.install_path(), SYSTEMD_PHP_FPM)
         add_service(self.config.install_path(), SYSTEMD_NGINX)
 
@@ -75,8 +75,8 @@ class MailInstaller:
         platform_app.unregister_app('mail')
         remove_service(SYSTEMD_NGINX)
         remove_service(SYSTEMD_PHP_FPM)
-        remove_service(SYSTEMD_POSTFIX)
         remove_service(SYSTEMD_DOVECOT)
+        remove_service(SYSTEMD_POSTFIX)
         remove_service(SYSTEMD_POSTGRES)
 
         if isdir(self.config.install_path()):
