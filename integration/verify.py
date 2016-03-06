@@ -26,7 +26,7 @@ SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 DEFAULT_DEVICE_PASSWORD = 'syncloud'
-
+LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 
 @pytest.fixture(scope='module')
 def user_domain(auth):
@@ -55,6 +55,8 @@ def test_activate_device(auth):
                              data={'main_domain': 'syncloud.info', 'redirect_email': email, 'redirect_password': password,
                                    'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200
+    global LOGS_SSH_PASSWORD
+    LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
 def test_external_mode(auth, syncloud_session):
