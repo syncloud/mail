@@ -62,7 +62,7 @@ def test_external_mode(auth, syncloud_session):
     email, password, domain, version, arch, release = auth
 
     response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
-                                      params={'external_access': 'True'})
+                                      params={'external_access': 'true'})
     assert '"success": true' in response.text
     assert response.status_code == 200
 
