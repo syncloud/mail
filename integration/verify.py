@@ -119,14 +119,14 @@ def test_running_roundcube():
 #     response = session.get('http://localhost/diaspora/index.php/settings/admin', allow_redirects=False)
 #     assert response.status_code == 200, response.text
 
-# def test_remove():
-#     session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
-#     response = session.get('http://localhost/server/rest/remove?app_id=diaspora', allow_redirects=False)
-#     assert response.status_code == 200, response.text
+def test_remove():
+    session.post('http://localhost/server/rest/login', data={'name': device_user, 'password': device_password})
+    response = session.get('http://localhost/server/rest/remove?app_id=diaspora', allow_redirects=False)
+    assert response.status_code == 200, response.text
 
 
-# def test_reinstall(auth):
-#     __local_install(auth)
+def test_reinstall(auth):
+    __local_install(auth)
 
 
 def test_copy_logs():
