@@ -141,11 +141,11 @@ def test_reinstall(auth):
 
 def test_copy_logs():
     os.mkdir(LOG_DIR)
-    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(join(DIR, 'platform_log')), password=DEVICE_PASSWORD)
 
     run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
     run_ssh('netstat -l', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(LOG_DIR), password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(join(DIR, 'mail_log')), password=DEVICE_PASSWORD)
 
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
