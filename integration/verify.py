@@ -57,7 +57,7 @@ def test_activate_device(auth):
     assert response.status_code == 200
 
 
-    def test_external_mode(auth, syncloud_session):
+def test_external_mode(auth, syncloud_session):
 
     email, password, domain, version, arch, release = auth
 
