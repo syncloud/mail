@@ -39,6 +39,9 @@ class Config:
     def db_socket(self):
         return self.parser.get('mail', 'db_socket')
 
+    def postfix_main_config_file(self):
+        return self.parser.get('mail', 'postfix_main_config_file')
+
 
 class UserConfig:
 

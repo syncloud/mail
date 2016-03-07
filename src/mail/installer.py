@@ -1,5 +1,6 @@
+import os
 from os import environ
-from os.path import isdir, join
+from os.path import isdir, join, isfile
 import shutil
 from subprocess import check_output
 
@@ -70,6 +71,7 @@ class MailInstaller:
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
+        self.update_domain()
 
         platform_app.register_app('mail', self.config.port())
 
@@ -91,11 +93,20 @@ class MailInstaller:
         postgres.execute("create database mail;", database="postgres")
         user_config = UserConfig()
         user_config.set_activated(True)
- 
 
     def prepare_storage(self):
         app_storage_dir = storage.init(self.config.app_name(), self.config.app_name())
         app.create_data_dir(app_storage_dir, 'tmp', self.config.app_name())
+
+    def update_domain(self):
+        app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())
+        if isfile(self.config.postfix_main_config_file()):
+            os.remove(self.config.postfix_main_config_file())
+        template_file_name = '{0}.template'.format(self.config.postfix_main_config_file())
+        shutil.copyfile(template_file_name, self.config.postfix_main_config_file())
+        with open(self.config.postfix_main_config_file(), "a") as config_file:
+            config_file.write('mydomain = {0}\n'.format(app_domain))
+            config_file.write('myhostname = {0}\n'.format(app_domain))
 
 
 def useradd(user):
