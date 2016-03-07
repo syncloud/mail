@@ -28,6 +28,32 @@ DEVICE_PASSWORD = 'password'
 DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 
+
+@pytest.fixture(scope="session")
+def module_setup(request):
+    request.addfinalizer(module_teardown)
+
+
+def module_teardown():
+    os.mkdir(LOG_DIR)
+
+    platform_log_dir = join(LOG_DIR, 'platform_log')
+    os.mkdir(platform_log_dir)
+    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
+
+    mail_log_dir = join(LOG_DIR, 'mail_log')
+    os.mkdir(mail_log_dir)
+    run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(mail_log_dir), password=DEVICE_PASSWORD)
+
+    run_ssh('netstat -l', password=DEVICE_PASSWORD)
+    
+    print('-------------------------------------------------------')
+    print('syncloud docker image is running')
+    print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
+    print('-------------------------------------------------------')
+
+
 @pytest.fixture(scope='module')
 def user_domain(auth):
     email, password, domain, release, version, arch = auth
@@ -41,7 +67,7 @@ def syncloud_session():
     return session
 
 
-def test_remove_logs():
+def test_start(module_setup):
     shutil.rmtree(LOG_DIR, ignore_errors=True)
 
 
@@ -83,6 +109,9 @@ def test_running_pop3():
 
 def test_running_roundcube():
     print(check_output('nc -zv -w 1 localhost 1100', shell=True))
+
+def test_dovecot_auth():
+    print(check_output('/opt/app/mail/dovecot/bin/doveadm auth test {0} {1}'.format(DEVICE_USER, DEVICE_PASSWORD), shell=True))
 
 
 # def test_upload_profile_photo(diaspora_session, user_domain):
@@ -136,30 +165,8 @@ def test_remove(syncloud_session):
     assert response.status_code == 200, response.text
 
 
-
 def test_reinstall(auth):
     __local_install(auth)
-
-
-def test_copy_logs():
-    os.mkdir(LOG_DIR)
-
-    platform_log_dir = join(LOG_DIR, 'platform_log')
-    os.mkdir(platform_log_dir)
-    run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
-
-    mail_log_dir = join(LOG_DIR, 'mail_log')
-    os.mkdir(mail_log_dir)
-    run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(mail_log_dir), password=DEVICE_PASSWORD)
-
-    run_ssh('netstat -l', password=DEVICE_PASSWORD)
-    
-
-    print('-------------------------------------------------------')
-    print('syncloud docker image is running')
-    print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
-    print('-------------------------------------------------------')
 
 
 def __local_install(auth):
