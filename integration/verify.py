@@ -111,9 +111,8 @@ def test_running_roundcube():
     print(check_output('nc -zv -w 1 localhost 1100', shell=True))
 
 def test_dovecot_auth():
-    run_scp('/opt/app/mail/dovecot/bin/doveadm auth test -a  /opt/data/mail/spool/private/auth {0} {1}'.format(DEVICE_USER, DEVICE_PASSWORD, password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/mail/dovecot/bin/doveadm auth test -a  /opt/data/mail/spool/private/auth {0} {1}'.format(DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
 
-    print(check_output(), shell=True))
 
 
 # def test_upload_profile_photo(diaspora_session, user_domain):
