@@ -162,7 +162,7 @@ def test_dovecot_auth():
 #     assert response.status_code == 200, response.text
 
 def test_remove(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=diaspora', allow_redirects=False)
+    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=mail', allow_redirects=False)
     assert response.status_code == 200, response.text
 
 
