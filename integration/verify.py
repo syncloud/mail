@@ -161,17 +161,17 @@ def test_dovecot_auth():
 #     response = session.get('http://localhost/diaspora/index.php/settings/admin', allow_redirects=False)
 #     assert response.status_code == 200, response.text
 
-def test_remove(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=mail', allow_redirects=False)
-    assert response.status_code == 200, response.text
+#def test_remove(syncloud_session):
+#    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=mail', allow_redirects=False)
+#    assert response.status_code == 200, response.text
 
 
-def test_reinstall(auth):
-    __local_install(auth)
+def test_upgrade(auth):
+    __local_install(auth, 'upgrade')
 
 
-def __local_install(auth):
+def __local_install(auth, action='install'):
     email, password, domain, release, version, arch = auth
     run_scp('{0}/../mail-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug install /mail-{0}-{1}.tar.gz'.format(version, arch), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug {0} /mail-{1}-{2}.tar.gz'.format(action, version, arch), password=DEVICE_PASSWORD)
     time.sleep(3)
