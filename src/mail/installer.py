@@ -7,7 +7,7 @@ from subprocess import check_output
 import pwd
 from syncloud_app import logger
 
-from syncloud_platform.systemd.systemctl import remove_service, add_service
+from syncloud_platform.systemd.systemctl import remove_service, add_service, reload_service
 from syncloud_platform.tools import app
 from syncloud_platform.api import storage
 from syncloud_platform.tools import chown, locale
@@ -58,7 +58,8 @@ class MailInstaller:
         useradd('maildrop')
 
         print("setup systemd")
-        
+        self.generate_postfix_config()
+
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
         add_service(self.config.install_path(), SYSTEMD_DOVECOT)
@@ -71,7 +72,6 @@ class MailInstaller:
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
-        self.update_domain()
 
         platform_app.register_app('mail', self.config.port())
 
@@ -99,9 +99,11 @@ class MailInstaller:
         app.create_data_dir(app_storage_dir, 'tmp', self.config.app_name())
 
     def update_domain(self):
+        self.generate_postfix_config()
+        reload_service(SYSTEMD_POSTFIX)
+
+    def generate_postfix_config():
         app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())
-        if isfile(self.config.postfix_main_config_file()):
-            os.remove(self.config.postfix_main_config_file())
         template_file_name = '{0}.template'.format(self.config.postfix_main_config_file())
         shutil.copyfile(template_file_name, self.config.postfix_main_config_file())
         with open(self.config.postfix_main_config_file(), "a") as config_file:
