@@ -167,7 +167,8 @@ def test_dovecot_auth():
 
 
 def test_upgrade(auth):
-    __local_install(auth, 'upgrade')
+    run_ssh('/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
+    __local_install(auth)
 
 
 def __local_install(auth, action='install'):
