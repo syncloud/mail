@@ -102,7 +102,7 @@ class MailInstaller:
         self.generate_postfix_config()
         reload_service(SYSTEMD_POSTFIX)
 
-    def generate_postfix_config():
+    def generate_postfix_config(self):
         app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())
         template_file_name = '{0}.template'.format(self.config.postfix_main_config_file())
         shutil.copyfile(template_file_name, self.config.postfix_main_config_file())
