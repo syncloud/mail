@@ -59,6 +59,7 @@ class MailInstaller:
 
         print("setup systemd")
         self.generate_postfix_config()
+        self.generate_roundcube_config()
 
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
@@ -101,6 +102,9 @@ class MailInstaller:
     def update_domain(self):
         self.generate_postfix_config()
         reload_service(SYSTEMD_POSTFIX)
+
+    def generate_roundcube_config(self):
+        shutil.copyfile(self.config.roundcube_config_file_template(), self.config.roundcube_config_file())
 
     def generate_postfix_config(self):
         app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())

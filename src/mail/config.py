@@ -42,6 +42,11 @@ class Config:
     def postfix_main_config_file(self):
         return self.parser.get('mail', 'postfix_main_config_file')
 
+    def roundcube_config_file_template(self):
+        return self.parser.get('mail', 'roundcube_config_file_template')
+
+    def roundcube_config_file(self):
+        return self.parser.get('mail', 'roundcube_config_file')
 
 class UserConfig:
 
