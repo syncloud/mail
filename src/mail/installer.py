@@ -13,6 +13,7 @@ from syncloud_platform.api import storage
 from syncloud_platform.tools import chown, locale
 from syncloud_platform.api import info
 from syncloud_platform.api import app as platform_app
+from syncloud_platform.api import port
 from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
@@ -76,6 +77,9 @@ class MailInstaller:
         self.prepare_storage()
 
         platform_app.register_app('mail', self.config.port())
+        port.add_port(25)
+        port.add_port(110)
+        port.add_port(143)
 
     def remove(self):
 
