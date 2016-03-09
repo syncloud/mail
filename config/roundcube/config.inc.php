@@ -1,3 +1,5 @@
+<?php
+
 $config = array();
 
 $config['db_dsnw'] = 'pgsql://mail:@unix(/opt/data/mail/postgresql)/mail';
