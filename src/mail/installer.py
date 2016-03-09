@@ -28,6 +28,7 @@ class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
+        self.app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())
 
     def install(self):
 
@@ -101,18 +102,21 @@ class MailInstaller:
 
     def update_domain(self):
         self.generate_postfix_config()
+        self.generate_roundcube_config()
         reload_service(SYSTEMD_POSTFIX)
 
     def generate_roundcube_config(self):
         shutil.copyfile(self.config.roundcube_config_file_template(), self.config.roundcube_config_file())
+        with open(self.config.roundcube_config_file(), "a") as config_file:
+            config_file.write('$config['default_host'] = '{0}';\n'.format(self.app_domain))
 
     def generate_postfix_config(self):
-        app_domain = '{0}.{1}'.format(self.config.app_name(), info.domain())
+        
         template_file_name = '{0}.template'.format(self.config.postfix_main_config_file())
         shutil.copyfile(template_file_name, self.config.postfix_main_config_file())
         with open(self.config.postfix_main_config_file(), "a") as config_file:
-            config_file.write('mydomain = {0}\n'.format(app_domain))
-            config_file.write('myhostname = {0}\n'.format(app_domain))
+            config_file.write('mydomain = {0}\n'.format(self.app_domain))
+            config_file.write('myhostname = {0}\n'.format(self.app_domain))
 
 
 def useradd(user):
