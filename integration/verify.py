@@ -17,7 +17,7 @@ map(lambda x: sys.path.insert(0, x), libs)
 
 import requests
 import shutil
-
+import smtplib
 from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_ssh_port
 
 DIR = dirname(__file__)
@@ -85,12 +85,10 @@ def test_activate_device(auth):
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
-def test_external_mode(auth, syncloud_session):
-
-    email, password, domain, version, arch, release = auth
-
+def test_external_mode(syncloud_session):
     response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
-                                      params={'external_access': 'true'})
+                                    params={'external_access': 'true'},
+                                    timeout=10)
     assert '"success": true' in response.text
     assert response.status_code == 200
 
@@ -110,10 +108,16 @@ def test_running_pop3():
 def test_running_roundcube():
     print(check_output('nc -zv -w 1 localhost 1100', shell=True))
 
+
 def test_dovecot_auth():
-    run_ssh('/opt/app/mail/dovecot/bin/doveadm auth test -a  /opt/data/mail/spool/private/auth {0} {1}'.format(DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/mail/dovecot/bin/doveadm auth test -a  /opt/data/mail/spool/private/auth {0} {1}'
+            .format(DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
 
 
+def test_postfix_auth():
+    server = smtplib.SMTP('localhost')
+    server.set_debuglevel(1)
+    server.login(DEVICE_USER, DEVICE_PASSWORD)
 
 # def test_upload_profile_photo(diaspora_session, user_domain):
 #
