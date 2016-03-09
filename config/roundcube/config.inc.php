@@ -2,6 +2,8 @@
 
 $config = array();
 
+$config['log_dir'] = '/opt/data/mail/log/';
+
 $config['db_dsnw'] = 'pgsql://mail:@unix(/opt/data/mail/postgresql)/mail';
 
 $config['default_host'] = 'localhost';
