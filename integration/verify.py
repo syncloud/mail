@@ -115,7 +115,7 @@ def test_dovecot_auth():
 
 
 def test_postfix_auth():
-    server = smtplib.SMTP('localhost')
+    server = smtplib.SMTP('localhost', timeout=10)
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 

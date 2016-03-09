@@ -115,6 +115,7 @@ class MailInstaller:
         template_file_name = '{0}.template'.format(self.config.postfix_main_config_file())
         shutil.copyfile(template_file_name, self.config.postfix_main_config_file())
         with open(self.config.postfix_main_config_file(), "a") as config_file:
+            config_file.write('\n')
             config_file.write('mydomain = {0}\n'.format(self.app_domain))
             config_file.write('myhostname = {0}\n'.format(self.app_domain))
 
