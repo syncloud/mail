@@ -3,3 +3,4 @@ search_base = ou=users, dc=syncloud, dc=org
 query_filter = (cn=%u)
 result_attribute = cn
 result_format = %u
+version = 3
