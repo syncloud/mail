@@ -96,7 +96,7 @@ mail_owner = mail
 # to recipient addresses that have no @domain part.
 #
 #myorigin = $myhostname
-#myorigin = $mydomain
+myorigin = $mydomain
 
 # RECEIVING MAIL
 
@@ -110,7 +110,7 @@ mail_owner = mail
 #
 # Note: you need to stop/start Postfix when this parameter changes.
 #
-#inet_interfaces = all
+inet_interfaces = all
 #inet_interfaces = $myhostname
 #inet_interfaces = $myhostname, localhost
 
@@ -159,7 +159,7 @@ mail_owner = mail
 #
 #mydestination = $myhostname, localhost.$mydomain, localhost
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
-#mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
 #	mail.$mydomain, www.$mydomain, ftp.$mydomain
 
 # REJECTING MAIL FOR UNKNOWN LOCAL USERS
@@ -289,7 +289,7 @@ unknown_local_recipient_reject_code = 550
 # list this system as their primary or backup MX host. See the
 # permit_mx_backup restriction description in postconf(5).
 #
-#relay_domains = $mydestination
+relay_domains = $mydestination
 
 # INTERNET OR INTRANET
 
@@ -306,7 +306,7 @@ unknown_local_recipient_reject_code = 550
 #
 # If you're connected via UUCP, see also the default_transport parameter.
 #
-#relayhost = $mydomain
+relayhost = $mydomain
 #relayhost = [gateway.my.domain]
 #relayhost = [mailserver.isp.tld]
 #relayhost = uucphost

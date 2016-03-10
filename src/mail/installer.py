@@ -30,6 +30,7 @@ class MailInstaller:
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
         self.device_domain_name = info.domain()
+        self.app_domain_name = '{0}.{1}'.format(self.config.app_name(), self.device_domain_name)
 
     def install(self):
 
@@ -121,7 +122,7 @@ class MailInstaller:
         with open(self.config.postfix_main_config_file(), "a") as config_file:
             config_file.write('\n')
             config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
-            config_file.write('myhostname = {0}\n'.format(self.device_domain_name))
+            config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
 
 
 def useradd(user):
