@@ -119,6 +119,11 @@ def test_postfix_auth():
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
+
+def test_postfix_ldap_aliases(user_domain):
+    run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
+            .format(DEVICE_USER, user_domain))
+
 # def test_upload_profile_photo(diaspora_session, user_domain):
 #
 #     response = diaspora_session.get('https://127.0.0.1/profile/edit',
