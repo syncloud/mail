@@ -382,6 +382,7 @@ relayhost = $mydomain
 #alias_maps = hash:/etc/aliases
 #alias_maps = hash:/etc/aliases, nis:mail.aliases
 #alias_maps = netinfo:/aliases
+alias_maps = ldap:/opt/app/mail/config/postfix/ldap-aliases.cf
 
 # The alias_database parameter specifies the alias database(s) that
 # are built with "newaliases" or "sendmail -bi".  This is a separate
