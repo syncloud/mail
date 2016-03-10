@@ -4,3 +4,5 @@ query_filter = (cn=%u)
 result_attribute = cn
 result_format = %u
 version = 3
+bind_dn = dc=syncloud, dc=org
+bind_pw = syncloud
