@@ -7,7 +7,7 @@ from subprocess import check_output
 import pwd
 from syncloud_app import logger
 
-from syncloud_platform.systemd.systemctl import remove_service, add_service, reload_service
+from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
 from syncloud_platform.tools import app
 from syncloud_platform.api import storage
 from syncloud_platform.tools import chown, locale
@@ -107,7 +107,7 @@ class MailInstaller:
     def update_domain(self):
         self.generate_postfix_config()
         self.generate_roundcube_config()
-        reload_service(SYSTEMD_POSTFIX)
+        restart_service(SYSTEMD_POSTFIX)
 
     def generate_roundcube_config(self):
         shutil.copyfile(self.config.roundcube_config_file_template(), self.config.roundcube_config_file())
