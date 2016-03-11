@@ -122,7 +122,7 @@ def test_postfix_auth():
 
 def test_postfix_ldap_aliases(user_domain):
     run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
-            .format(DEVICE_USER, user_domain))
+            .format(DEVICE_USER, user_domain), 10, 5)
 
 # def test_upload_profile_photo(diaspora_session, user_domain):
 #
