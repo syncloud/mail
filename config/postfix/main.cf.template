@@ -159,7 +159,9 @@ inet_interfaces = all
 #
 #mydestination = $myhostname, localhost.$mydomain, localhost
 #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
+
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
 #	mail.$mydomain, www.$mydomain, ftp.$mydomain
 
 # REJECTING MAIL FOR UNKNOWN LOCAL USERS
