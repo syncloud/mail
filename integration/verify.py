@@ -88,7 +88,7 @@ def test_activate_device(auth):
 def test_external_mode(syncloud_session):
     response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
                                     params={'external_access': 'true'},
-                                    timeout=10)
+                                    timeout=60)
     assert '"success": true' in response.text
     assert response.status_code == 200
 
