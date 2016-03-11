@@ -81,6 +81,7 @@ class MailInstaller:
         port.add_port(25)
         port.add_port(110)
         port.add_port(143)
+        port.add_port(587)
 
     def remove(self):
 
