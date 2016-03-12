@@ -47,6 +47,8 @@ def module_teardown():
     run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(mail_log_dir), password=DEVICE_PASSWORD)
 
     run_ssh('netstat -l', password=DEVICE_PASSWORD)
+
+    run_ssh('journalctl', password=DEVICE_PASSWORD)
     
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
