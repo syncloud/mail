@@ -98,6 +98,13 @@ def test_running_platform_web():
     print(check_output('nc -zv -w 1 localhost 80', shell=True))
 
 
+
+def test_platform_rest(syncloud_session):
+    response = syncloud_session.get('http://localhost',
+timeout=60)
+    assert response.status_code == 200
+
+
 def test_external_mode(syncloud_session):
     response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
                                     params={'external_access': 'true'},
