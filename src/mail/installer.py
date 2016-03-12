@@ -59,6 +59,7 @@ class MailInstaller:
             app.create_data_dir(app_data_dir, 'postgresql', self.config.app_name())
 
         useradd('maildrop')
+        useradd('dovecot')
 
         print("setup systemd")
         self.generate_postfix_config()
@@ -124,6 +125,9 @@ class MailInstaller:
             config_file.write('\n')
             config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
             config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
+            config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
+ 
+
 
 
 def useradd(user):

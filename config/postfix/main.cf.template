@@ -662,3 +662,5 @@ inet_protocols = ipv4
 
 smtpd_sasl_path = /opt/data/mail/spool/private/auth
 smtpd_sasl_auth_enable = yes
+
+dovecot_destination_recipient_limit = 1 virtual_transport = dovecot
