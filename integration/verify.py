@@ -126,9 +126,10 @@ def test_postfix_submission():
     server.set_debuglevel(1)
     server.ehlo()
     #server.starttls()
+    server.login(DEVICE_USER, DEVICE_PASSWORD)
     #server.sendmail(fromaddr, toaddrs, msg)
     server.quit()
-    server.login(DEVICE_USER, DEVICE_PASSWORD)
+
 
 def test_postfix_ldap_aliases(user_domain):
     run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
