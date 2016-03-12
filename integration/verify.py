@@ -139,12 +139,12 @@ def test_postfix_submission(device_domain):
     #server.starttls()
     server.login(DEVICE_USER, DEVICE_PASSWORD)
     msg = MIMEText('test')
-    from = '{0}@{1}'.format(DEVICE_USER, device_domain)
-    to = from
+    mail_from = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    mail_to = mail_from
     msg['Subject'] = 'test subject'
-    msg['From'] = from
-    msg['To'] = to
-    server.sendmail(from, [to], msg.as_string())
+    msg['From'] = mail_from
+    msg['To'] = mail_to
+    server.sendmail(mail_from, [mail_to], msg.as_string())
     server.quit()
 
 
