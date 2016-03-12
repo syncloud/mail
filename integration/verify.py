@@ -87,6 +87,11 @@ def test_activate_device(auth):
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
+
+def test_running_platform_web():
+    print(check_output('nc -zv -w 1 localhost 80', shell=True))
+
+
 def test_external_mode(syncloud_session):
     response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
                                     params={'external_access': 'true'},
