@@ -20,6 +20,7 @@ import shutil
 import smtplib
 from email.mime.text import MIMEText
 from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_ssh_port
+from requests.adapters import HTTPAdapter
 
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
@@ -100,6 +101,7 @@ def test_running_platform_web():
 
 
 def test_platform_rest(syncloud_session):
+    syncloud_session.mount('http://localhost', HTTPAdapter(max_retries=5))
     response = syncloud_session.get('http://localhost',
 timeout=60)
     assert response.status_code == 200
