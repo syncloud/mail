@@ -144,7 +144,7 @@ def test_postfix_submission(device_domain):
     msg['Subject'] = 'test subject'
     msg['From'] = from
     msg['To'] = to
-    server.sendmail(from, [to], msg)
+    server.sendmail(from, [to], msg.as_string())
     server.quit()
 
 
