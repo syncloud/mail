@@ -18,6 +18,7 @@ map(lambda x: sys.path.insert(0, x), libs)
 import requests
 import shutil
 import smtplib
+from email.mime.text import MIMEText
 from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_ssh_port
 
 DIR = dirname(__file__)
@@ -57,10 +58,15 @@ def module_teardown():
 
 
 @pytest.fixture(scope='module')
-def user_domain(auth):
+def user_domain(auth, device_domain):
     email, password, domain, release, version, arch = auth
-    return 'mail.{0}.{1}'.format(domain, SYNCLOUD_INFO)
+    return 'mail.{0}'.format(device_domain)
 
+
+@pytest.fixture(scope='module')
+def device_domain(auth):
+    email, password, domain, release, version, arch = auth
+    return '{0}.{1}'.format(domain, SYNCLOUD_INFO)
 
 @pytest.fixture(scope='function')
 def syncloud_session():
@@ -126,13 +132,19 @@ def test_postfix_auth():
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
-def test_postfix_submission():
+def test_postfix_submission(device_domain):
     server = smtplib.SMTP('localhost:587', timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
     #server.starttls()
     server.login(DEVICE_USER, DEVICE_PASSWORD)
-    #server.sendmail(fromaddr, toaddrs, msg)
+    msg = MIMEText('test')
+    from = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    to = from
+    msg['Subject'] = 'test subject'
+    msg['From'] = from
+    msg['To'] = to
+    server.sendmail(from, [to], msg)
     server.quit()
 
 
@@ -140,55 +152,6 @@ def test_postfix_ldap_aliases(user_domain):
     run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
             .format(DEVICE_USER, user_domain), password=DEVICE_PASSWORD)
 
-# def test_upload_profile_photo(diaspora_session, user_domain):
-#
-#     response = diaspora_session.get('https://127.0.0.1/profile/edit',
-#                                     headers={"Host": user_domain},
-#                                     allow_redirects=False, verify=False)
-#     assert response.status_code == 200, response.text
-#
-#     soup = BeautifulSoup(response.text, "html.parser")
-#     token = soup.find_all('meta', {'name': 'csrf-token'})[0]['content']
-#
-#     response = diaspora_session.post('https://127.0.0.1/photos',
-#                                      headers={
-#                                          "Host": user_domain,
-#                                          'X-File-Name': 'profile.png',
-#                                          'X-CSRF-Token': token
-#                                      },
-#                                      verify=False, allow_redirects=False,
-#                                      params={
-#                                          'photo[pending]': 'true',
-#                                          'photo[aspect_ids]': 'all',
-#                                          'photo[set_profile_photo]': 'true',
-#                                          'qqfile': 'profile.png'
-#                                      })
-#     assert response.status_code == 200, response.text
-
-    # with open(join(DIR, 'images', 'profile.png'),'rb') as payload:
-    #     headers = {'content-type': 'application/x-www-form-urlencoded'}
-    #     r = requests.post('https://IP_ADDRESS/rest/rest/2', auth=('userid', 'password'),
-    #                   data=payload, verify=False, headers=headers)
-
-# def test_authenticated_resource(diaspora_session):
-#     response = diaspora_session.get('http://localhost/diaspora/', allow_redirects=False)
-#     soup = BeautifulSoup(response.text, "html.parser")
-#     requesttoken = soup.find_all('input', {'name': 'requesttoken'})[0]['value']
-#     response = diaspora_session.post('http://localhost/diaspora/index.php',
-#                             data={'user': device_user, 'password': device_password, 'requesttoken': requesttoken},
-#                             allow_redirects=False)
-#
-#     assert response.status_code == 302, response.text
-#
-#     assert session.get('http://localhost/diaspora/core/img/filetypes/text.png').status_code == 200
-
-# def test_admin():
-#     response = session.get('http://localhost/diaspora/index.php/settings/admin', allow_redirects=False)
-#     assert response.status_code == 200, response.text
-
-#def test_remove(syncloud_session):
-#    response = syncloud_session.get('http://localhost/server/rest/remove?app_id=mail', allow_redirects=False)
-#    assert response.status_code == 200, response.text
 
 
 def test_upgrade(auth):
