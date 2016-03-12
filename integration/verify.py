@@ -125,7 +125,7 @@ def test_postfix_submission():
     server = smtplib.SMTP('localhost:587', timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
-    server.starttls()
+    #server.starttls()
     #server.sendmail(fromaddr, toaddrs, msg)
     server.quit()
     server.login(DEVICE_USER, DEVICE_PASSWORD)
