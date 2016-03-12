@@ -291,7 +291,7 @@ mynetworks_style = host
 # list this system as their primary or backup MX host. See the
 # permit_mx_backup restriction description in postconf(5).
 #
-relay_domains = $mydestination
+#relay_domains = $mydestination
 
 # INTERNET OR INTRANET
 
@@ -308,7 +308,7 @@ relay_domains = $mydestination
 #
 # If you're connected via UUCP, see also the default_transport parameter.
 #
-relayhost = $mydomain
+relayhost = 
 #relayhost = [gateway.my.domain]
 #relayhost = [mailserver.isp.tld]
 #relayhost = uucphost
@@ -405,7 +405,7 @@ alias_maps = ldap:/opt/app/mail/config/postfix/ldap-aliases.cf
 # Basically, the software tries user+foo and .forward+foo before
 # trying user and .forward.
 #
-#recipient_delimiter = +
+recipient_delimiter = +
 
 # DELIVERY TO MAILBOX
 #
