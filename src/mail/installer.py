@@ -63,7 +63,7 @@ class MailInstaller:
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         with open(dovecot_lda_error_log, 'a'):
-            os.utime(dovecot_lda_error_log, times)
+            os.utime(dovecot_lda_error_log, None)
         dovecot_uid = pwd.getpwnam("dovecot").pw_uid
         dovecot_gid = grp.getgrnam("dovecot").gr_gid
         os.chown(dovecot_lda_error_log, dovecot_uid, dovecot_gid)
