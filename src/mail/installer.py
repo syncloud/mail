@@ -64,11 +64,10 @@ class MailInstaller:
         useradd('dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
-        with open(dovecot_lda_error_log, 'a'):
-            os.utime(dovecot_lda_error_log, None)
-        dovecot_uid = pwd.getpwnam("dovecot").pw_uid
-        dovecot_gid = grp.getgrnam("dovecot").gr_gid
-        os.chown(dovecot_lda_error_log, dovecot_uid, dovecot_gid)
+        touch(dovecot_lda_error_log, 'dovecot')
+
+        dovecot_lda_info_log = join(app_data_dir, 'log', 'dovecot-lda.info.log')
+        touch(dovecot_lda_info_log, 'dovecot')
 
         print("setup systemd")
         self.generate_postfix_config()
@@ -137,6 +136,12 @@ class MailInstaller:
             config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
 
 
+def touch(file, user):
+    with open(file, 'a'):
+            os.utime(file, None)
+        usee_uid = pwd.getpwnam(user).pw_uid
+        usee_gid = grp.getgrnam(user).gr_gid
+        os.chown(file, user_uid, usee_gid)
 
 
 def useradd(user):
