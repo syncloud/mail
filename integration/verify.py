@@ -51,7 +51,10 @@ def module_teardown():
 
     run_ssh('netstat -l', password=DEVICE_PASSWORD)
 
-    run_ssh('journalctl', password=DEVICE_PASSWORD)
+   print('postfix systems logs')
+    run_ssh('journalctl | grep postfix', password=DEVICE_PASSWORD)
+    print('dovecot systems logs')
+    run_ssh('journalctl | grep dovecot', password=DEVICE_PASSWORD)
     
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
