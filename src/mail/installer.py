@@ -139,9 +139,9 @@ class MailInstaller:
 def touch(file, user):
     with open(file, 'a'):
             os.utime(file, None)
-        usee_uid = pwd.getpwnam(user).pw_uid
-        usee_gid = grp.getgrnam(user).gr_gid
-        os.chown(file, user_uid, usee_gid)
+    user_uid = pwd.getpwnam(user).pw_uid
+    user_gid = grp.getgrnam(user).gr_gid
+    os.chown(file, user_uid, user_gid)
 
 
 def useradd(user):
