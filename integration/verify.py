@@ -163,6 +163,7 @@ def test_mail_sending(device_domain):
     server.quit()
 
 def test_mail_receiving():
+    imaplib.Debug = 4
     M = imaplib.IMAP4('localhost')
     M.login(DEVICE_USER, DEVICE_PASSWORD) 
     M.select() 
