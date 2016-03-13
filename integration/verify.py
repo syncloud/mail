@@ -105,9 +105,10 @@ def test_running_platform_web():
 
 
 
-def test_platform_rest(syncloud_session):
-    syncloud_session.mount('http://localhost', HTTPAdapter(max_retries=5))
-    response = syncloud_session.get('http://localhost',
+def test_platform_rest():
+    session = requests.session()
+    session.mount('http://localhost', HTTPAdapter(max_retries=5))
+    response = session.get('http://localhost',
 timeout=60)
     assert response.status_code == 200
 
@@ -162,7 +163,7 @@ def test_mail_sending(device_domain):
     server.quit()
 
 def test_mail_receiving():
-    M = imaplib.IMAP4()
+    M = imaplib.IMAP4('localhost')
     M.login(DEVICE_USER, DEVICE_PASSWORD) 
     M.select() 
     typ, data = M.search(None, 'ALL') 
