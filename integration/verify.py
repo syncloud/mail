@@ -21,6 +21,7 @@ import smtplib
 from email.mime.text import MIMEText
 from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_ssh_port
 from requests.adapters import HTTPAdapter
+import getpass, imaplib
 
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
@@ -141,7 +142,7 @@ def test_postfix_auth():
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
-def test_postfix_submission(device_domain):
+def test_mail_sending(device_domain):
     server = smtplib.SMTP('localhost:587', timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
@@ -155,6 +156,17 @@ def test_postfix_submission(device_domain):
     msg['To'] = mail_to
     server.sendmail(mail_from, [mail_to], msg.as_string())
     server.quit()
+
+def test_mail_receiving():
+    M = imaplib.IMAP4()
+    M.login(DEVICE_USER, DEVICE_PASSWORD) 
+    M.select() 
+    typ, data = M.search(None, 'ALL') 
+    for num in data[0].split(): 
+        typ, data = M.fetch(num, '(RFC822)')
+        print 'Message %s\n%s\n' % (num, data[0][1]) 
+    M.close()
+    M.logout()
 
 
 def test_postfix_ldap_aliases(user_domain):
