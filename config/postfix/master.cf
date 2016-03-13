@@ -132,5 +132,5 @@ scache    unix  -       -       n       -       1       scache
 #  flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py
 #  ${nexthop} ${user}
 
-dovecot unix - n n - - pipe 
+dovecot unix - n n - - pipe
   flags=DRhu user=dovecot:dovecot argv=/opt/app/mail/dovecot/libexec/dovecot/dovecot-lda -f ${sender} -d ${user}

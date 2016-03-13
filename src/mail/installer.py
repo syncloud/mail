@@ -126,7 +126,7 @@ class MailInstaller:
             config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
             config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
             config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
- 
+
 
 
 
