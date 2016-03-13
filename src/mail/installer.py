@@ -17,6 +17,8 @@ from syncloud_platform.api import port
 from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
+import grp
+
 
 SYSTEMD_POSTFIX = 'mail-postfix'
 SYSTEMD_DOVECOT = 'mail-dovecot'
