@@ -138,7 +138,7 @@ def test_running_roundcube():
 
 
 def test_dovecot_auth():
-    run_ssh('/opt/app/mail/dovecot/bin/doveadm auth test -c /opt/app/mail/config/dovecot/dovecot.conf {0} {1}'
+    run_ssh('/opt/app/mail/dovecot/bin/doveadm -c /opt/app/mail/config/dovecot/dovecot.conf  auth test {0} {1}'
             .format(DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
 
 
