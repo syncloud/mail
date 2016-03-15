@@ -42,6 +42,9 @@ class MailInstaller:
 
         app_data_dir = app.get_app_data_root(self.config.app_name(), self.config.app_name())
 
+        useradd('maildrop')
+        useradd('dovecot')
+
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', self.config.app_name())
 
@@ -58,16 +61,13 @@ class MailInstaller:
             app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', self.config.app_name())
 
         if not isdir(join(app_data_dir, 'box')):
-            app.create_data_dir(app_data_dir, 'box', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'box', 'dovecot')
 
         if not isdir(join(app_data_dir, 'data')):
             app.create_data_dir(app_data_dir, 'data', self.config.app_name())
 
         if not isdir(join(app_data_dir, 'postgresql')):
             app.create_data_dir(app_data_dir, 'postgresql', self.config.app_name())
-
-        useradd('maildrop')
-        useradd('dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         touch(dovecot_lda_error_log, 'dovecot')
@@ -78,6 +78,7 @@ class MailInstaller:
         print("setup systemd")
         self.generate_postfix_config()
         self.generate_roundcube_config()
+        self.generate_dovecot_config()
 
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
@@ -124,6 +125,7 @@ class MailInstaller:
     def update_domain(self):
         self.generate_postfix_config()
         self.generate_roundcube_config()
+        self.generate_dovecot_config()
         restart_service(SYSTEMD_POSTFIX)
 
     def generate_roundcube_config(self):
@@ -140,6 +142,14 @@ class MailInstaller:
             config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
             config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
             config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
+
+    def generate_dovecot_config(self):
+
+        template_file_name = '{0}.template'.format(self.config.dovecot_config_file())
+        shutil.copyfile(template_file_name, self.config.dovecot_config_file())
+        with open(self.config.dovecot_config_file(), "a") as config_file:
+            config_file.write('\n')
+            config_file.write('postmaster_address = postmaster@{0}\n'.format(self.device_domain_name))
 
 
 def touch(file, user):

@@ -29,5 +29,5 @@ passdb {
 # <doc/wiki/UserDatabase.Static.txt>
 userdb {
   driver = static
-  args = uid=mail gid=mail home=/opt/data/mail/box/%u
+  args = uid=dovecot gid=dovecot home=/opt/data/mail/box/%u
 }
