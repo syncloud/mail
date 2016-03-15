@@ -54,6 +54,9 @@ class MailInstaller:
         if not isdir(join(app_data_dir, 'dovecot')):
             app.create_data_dir(app_data_dir, 'dovecot', self.config.app_name())
 
+        if not isdir(join(app_data_dir, 'dovecot', 'private')):
+            app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', self.config.app_name())
+
         if not isdir(join(app_data_dir, 'box')):
             app.create_data_dir(app_data_dir, 'box', self.config.app_name())
 
