@@ -660,7 +660,7 @@ sample_directory = /opt/app/mail/postfix/etc/postfix
 readme_directory = no
 inet_protocols = ipv4
 
-smtpd_sasl_path = /opt/data/mail/dovecot/auth-userdb
+smtpd_sasl_path = /opt/data/mail/dovecot/private/auth
 smtpd_sasl_auth_enable = yes
 
 dovecot_destination_recipient_limit = 1
