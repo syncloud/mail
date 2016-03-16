@@ -166,8 +166,7 @@ def test_mail_receiving():
     imaplib.Debug = 4
     M = imaplib.IMAP4('localhost')
     M.login(DEVICE_USER, DEVICE_PASSWORD)
-
-   M.select()
+    M.select()
     typ, data = M.search(None, 'ALL')
     print('emails: {0}'.format(data))
     for num in data[0].split():
