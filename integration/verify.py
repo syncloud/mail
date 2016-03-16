@@ -165,8 +165,14 @@ def test_mail_sending(device_domain):
 def test_mail_receiving():
     imaplib.Debug = 4
     M = imaplib.IMAP4('localhost')
-    M.login(DEVICE_USER, DEVICE_PASSWORD) 
-    M.select('INBOX', readonly=True)
+    M.login(DEVICE_USER, DEVICE_PASSWORD)
+
+   M.select()
+    typ, data = M.search(None, 'ALL')
+    print('emails: {0}'.format(data))
+    for num in data[0].split():
+        typ, data = M.fetch(num, '(RFC822)')
+        print 'Message %s\n%s\n' % (num, data[0][1])
 
     for i in range(1, 30):
         typ, msg_data = M.fetch(str(i), '(RFC822)')
