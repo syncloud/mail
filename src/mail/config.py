@@ -51,6 +51,10 @@ class Config:
     def dovecot_config_file(self):
         return self.parser.get('mail', 'dovecot_config_file')
 
+    def db_init_file(self):
+        return self.parser.get('mail', 'db_init_file')
+
+
 class UserConfig:
 
     def __init__(self, filename=default_user_config_file):

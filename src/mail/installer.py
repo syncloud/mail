@@ -88,7 +88,7 @@ class MailInstaller:
 
         user_config = UserConfig()
         if not user_config.is_activated():
-            self.initialize()
+            self.initialize(user_config)
         self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
 
         self.prepare_storage()
@@ -111,11 +111,11 @@ class MailInstaller:
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
 
-    def initialize(self):
+    def initialize(self, user_config):
         print("initialization")
-        postgres.execute("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
-        postgres.execute("create database mail;", database="postgres")
-        user_config = UserConfig()
+        postgres.execute_sql("ALTER USER mail WITH PASSWORD 'mail';", database="postgres")
+        postgres.execute_sql("create database mail;", database="postgres")
+        postgres.execute_file(self.config.db_init_file(), database="mail")
         user_config.set_activated(True)
 
     def prepare_storage(self):

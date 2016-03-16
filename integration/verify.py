@@ -64,8 +64,7 @@ def module_teardown():
 
 
 @pytest.fixture(scope='module')
-def user_domain(auth, device_domain):
-    email, password, domain, release, version, arch = auth
+def user_domain(device_domain):
     return 'mail.{0}'.format(device_domain)
 
 
@@ -73,6 +72,7 @@ def user_domain(auth, device_domain):
 def device_domain(auth):
     email, password, domain, release, version, arch = auth
     return '{0}.{1}'.format(domain, SYNCLOUD_INFO)
+
 
 @pytest.fixture(scope='function')
 def syncloud_session():
@@ -99,17 +99,14 @@ def test_activate_device(auth):
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
-
 def test_running_platform_web():
     print(check_output('nc -zv -w 1 localhost 80', shell=True))
-
 
 
 def test_platform_rest():
     session = requests.session()
     session.mount('http://localhost', HTTPAdapter(max_retries=5))
-    response = session.get('http://localhost',
-timeout=60)
+    response = session.get('http://localhost', timeout=60)
     assert response.status_code == 200
 
 
@@ -147,6 +144,7 @@ def test_postfix_auth():
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
+
 def test_mail_sending(device_domain):
     server = smtplib.SMTP('localhost:587', timeout=10)
     server.set_debuglevel(1)
@@ -162,27 +160,27 @@ def test_mail_sending(device_domain):
     server.sendmail(mail_from, [mail_to], msg.as_string())
     server.quit()
 
-def test_mail_receiving():
-    imaplib.Debug = 4
-    M = imaplib.IMAP4('localhost')
-    M.login(DEVICE_USER, DEVICE_PASSWORD)
-    M.select()
-    typ, data = M.search(None, 'ALL')
-    print('emails: {0}'.format(data))
-    for num in data[0].split():
-        typ, data = M.fetch(num, '(RFC822)')
-        print 'Message %s\n%s\n' % (num, data[0][1])
-    M.close()
-    M.logout()
 
 def test_filesystem_mailbox():
     run_ssh('find /opt/data/mail/box', password=DEVICE_PASSWORD)
 
 
+def test_mail_receiving():
+    imaplib.Debug = 4
+    server = imaplib.IMAP4('localhost')
+    server.login(DEVICE_USER, DEVICE_PASSWORD)
+    selected = server.select('inbox')
+    assert selected[0] == 'OK'
+
+    messageCount = int(selected[1][0])
+    assert messageCount == 1
+
+    server.logout()
+
+
 def test_postfix_ldap_aliases(user_domain):
     run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
             .format(DEVICE_USER, user_domain), password=DEVICE_PASSWORD)
-
 
 
 def test_upgrade(auth):
