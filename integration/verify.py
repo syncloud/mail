@@ -175,6 +175,9 @@ def test_mail_receiving():
     M.close()
     M.logout()
 
+def test_filesystem_mailbox():
+    run_ssh('find /opt/data/mail/box', password=DEVICE_PASSWORD)
+
 
 def test_postfix_ldap_aliases(user_domain):
     run_ssh('/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
