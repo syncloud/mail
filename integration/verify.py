@@ -172,14 +172,6 @@ def test_mail_receiving():
     for num in data[0].split():
         typ, data = M.fetch(num, '(RFC822)')
         print 'Message %s\n%s\n' % (num, data[0][1])
-
-    for i in range(1, 30):
-        typ, msg_data = M.fetch(str(i), '(RFC822)')
-        for response_part in msg_data:
-            if isinstance(response_part, tuple):
-                msg = email.message_from_string(response_part[1])
-                for header in [ 'subject', 'to', 'from' ]:
-                    print '%-8s: %s' % (header.upper(), msg[header])
     M.close()
     M.logout()
 
