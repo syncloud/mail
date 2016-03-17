@@ -160,7 +160,7 @@ class MailInstaller:
         shutil.copyfile(template_file_name, self.config.php_ini())
         with open(self.config.php_ini(), "a") as config_file:
             config_file.write('\n')
-            config_file.write("date.timezone = '{0}'\n".format(gettz()))
+            config_file.write("date.timezone = '{0}'\n".format(gettz().tzname(None)))
 
 
 def touch(file, user):
