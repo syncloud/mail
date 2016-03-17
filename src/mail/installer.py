@@ -18,6 +18,7 @@ from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
 import grp
+from dateutil.tz import gettz
 
 
 SYSTEMD_POSTFIX = 'mail-postfix'
@@ -79,6 +80,7 @@ class MailInstaller:
         self.generate_postfix_config()
         self.generate_roundcube_config()
         self.generate_dovecot_config()
+        self.generate_php_config()
 
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
@@ -150,6 +152,14 @@ class MailInstaller:
         with open(self.config.dovecot_config_file(), "a") as config_file:
             config_file.write('\n')
             config_file.write('postmaster_address = postmaster@{0}\n'.format(self.device_domain_name))
+
+    def generate_php_config(self):
+        
+        template_file_name = '{0}.template'.format(self.config.php_ini())
+        shutil.copyfile(template_file_name, self.config.php_ini())
+        with open(self.config.php_ini(), "a") as config_file:
+            config_file.write('\n')
+            config_file.write('date.timezone = '{0}'\n'.format(gettz()))
 
 
 def touch(file, user):

@@ -18,5 +18,6 @@ cd lib
 
 coin py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
 coin py https://pypi.python.org/packages/source/s/syncloud-lib/syncloud-lib-2.tar.gz
+coin py https://pypi.python.org/packages/source/p/python-dateutil/python-dateutil-2.5.1.tar.gz
 
 cd ..

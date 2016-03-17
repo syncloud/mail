@@ -54,6 +54,10 @@ class Config:
     def db_init_file(self):
         return self.parser.get('mail', 'db_init_file')
 
+    def php_ini(self):
+        return self.parser.get('mail', 'php_ini')
+
+
 
 class UserConfig:
 
