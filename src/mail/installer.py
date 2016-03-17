@@ -76,12 +76,13 @@ class MailInstaller:
         dovecot_lda_info_log = join(app_data_dir, 'log', 'dovecot-lda.info.log')
         touch(dovecot_lda_info_log, 'dovecot')
 
-        print("setup systemd")
+        print("setup configs")
         self.generate_postfix_config()
         self.generate_roundcube_config()
         self.generate_dovecot_config()
         self.generate_php_config()
 
+        print("setup systemd")
         add_service(self.config.install_path(), SYSTEMD_POSTGRES)
         add_service(self.config.install_path(), SYSTEMD_POSTFIX)
         add_service(self.config.install_path(), SYSTEMD_DOVECOT)
@@ -159,7 +160,7 @@ class MailInstaller:
         shutil.copyfile(template_file_name, self.config.php_ini())
         with open(self.config.php_ini(), "a") as config_file:
             config_file.write('\n')
-            config_file.write('date.timezone = '{0}'\n'.format(gettz()))
+            config_file.write("date.timezone = '{0}'\n".format(gettz()))
 
 
 def touch(file, user):
