@@ -18,7 +18,7 @@ from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
 import grp
-from dateutil.tz import get_localzone
+from tzlocal import get_localzone
 
 
 SYSTEMD_POSTFIX = 'mail-postfix'
