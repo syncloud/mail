@@ -18,7 +18,7 @@ from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
 import grp
-from dateutil.tz import gettz
+from dateutil.tz import get_localzone
 
 
 SYSTEMD_POSTFIX = 'mail-postfix'
@@ -160,7 +160,7 @@ class MailInstaller:
         shutil.copyfile(template_file_name, self.config.php_ini())
         with open(self.config.php_ini(), "a") as config_file:
             config_file.write('\n')
-            config_file.write("date.timezone = '{0}'\n".format(gettz().tzname(None)))
+            config_file.write("date.timezone = '{0}'\n".format(get_localzone()))
 
 
 def touch(file, user):
