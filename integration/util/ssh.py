@@ -1,5 +1,6 @@
 from subprocess import check_output
 
+import time
 
 DOCKER_SSH_PORT = 2222
 SSH = 'ssh -o StrictHostKeyChecking=no -p {0} root@localhost'.format(DOCKER_SSH_PORT)
