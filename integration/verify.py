@@ -165,6 +165,10 @@ def test_filesystem_mailbox():
     run_ssh('find /opt/data/mail/box', password=DEVICE_PASSWORD)
 
 
+def test_starttls():
+    run_ssh("echo \"A Logout\" | openssl s_client -connect localhost:143 -starttls imap", password=DEVICE_PASSWORD)
+
+
 def test_mail_receiving():
 
     message_count = 0
@@ -182,7 +186,7 @@ def test_mail_receiving():
 
 def get_message_count():
     imaplib.Debug = 4
-    server = imaplib.IMAP4('localhost')
+    server = imaplib.IMAP4_SSL('localhost')
     server.login(DEVICE_USER, DEVICE_PASSWORD)
     selected = server.select('inbox')
     server.logout()

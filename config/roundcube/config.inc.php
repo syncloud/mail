@@ -16,3 +16,5 @@ $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 $config['plugins'] = array();
+
+$config['default_host'] = 'tls://localhost';

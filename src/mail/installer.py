@@ -134,7 +134,8 @@ class MailInstaller:
     def generate_roundcube_config(self):
         shutil.copyfile(self.config.roundcube_config_file_template(), self.config.roundcube_config_file())
         with open(self.config.roundcube_config_file(), "a") as config_file:
-            config_file.write("$config['default_host'] = '{0}';\n".format(self.device_domain_name))
+            config_file.write('\n')
+            config_file.write("$config['mail_domain'] = '{0}';\n".format(self.device_domain_name))
 
     def generate_postfix_config(self):
         
