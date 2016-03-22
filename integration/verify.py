@@ -166,16 +166,28 @@ def test_filesystem_mailbox():
 
 
 def test_mail_receiving():
+
+    message_count = 0
+    retry = 0
+    retries = 3
+    while retry < retries:
+        message_count = get_message_count()
+        if message_count > 0:
+            break
+        retry += 1
+        time.sleep(1)
+
+    assert message_count == 1
+
+
+def get_message_count():
     imaplib.Debug = 4
     server = imaplib.IMAP4('localhost')
     server.login(DEVICE_USER, DEVICE_PASSWORD)
     selected = server.select('inbox')
-    assert selected[0] == 'OK'
-
-    messageCount = int(selected[1][0])
-    assert messageCount == 1
-
     server.logout()
+    # assert selected[0] == 'OK'
+    return int(selected[1][0])
 
 
 def test_postfix_ldap_aliases(user_domain):
