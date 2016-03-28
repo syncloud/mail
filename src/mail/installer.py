@@ -97,10 +97,10 @@ class MailInstaller:
         self.prepare_storage()
 
         platform_app.register_app('mail', self.config.port())
-        port.add_port(25)
-        port.add_port(110)
-        port.add_port(143)
-        port.add_port(587)
+        port.add_port(25, 'TCP')
+        port.add_port(110, 'TCP')
+        port.add_port(143, 'TCP')
+        port.add_port(587, 'TCP')
 
     def remove(self):
 
