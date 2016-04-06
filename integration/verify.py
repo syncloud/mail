@@ -77,7 +77,7 @@ def device_domain(auth):
 @pytest.fixture(scope='function')
 def syncloud_session():
     session = requests.session()
-    session.post('http://localhost/server/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('http://localhost/rest/login', data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
     return session
 
 
@@ -111,7 +111,7 @@ def test_platform_rest():
 
 
 def test_external_mode(syncloud_session):
-    response = syncloud_session.get('http://localhost/server/rest/settings/set_external_access',
+    response = syncloud_session.get('http://localhost/rest/settings/set_external_access',
                                     params={'external_access': 'true'},
                                     timeout=60)
     assert '"success": true' in response.text
