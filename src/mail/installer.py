@@ -27,48 +27,51 @@ SYSTEMD_NGINX = 'mail-nginx'
 SYSTEMD_PHP_FPM = 'mail-php-fpm'
 SYSTEMD_POSTGRES = 'mail-postgres'
 
+USER_NAME = 'mail'
+APP_NAME = 'mail'
+
 
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
         self.device_domain_name = info.domain()
-        self.app_domain_name = '{0}.{1}'.format(self.config.app_name(), self.device_domain_name)
+        self.app_domain_name = '{0}.{1}'.format(APP_NAME, self.device_domain_name)
 
     def install(self):
 
         locale.fix_locale()
 
-        self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
+        self.log.info(chown.chown(USER_NAME, self.config.install_path()))
 
-        app_data_dir = app.get_app_data_root(self.config.app_name(), self.config.app_name())
+        app_data_dir = app.get_app_data_root(APP_NAME, USER_NAME)
 
         useradd('maildrop')
         useradd('dovecot')
 
         if not isdir(join(app_data_dir, 'config')):
-            app.create_data_dir(app_data_dir, 'config', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'config', USER_NAME)
 
         if not isdir(join(app_data_dir, 'log')):
-            app.create_data_dir(app_data_dir, 'log', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'log', USER_NAME)
 
         if not isdir(join(app_data_dir, 'spool')):
-            app.create_data_dir(app_data_dir, 'spool', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'spool', USER_NAME)
 
         if not isdir(join(app_data_dir, 'dovecot')):
-            app.create_data_dir(app_data_dir, 'dovecot', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'dovecot', USER_NAME)
 
         if not isdir(join(app_data_dir, 'dovecot', 'private')):
-            app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', self.config.app_name())
+            app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', USER_NAME)
 
         if not isdir(join(app_data_dir, 'box')):
             app.create_data_dir(app_data_dir, 'box', 'dovecot')
 
         if not isdir(join(app_data_dir, 'data')):
-            app.create_data_dir(app_data_dir, 'data', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'data', USER_NAME)
 
         if not isdir(join(app_data_dir, 'postgresql')):
-            app.create_data_dir(app_data_dir, 'postgresql', self.config.app_name())
+            app.create_data_dir(app_data_dir, 'postgresql', USER_NAME)
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         touch(dovecot_lda_error_log, 'dovecot')
@@ -92,7 +95,7 @@ class MailInstaller:
         user_config = UserConfig()
         if not user_config.is_activated():
             self.initialize(user_config)
-        self.log.info(chown.chown(self.config.app_name(), self.config.install_path()))
+        self.log.info(chown.chown(USER_NAME, self.config.install_path()))
 
         self.prepare_storage()
 
@@ -122,8 +125,8 @@ class MailInstaller:
         user_config.set_activated(True)
 
     def prepare_storage(self):
-        app_storage_dir = storage.init(self.config.app_name(), self.config.app_name())
-        app.create_data_dir(app_storage_dir, 'tmp', self.config.app_name())
+        app_storage_dir = storage.init(APP_NAME, USER_NAME)
+        app.create_data_dir(app_storage_dir, 'tmp', USER_NAME)
 
     def update_domain(self):
         self.generate_postfix_config()
