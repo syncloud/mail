@@ -42,6 +42,20 @@ def chownpath(path, user):
     os.chown(path, getpwnam(user).pw_uid, getgrnam(user).gr_gid)
 
 
+def touch(file, user):
+    with open(file, 'a'):
+        os.utime(file, None)
+    chownpath(file, user)
+
+
+def useradd(user):
+    try:
+        getpwnam(user)
+        return 'user {0} exists'.format(user)
+    except KeyError:
+        return check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(user), shell=True)
+
+
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
@@ -61,27 +75,20 @@ class MailInstaller:
         app_data_dir = app.get_app_data_dir(APP_NAME)
         chownpath(app_data_dir, USER_NAME)
 
+        data_dirs = [
+            join(app_data_dir, 'config'),
+            join(app_data_dir, 'log'),
+            join(app_data_dir, 'spool'),
+            join(app_data_dir, 'dovecot'),
+            join(app_data_dir, 'dovecot', 'private'),
+            join(app_data_dir, 'data'),
+            join(app_data_dir, 'postgresql'),
+            join(app_data_dir, 'config')
+        ]
 
-        if not isdir(join(app_data_dir, 'config')):
-            app.create_data_dir(app_data_dir, 'config', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'log')):
-            app.create_data_dir(app_data_dir, 'log', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'spool')):
-            app.create_data_dir(app_data_dir, 'spool', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'dovecot')):
-            app.create_data_dir(app_data_dir, 'dovecot', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'dovecot', 'private')):
-            app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'data')):
-            app.create_data_dir(app_data_dir, 'data', USER_NAME)
-
-        if not isdir(join(app_data_dir, 'postgresql')):
-            app.create_data_dir(app_data_dir, 'postgresql', USER_NAME)
+        for data_dir in data_dirs:
+            makepath(data_dir)
+            chownpath(data_dir, USER_NAME)
 
         box_data_dir = join(app_data_dir, 'box')
         makepath(box_data_dir)
@@ -182,19 +189,3 @@ class MailInstaller:
         with open(self.config.php_ini(), "a") as config_file:
             config_file.write('\n')
             config_file.write("date.timezone = '{0}'\n".format(get_localzone()))
-
-
-def touch(file, user):
-    with open(file, 'a'):
-            os.utime(file, None)
-    user_uid = pwd.getpwnam(user).pw_uid
-    user_gid = grp.getgrnam(user).gr_gid
-    os.chown(file, user_uid, user_gid)
-
-
-def useradd(user):
-    try:
-        pwd.getpwnam(user)
-        return 'user {0} exists'.format(user)
-    except KeyError:
-        return check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(user), shell=True)
