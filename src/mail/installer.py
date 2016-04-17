@@ -61,6 +61,7 @@ class MailInstaller:
         app_data_dir = app.get_app_data_dir(APP_NAME)
         chownpath(app_data_dir, USER_NAME)
 
+
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', USER_NAME)
 
@@ -82,8 +83,9 @@ class MailInstaller:
         if not isdir(join(app_data_dir, 'postgresql')):
             app.create_data_dir(app_data_dir, 'postgresql', USER_NAME)
 
-        if not isdir(join(app_data_dir, 'box')):
-            app.create_data_dir(app_data_dir, 'box', 'dovecot')
+        box_data_dir = join(app_data_dir, 'box')
+        makepath(box_data_dir)
+        chownpath(box_data_dir, 'dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         touch(dovecot_lda_error_log, 'dovecot')
