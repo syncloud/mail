@@ -2,15 +2,12 @@ import os
 from os import environ, makedirs
 from os.path import isdir, join, isfile
 import shutil
-from subprocess import check_output
 
-import pwd
 from syncloud_app import logger
 
 from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
 from syncloud_platform.tools import app
 from syncloud_platform.api import storage
-from syncloud_platform.tools import chown
 from syncloud_platform.api import info
 from syncloud_platform.api import app as platform_app
 from syncloud_platform.api import port
@@ -20,7 +17,6 @@ from syncloud_platform.gaplib import fs, linux
 from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
-import grp
 from tzlocal import get_localzone
 
 
@@ -51,14 +47,6 @@ def touch(file, user):
     chownpath(file, user)
 
 
-def useradd(user):
-    try:
-        getpwnam(user)
-        return 'user {0} exists'.format(user)
-    except KeyError:
-        return check_output('/usr/sbin/useradd -r -s /bin/false {0}'.format(user), shell=True)
-
-
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
@@ -70,10 +58,11 @@ class MailInstaller:
 
         linux.fix_locale()
 
-        useradd('maildrop')
-        useradd('dovecot')
+        linux.useradd('maildrop')
+        linux.useradd('dovecot')
+        linux.useradd(USER_NAME)
 
-        self.log.info(chown.chown(USER_NAME, self.config.install_path()))
+        self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
         app_data_dir = app.get_app_data_dir(APP_NAME)
         chownpath(app_data_dir, USER_NAME)
@@ -119,7 +108,7 @@ class MailInstaller:
         user_config = UserConfig()
         if not user_config.is_activated():
             self.initialize(user_config)
-        self.log.info(chown.chown(USER_NAME, self.config.install_path()))
+        self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
         self.prepare_storage()
 
