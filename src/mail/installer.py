@@ -1,5 +1,5 @@
 import os
-from os import environ
+from os import environ, makedirs
 from os.path import isdir, join, isfile
 import shutil
 from subprocess import check_output
@@ -31,6 +31,17 @@ USER_NAME = 'mail'
 APP_NAME = 'mail'
 
 
+def makepath(path):
+    if not isdir(path):
+        makedirs(path)
+
+from grp import getgrnam
+from pwd import getpwnam
+
+def chownpath(path, user):
+    os.chown(path, getpwnam(user).pw_uid, getgrnam(user).gr_gid)
+
+
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
@@ -42,12 +53,12 @@ class MailInstaller:
 
         locale.fix_locale()
 
+        useradd('maildrop')
+        useradd('dovecot')
+
         self.log.info(chown.chown(USER_NAME, self.config.install_path()))
 
         app_data_dir = app.get_app_data_root(APP_NAME, USER_NAME)
-
-        useradd('maildrop')
-        useradd('dovecot')
 
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', USER_NAME)
@@ -64,14 +75,14 @@ class MailInstaller:
         if not isdir(join(app_data_dir, 'dovecot', 'private')):
             app.create_data_dir(join(app_data_dir, 'dovecot'), 'private', USER_NAME)
 
-        if not isdir(join(app_data_dir, 'box')):
-            app.create_data_dir(app_data_dir, 'box', 'dovecot')
-
         if not isdir(join(app_data_dir, 'data')):
             app.create_data_dir(app_data_dir, 'data', USER_NAME)
 
         if not isdir(join(app_data_dir, 'postgresql')):
             app.create_data_dir(app_data_dir, 'postgresql', USER_NAME)
+
+        if not isdir(join(app_data_dir, 'box')):
+            app.create_data_dir(app_data_dir, 'box', 'dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         touch(dovecot_lda_error_log, 'dovecot')
@@ -126,7 +137,9 @@ class MailInstaller:
 
     def prepare_storage(self):
         app_storage_dir = storage.init(APP_NAME, USER_NAME)
-        app.create_data_dir(app_storage_dir, 'tmp', USER_NAME)
+        tmp_storage_path = join(app_storage_dir, 'tmp')
+        makepath(tmp_storage_path)
+        chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
         self.generate_postfix_config()
