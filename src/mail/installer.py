@@ -58,7 +58,8 @@ class MailInstaller:
 
         self.log.info(chown.chown(USER_NAME, self.config.install_path()))
 
-        app_data_dir = app.get_app_data_root(APP_NAME, USER_NAME)
+        app_data_dir = app.get_app_data_dir(APP_NAME)
+        chownpath(app_data_dir, USER_NAME)
 
         if not isdir(join(app_data_dir, 'config')):
             app.create_data_dir(app_data_dir, 'config', USER_NAME)
