@@ -10,10 +10,13 @@ from syncloud_app import logger
 from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
 from syncloud_platform.tools import app
 from syncloud_platform.api import storage
-from syncloud_platform.tools import chown, locale
+from syncloud_platform.tools import chown
 from syncloud_platform.api import info
 from syncloud_platform.api import app as platform_app
 from syncloud_platform.api import port
+
+from syncloud_platform.gaplib import fs, linux
+
 from mail.config import Config
 from mail.config import UserConfig
 from mail import postgres
@@ -65,7 +68,7 @@ class MailInstaller:
 
     def install(self):
 
-        locale.fix_locale()
+        linux.fix_locale()
 
         useradd('maildrop')
         useradd('dovecot')
