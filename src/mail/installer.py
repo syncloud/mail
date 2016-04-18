@@ -35,12 +35,6 @@ def makepath(path):
         makedirs(path)
 
 
-def touch(file, user):
-    with open(file, 'a'):
-        os.utime(file, None)
-    fs.chownpath(file, user)
-
-
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
@@ -81,10 +75,12 @@ class MailInstaller:
         fs.chownpath(box_data_dir, 'dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
-        touch(dovecot_lda_error_log, 'dovecot')
+        fs.touchfile(dovecot_lda_error_log)
+        fs.chownpath(dovecot_lda_error_log, 'dovecot')
 
         dovecot_lda_info_log = join(app_data_dir, 'log', 'dovecot-lda.info.log')
-        touch(dovecot_lda_info_log, 'dovecot')
+        fs.touchfile(dovecot_lda_info_log)
+        fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
         print("setup configs")
         self.generate_postfix_config()
