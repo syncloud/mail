@@ -34,17 +34,11 @@ def makepath(path):
     if not isdir(path):
         makedirs(path)
 
-from grp import getgrnam
-from pwd import getpwnam
-
-def chownpath(path, user):
-    os.chown(path, getpwnam(user).pw_uid, getgrnam(user).gr_gid)
-
 
 def touch(file, user):
     with open(file, 'a'):
         os.utime(file, None)
-    chownpath(file, user)
+    fs.chownpath(file, user)
 
 
 class MailInstaller:
@@ -65,7 +59,7 @@ class MailInstaller:
         self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
         app_data_dir = app.get_app_data_dir(APP_NAME)
-        chownpath(app_data_dir, USER_NAME)
+        fs.chownpath(app_data_dir, USER_NAME)
 
         data_dirs = [
             join(app_data_dir, 'config'),
@@ -80,11 +74,11 @@ class MailInstaller:
 
         for data_dir in data_dirs:
             makepath(data_dir)
-            chownpath(data_dir, USER_NAME)
+            fs.chownpath(data_dir, USER_NAME)
 
         box_data_dir = join(app_data_dir, 'box')
         makepath(box_data_dir)
-        chownpath(box_data_dir, 'dovecot')
+        fs.chownpath(box_data_dir, 'dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
         touch(dovecot_lda_error_log, 'dovecot')
@@ -141,7 +135,7 @@ class MailInstaller:
         app_storage_dir = storage.init(APP_NAME, USER_NAME)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         makepath(tmp_storage_path)
-        chownpath(tmp_storage_path, USER_NAME)
+        fs.chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
         self.generate_postfix_config()
