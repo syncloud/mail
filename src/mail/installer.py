@@ -30,11 +30,6 @@ USER_NAME = 'mail'
 APP_NAME = 'mail'
 
 
-def makepath(path):
-    if not isdir(path):
-        makedirs(path)
-
-
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
@@ -67,11 +62,11 @@ class MailInstaller:
         ]
 
         for data_dir in data_dirs:
-            makepath(data_dir)
+            fs.makepath(data_dir)
             fs.chownpath(data_dir, USER_NAME)
 
         box_data_dir = join(app_data_dir, 'box')
-        makepath(box_data_dir)
+        fs.makepath(box_data_dir)
         fs.chownpath(box_data_dir, 'dovecot')
 
         dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
@@ -130,7 +125,7 @@ class MailInstaller:
     def prepare_storage(self):
         app_storage_dir = storage.init(APP_NAME, USER_NAME)
         tmp_storage_path = join(app_storage_dir, 'tmp')
-        makepath(tmp_storage_path)
+        fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
