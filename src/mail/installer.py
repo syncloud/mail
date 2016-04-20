@@ -1,18 +1,16 @@
-import os
-from os import environ, makedirs
 from os.path import isdir, join, isfile
 import shutil
 
 from syncloud_app import logger
 
 from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
-from syncloud_platform.tools import app
 from syncloud_platform.api import storage
 from syncloud_platform.api import info
-from syncloud_platform.api import app as platform_app
 from syncloud_platform.api import port
 
 from syncloud_platform.gaplib import fs, linux
+
+from syncloud_platform.application import api
 
 from mail.config import Config
 from mail.config import UserConfig
@@ -47,7 +45,8 @@ class MailInstaller:
 
         self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
-        app_data_dir = app.get_app_data_dir(APP_NAME)
+        app_setup = api.get_app_setup(APP_NAME)
+        app_data_dir = app_setup.get_data_dir()
         fs.chownpath(app_data_dir, USER_NAME)
 
         data_dirs = [
@@ -97,7 +96,7 @@ class MailInstaller:
 
         self.prepare_storage()
 
-        platform_app.register_app('mail', self.config.port())
+        app_setup.register_web(self.config.port())
         port.add_port(25, 'TCP')
         port.add_port(110, 'TCP')
         port.add_port(143, 'TCP')
@@ -105,7 +104,8 @@ class MailInstaller:
 
     def remove(self):
 
-        platform_app.unregister_app('mail')
+        app_setup = api.get_app_setup(APP_NAME)
+        app_setup.unregister_web()
         remove_service(SYSTEMD_NGINX)
         remove_service(SYSTEMD_PHP_FPM)
         remove_service(SYSTEMD_DOVECOT)
