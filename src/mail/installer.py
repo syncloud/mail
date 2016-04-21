@@ -4,7 +4,6 @@ import shutil
 from syncloud_app import logger
 
 from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
-from syncloud_platform.api import info
 from syncloud_platform.api import port
 
 from syncloud_platform.gaplib import fs, linux
@@ -31,8 +30,9 @@ class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
         self.config = Config()
-        self.device_domain_name = info.domain()
-        self.app_domain_name = '{0}.{1}'.format(APP_NAME, self.device_domain_name)
+        self.app = api.get_app_setup(APP_NAME)
+        self.device_domain_name = self.app.device_domain_name()
+        self.app_domain_name = self.app.app_domain_name()
 
     def install(self):
 
