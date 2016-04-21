@@ -1,10 +1,9 @@
-from os.path import isdir, join, isfile
+from os.path import isdir, join
 import shutil
 
 from syncloud_app import logger
 
 from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
-from syncloud_platform.api import storage
 from syncloud_platform.api import info
 from syncloud_platform.api import port
 
@@ -94,7 +93,8 @@ class MailInstaller:
             self.initialize(user_config)
         self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
-        self.prepare_storage()
+        app_storage_dir = app_setup.init_storage(USER_NAME)
+        self.prepare_storage(app_storage_dir)
 
         app_setup.register_web(self.config.port())
         port.add_port(25, 'TCP')
@@ -122,8 +122,7 @@ class MailInstaller:
         postgres.execute_file(self.config.db_init_file(), database="mail")
         user_config.set_activated(True)
 
-    def prepare_storage(self):
-        app_storage_dir = storage.init(APP_NAME, USER_NAME)
+    def prepare_storage(self, app_storage_dir):
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
