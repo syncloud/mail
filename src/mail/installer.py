@@ -3,8 +3,6 @@ import shutil
 
 from syncloud_app import logger
 
-from syncloud_platform.systemd.systemctl import remove_service, add_service, restart_service
-
 from syncloud_platform.gaplib import fs, linux
 
 from syncloud_platform.application import api
@@ -80,11 +78,11 @@ class MailInstaller:
         self.generate_php_config()
 
         print("setup systemd")
-        add_service(self.config.install_path(), SYSTEMD_POSTGRES)
-        add_service(self.config.install_path(), SYSTEMD_POSTFIX)
-        add_service(self.config.install_path(), SYSTEMD_DOVECOT)
-        add_service(self.config.install_path(), SYSTEMD_PHP_FPM)
-        add_service(self.config.install_path(), SYSTEMD_NGINX)
+        self.app.add_service(SYSTEMD_POSTGRES)
+        self.app.add_service(SYSTEMD_POSTFIX)
+        self.app.add_service(SYSTEMD_DOVECOT)
+        self.app.add_service(SYSTEMD_PHP_FPM)
+        self.app.add_service(SYSTEMD_NGINX)
 
         user_config = UserConfig()
         if not user_config.is_activated():
@@ -103,11 +101,11 @@ class MailInstaller:
     def remove(self):
 
         self.app.unregister_web()
-        remove_service(SYSTEMD_NGINX)
-        remove_service(SYSTEMD_PHP_FPM)
-        remove_service(SYSTEMD_DOVECOT)
-        remove_service(SYSTEMD_POSTFIX)
-        remove_service(SYSTEMD_POSTGRES)
+        self.app.remove_service(SYSTEMD_NGINX)
+        self.app.remove_service(SYSTEMD_PHP_FPM)
+        self.app.remove_service(SYSTEMD_DOVECOT)
+        self.app.remove_service(SYSTEMD_POSTFIX)
+        self.app.remove_service(SYSTEMD_POSTGRES)
 
         if isdir(self.config.install_path()):
             shutil.rmtree(self.config.install_path())
@@ -128,7 +126,7 @@ class MailInstaller:
         self.generate_postfix_config()
         self.generate_roundcube_config()
         self.generate_dovecot_config()
-        restart_service(SYSTEMD_POSTFIX)
+        self.app.restart_service(SYSTEMD_POSTFIX)
 
     def generate_roundcube_config(self):
         shutil.copyfile(self.config.roundcube_config_file_template(), self.config.roundcube_config_file())
