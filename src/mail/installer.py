@@ -89,8 +89,7 @@ class MailInstaller:
             self.initialize(user_config)
         self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
-        app_storage_dir = self.app.init_storage(USER_NAME)
-        self.prepare_storage(app_storage_dir)
+        self.prepare_storage()
 
         self.app.register_web(self.config.port())
         self.app.add_port(25, 'TCP')
@@ -117,7 +116,8 @@ class MailInstaller:
         postgres.execute_file(self.config.db_init_file(), database="mail")
         user_config.set_activated(True)
 
-    def prepare_storage(self, app_storage_dir):
+    def prepare_storage(self):
+        app_storage_dir = self.app.init_storage(USER_NAME)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
