@@ -11,7 +11,6 @@ ROUNDCUBE_VERSION=1.1.4
 
 apt-get install -y git build-essential dpkg-dev
 
-
 ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
 if [ ! -z "$1" ]; then
     ARCH=$1
