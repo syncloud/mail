@@ -7,8 +7,7 @@ Description=mail php fpm
 User=mail
 Type=forking
 PIDFile=/opt/data/mail/php-fpm.pid
-ExecStart=/opt/app/mail/php/sbin/php-fpm -y /opt/app/mail/config/php/php-fpm.conf -c /opt/app/mail/config/php/php.ini
-Environment=LD_LIBRARY_PATH=/opt/app/mail/php/lib
+ExecStart=/opt/app/mail/bin/service.php-fpm.sh
 RemainAfterExit=yes
 
 [Install]
