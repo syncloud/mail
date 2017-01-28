@@ -63,17 +63,6 @@ def module_teardown():
     print('-------------------------------------------------------')
 
 
-@pytest.fixture(scope='module')
-def user_domain(device_domain):
-    return 'mail.{0}'.format(device_domain)
-
-
-@pytest.fixture(scope='module')
-def device_domain(auth):
-    email, password, domain, release, version, arch = auth
-    return '{0}.{1}'.format(domain, SYNCLOUD_INFO)
-
-
 @pytest.fixture(scope='function')
 def syncloud_session():
     session = requests.session()
