@@ -39,4 +39,7 @@ def test_web_with_selenium(user_domain):
     time.sleep(2)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
 
+    print(driver.page_source.encode("utf-8"))
+
+
     
