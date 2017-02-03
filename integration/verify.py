@@ -99,12 +99,12 @@ def test_platform_rest():
     assert response.status_code == 200
 
 
-def test_external_mode(syncloud_session):
-    response = syncloud_session.get('http://localhost/rest/settings/set_external_access',
-                                    params={'external_access': 'true'},
-                                    timeout=60)
-    assert '"success": true' in response.text
-    assert response.status_code == 200
+# def test_external_mode(syncloud_session):
+#     response = syncloud_session.get('http://localhost/rest/settings/set_external_access',
+#                                     params={'external_access': 'true'},
+#                                     timeout=60)
+#     assert '"success": true' in response.text
+#     assert response.status_code == 200
 
 
 def test_install(auth):
