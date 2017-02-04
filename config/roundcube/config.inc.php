@@ -25,5 +25,5 @@ $config['imap_conn_options'] = array(
       'allow_self_signed' => true,
       'verify_depth' => 3,
        'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-       'cafile' => '/opt/data/platform/syncloud.crt', ), 
+       'cafile' => '/opt/data/platform/syncloud.ca.crt', ), 
     );

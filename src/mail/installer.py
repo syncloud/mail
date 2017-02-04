@@ -87,7 +87,6 @@ class MailInstaller:
         user_config = UserConfig()
         if not user_config.is_activated():
             self.initialize(user_config)
-        self.log.info(fs.chownpath(self.config.install_path(), USER_NAME, recursive=True))
 
         self.prepare_storage()
 
