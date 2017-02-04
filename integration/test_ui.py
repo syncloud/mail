@@ -51,7 +51,7 @@ def test_web_with_selenium(user_domain):
     password.send_keys(Keys.RETURN)
 
     username = '{0}@{1}'.format(DEVICE_USER, user_domain)
- wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
+    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
     #time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
