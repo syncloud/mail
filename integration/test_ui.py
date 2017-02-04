@@ -17,7 +17,7 @@ DEVICE_PASSWORD = 'password'
 log_dir = join(LOG_DIR, 'app_log')
 
 
-def test_web_with_selenium(user_domain):
+def test_web_with_selenium(user_domain, device_domain):
 
     os.environ['PATH'] = os.environ['PATH'] + ":" + join(DIR, 'geckodriver')
 
@@ -50,7 +50,7 @@ def test_web_with_selenium(user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.send_keys(Keys.RETURN)
 
-    username = '{0}@{1}'.format(DEVICE_USER, user_domain)
+    username = '{0}@{1}'.format(DEVICE_USER, device_domain)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
     #time.sleep(10)
