@@ -55,7 +55,7 @@ def test_web_with_selenium(user_domain):
     #wizard_close_button = driver.find_element_by_id("closeWizard")
     #wizard_close_button.click()
 
-    time.sleep(2)
+    time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
     print(driver.page_source.encode("utf-8"))
