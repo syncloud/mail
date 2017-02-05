@@ -29,7 +29,7 @@ def test_web_with_selenium(user_domain, device_domain):
     profile.set_preference("webdriver.log.file", "{0}/firefox.log".format(log_dir))
     driver = webdriver.Firefox(profile, capabilities=caps)
 
-    wait_driver = WebDriverWait(driver, 10)
+    wait_driver = WebDriverWait(driver, 20)
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
@@ -50,17 +50,17 @@ def test_web_with_selenium(user_domain, device_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.send_keys(Keys.RETURN)
 
-    time.sleep(10)
+    #time.sleep(10)
+
+    username = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    #print('found: {0}'.format(username in page))
+    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
     page = driver.page_source.encode("utf-8")
     print(page)
 
-    username = '{0}@{1}'.format(DEVICE_USER, device_domain)
-    print('found: {0}'.format(username in page))
-
-    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
 
 
