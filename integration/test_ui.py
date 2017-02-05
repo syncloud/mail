@@ -58,7 +58,7 @@ def test_web_with_selenium(user_domain, device_domain):
     print(page)
 
     username = '{0}@{1}'.format(DEVICE_USER, device_domain)
-   print('found: {0}'.format(username in page))
+    print('found: {0}'.format(username in page))
  wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
 
