@@ -75,7 +75,7 @@ def test_start(module_setup):
 
 
 def test_activate_device(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
 
     run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
@@ -107,8 +107,8 @@ def test_platform_rest():
 #     assert response.status_code == 200
 
 
-def test_install(auth):
-    __local_install(auth)
+def test_install(app_archive_path):
+    __local_install(app_archive_path)
 
 
 def test_running_smtp():
@@ -188,13 +188,12 @@ def test_postfix_ldap_aliases(user_domain):
             .format(DEVICE_USER, user_domain), password=DEVICE_PASSWORD)
 
 
-def test_upgrade(auth):
+def test_upgrade(app_archive_path):
     run_ssh('/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
-    __local_install(auth)
+    __local_install(app_archive_path)
 
 
-def __local_install(auth, action='install'):
-    email, password, domain, release, version, arch = auth
-    run_scp('{0}/../mail-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug {0} /mail-{1}-{2}.tar.gz'.format(action, version, arch), password=DEVICE_PASSWORD)
+def __local_install(app_archive_path, action='install'):
+    run_scp('{0} root@localhost:/app.tar.gz'.format(app_archive_path), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug {0} /app.tar.gz', password=DEVICE_PASSWORD)
     time.sleep(3)
