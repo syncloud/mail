@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
@@ -8,7 +8,7 @@ if [[ -z "$1" || -z "$2" || -z "$3" || -z "$4" || -z "$5" ]]; then
     exit 1
 fi
 
-./docker.sh $6
+./docker.sh
 
 apt-get install -y sshpass firefox xvfb
 coin --to ${DIR} raw --subfolder geckodriver https://github.com/mozilla/geckodriver/releases/download/v0.9.0/geckodriver-v0.9.0-linux64.tar.gz
