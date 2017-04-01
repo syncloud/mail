@@ -6,14 +6,13 @@ import time
 from subprocess import check_output
 
 import pytest
-import re
 
 app_path = join(dirname(__file__), '..')
 sys.path.append(join(app_path, 'src'))
 
 lib_path = join(app_path, 'lib')
 libs = [abspath(join(lib_path, item)) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(lambda x: sys.path.insert(0, x), libs)
+map(lambda x: sys.path.append(x), libs)
 
 import requests
 import shutil
@@ -23,13 +22,13 @@ from integration.util.ssh import run_scp, ssh_command, SSH, run_ssh, set_docker_
 from requests.adapters import HTTPAdapter
 import getpass, imaplib
 
-DIR = dirname(__file__)
-LOG_DIR = join(DIR, 'log')
 SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
 DEVICE_PASSWORD = 'password'
 DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
+DIR = dirname(__file__)
+LOG_DIR = join(DIR, 'log')
 
 
 @pytest.fixture(scope="session")
@@ -39,24 +38,22 @@ def module_setup(request):
 
 def module_teardown():
     os.mkdir(LOG_DIR)
-
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
     run_scp('root@localhost:/opt/data/platform/log/* {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
-
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
-    run_ssh('ls -la /opt/data/mail/log', password=DEVICE_PASSWORD)
-    run_scp('root@localhost:/opt/data/mail/log/* {0}'.format(mail_log_dir), password=DEVICE_PASSWORD)
+    run_scp('root@localhost:/opt/data/mail/log/*.log {0}'.format(mail_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@localhost:/var/log/sam.log {0}'.format(platform_log_dir), password=LOGS_SSH_PASSWORD)
 
-    run_ssh('netstat -l', password=DEVICE_PASSWORD)
+    run_ssh('netstat -l', password=LOGS_SSH_PASSWORD)
 
-    print('postfix systems logs')
-    run_ssh('journalctl | grep postfix', password=DEVICE_PASSWORD)
+    print('postfix systemd logs')
+    run_ssh('journalctl | grep postfix', password=LOGS_SSH_PASSWORD)
 
-    print('dovecot systems logs')
-    run_ssh('journalctl | grep dovecot', password=DEVICE_PASSWORD)
-    
+    print('dovecot systemd logs')
+    run_ssh('journalctl | grep dovecot', password=LOGS_SSH_PASSWORD)
+
     print('-------------------------------------------------------')
     print('syncloud docker image is running')
     print('connect using: {0}'.format(ssh_command(DEVICE_PASSWORD, SSH)))
@@ -75,15 +72,15 @@ def test_start(module_setup):
 
 
 def test_activate_device(auth):
-    email, password, domain, release, version, arch = auth
+    email, password, domain, release, _ = auth
 
     run_ssh('/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
     run_ssh('/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
 
     response = requests.post('http://localhost:81/rest/activate',
-                             data={'main_domain': 'syncloud.info', 'redirect_email': email, 'redirect_password': password,
+                             data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
                                    'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     global LOGS_SSH_PASSWORD
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
@@ -107,8 +104,8 @@ def test_platform_rest():
 #     assert response.status_code == 200
 
 
-def test_install(auth):
-    __local_install(auth)
+def test_install(app_archive_path):
+    __local_install(app_archive_path)
 
 
 def test_running_smtp():
@@ -188,13 +185,12 @@ def test_postfix_ldap_aliases(user_domain):
             .format(DEVICE_USER, user_domain), password=DEVICE_PASSWORD)
 
 
-def test_upgrade(auth):
+def test_upgrade(app_archive_path):
     run_ssh('/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
-    __local_install(auth)
+    __local_install(app_archive_path)
 
 
-def __local_install(auth, action='install'):
-    email, password, domain, release, version, arch = auth
-    run_scp('{0}/../mail-{1}-{2}.tar.gz root@localhost:/'.format(DIR, version, arch), password=DEVICE_PASSWORD)
-    run_ssh('/opt/app/sam/bin/sam --debug {0} /mail-{1}-{2}.tar.gz'.format(action, version, arch), password=DEVICE_PASSWORD)
+def __local_install(app_archive_path):
+    run_scp('{0} root@localhost:/app.tar.gz'.format(app_archive_path), password=DEVICE_PASSWORD)
+    run_ssh('/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
     time.sleep(3)

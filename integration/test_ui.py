@@ -17,7 +17,7 @@ DEVICE_PASSWORD = 'password'
 log_dir = join(LOG_DIR, 'app_log')
 
 
-def test_web_with_selenium(user_domain):
+def test_web_with_selenium(user_domain, device_domain):
 
     os.environ['PATH'] = os.environ['PATH'] + ":" + join(DIR, 'geckodriver')
 
@@ -28,6 +28,8 @@ def test_web_with_selenium(user_domain):
     profile = webdriver.FirefoxProfile()
     profile.set_preference("webdriver.log.file", "{0}/firefox.log".format(log_dir))
     driver = webdriver.Firefox(profile, capabilities=caps)
+
+    wait_driver = WebDriverWait(driver, 20)
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
@@ -48,17 +50,19 @@ def test_web_with_selenium(user_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.send_keys(Keys.RETURN)
 
-    wait_driver = WebDriverWait(driver, 10)
-    #wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#header #expandDisplayName'), DEVICE_USER))
+    #time.sleep(10)
 
-    #wait_driver.until(EC.element_to_be_clickable((By.ID, 'closeWizard')))
-    #wizard_close_button = driver.find_element_by_id("closeWizard")
-    #wizard_close_button.click()
+    username = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    #print('found: {0}'.format(username in page))
+    wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
 
-    time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
-    print(driver.page_source.encode("utf-8"))
+    page = driver.page_source.encode("utf-8")
+    print(page)
+
+
+
 
 
 

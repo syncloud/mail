@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
@@ -8,22 +8,8 @@ export TMP=/tmp
 
 NAME=mail
 ROUNDCUBE_VERSION=1.1.4
-
-apt-get install -y git build-essential dpkg-dev
-
-ARCH=$(dpkg-architecture -qDEB_HOST_GNU_CPU)
-if [ ! -z "$1" ]; then
-    ARCH=$1
-fi
-
-VERSION="local"
-if [ ! -z "$2" ]; then
-    VERSION=$2
-fi
-
-wget --no-check-certificate --progress=dot:giga -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py 2>&1
-python /tmp/get-pip.py
-pip install coin
+ARCH=$1
+VERSION=$2
 
 ./coin_lib.sh
 
@@ -53,8 +39,8 @@ cp -r config ${BUILD_DIR}
 cp -r lib ${BUILD_DIR}
 
 mkdir build/${NAME}/META
-echo ${NAME} >> build/${NAME}/META/app
-echo ${VERSION} >> build/${NAME}/META/version
+echo ${NAME} > build/${NAME}/META/app
+echo ${VERSION} > build/${NAME}/META/version
 
 echo "zipping"
 tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
