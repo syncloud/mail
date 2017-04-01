@@ -82,7 +82,8 @@ def test_activate_device(auth):
 
     response = requests.post('http://localhost:81/rest/activate',
                              data={'main_domain': 'syncloud.info', 'redirect_email': email, 'redirect_password': password,
-                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
+                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD}, 
+                             timeout=60)
     assert response.status_code == 200
     global LOGS_SSH_PASSWORD
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
