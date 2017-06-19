@@ -14,7 +14,7 @@ if [ ! -d $1 ]; then
     echo "nothing to upload, $1 does not exist"
     exit 0
 fi
-APP=gogs
+APP=mail
 echo "$ARTIFACT_SSH_KEY" | base64 --decode > artifact_ssh.key
 chmod 600 artifact_ssh.key
 chmod -R a+r $1

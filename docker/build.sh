@@ -8,6 +8,6 @@ if [ -z "$1" ]; then
 fi
 
 ARCH=$1
-APP=gogs
+APP=mail
 docker build -f Dockerfile.deps.$ARCH -t syncloud/$APP-build-deps-$ARCH .
 docker push syncloud/$APP-build-deps-$ARCH
