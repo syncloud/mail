@@ -33,9 +33,11 @@ def user_domain(request):
 def app_archive_path(request):
     return request.config.getoption("--app-archive-path")
 
+
 @pytest.fixture(scope='session')
 def installer(request):
     return request.config.getoption("--installer")
+
 
 @pytest.fixture(scope='session')
 def device_host(request):
