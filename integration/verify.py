@@ -144,13 +144,13 @@ def test_starttls(user_domain):
             password=DEVICE_PASSWORD)
 
 
-def test_mail_receiving():
+def test_mail_receiving(user_domain):
 
     message_count = 0
     retry = 0
     retries = 3
     while retry < retries:
-        message_count = get_message_count()
+        message_count = get_message_count(user_domain)
         if message_count > 0:
             break
         retry += 1
