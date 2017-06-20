@@ -46,7 +46,7 @@ def driver():
     return driver
 
 
-def test_web_with_selenium(user_domain, device_domain):
+def test_web_with_selenium(driver, user_domain, device_domain):
 
     wait_driver = WebDriverWait(driver, 20)
 
