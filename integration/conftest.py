@@ -24,7 +24,7 @@ def auth(request):
            config.getoption("--release")
 
 
-@pytest.fixture(scope='sessiom')
+@pytest.fixture(scope='session')
 def device_domain(request):
     return '{0}.{1}'.format(request.config.getoption("--domain"), SYNCLOUD_INFO)
     
