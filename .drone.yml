@@ -1,4 +1,4 @@
-platform: ${platform}
+platform: linux/${drone_arch}
 
 clone:
   git:
