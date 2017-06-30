@@ -1,32 +1,46 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-if [ "$#" -lt 9 ]; then
-    echo "usage $0 redirect_user redirect_password redirect_domain app_archive_path installer_version release [all|test_suite] [sam|snapd] device_host"
+if [ "$#" -lt 7 ]; then
+    echo "usage $0 redirect_user redirect_password redirect_domain version release [sam|snapd] device_host"
     exit 1
 fi
 
 DOMAIN=$3
-APP_ARCHIVE_PATH=$(realpath "$4")
-INSTALLER_VERSION=$5
-RELEASE=$6
-TEST=$7
-INSTALLER=$8
-DEVICE_HOST=$9
+VERSION=$4
+RELEASE=$5
+INSTALLER=$6
+DEVICE_HOST=$7
+
 APP=mail
 GECKODRIVER=0.14.0
 FIREFOX=52.0
 ARCH=$(uname -m)
 
+if [ $ARCH == "x86_64" ]; then
+    SNAP_ARCH=amd64
+else
+    SNAP_ARCH=armhf
+fi
+
+if [ $INSTALLER == "snapd" ]; then
+    ARCHIVE=${APP}_${VERSION}_${SAM_ARCH}.snap
+    INSTALLER_VERSION=170523
+else
+    ARCHIVE=${APP}-${VERSION}-${ARCH}.tar.gz
+    INSTALLER_VERSION=89
+fi
+APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
+
 cd ${DIR}
 
 echo ${APP_ARCHIVE_PATH}
 
-if [ "$TEST" == "all" ]; then
+if [ "$ARCH" == "x86_64" ]; then
     TEST_SUITE="verify.py test-ui.py"
 else
-    TEST_SUITE=${TEST}.py
+    TEST_SUITE=verify.py
 fi
 
 cd ${DIR}
