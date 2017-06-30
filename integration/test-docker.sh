@@ -17,6 +17,7 @@ DEVICE_HOST=$9
 APP=mail
 GECKODRIVER=0.14.0
 FIREFOX=52.0
+ARCH=$(uname -m)
 
 cd ${DIR}
 
@@ -53,6 +54,7 @@ sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /install
 
 pip2 install -r ${DIR}/../src/dev_requirements.txt
 
+coin --to ${DIR} raw http://artifact.syncloud.org/3rdparty/openssl-${ARCH}.tar.gz
 coin --to ${DIR} raw --subfolder geckodriver https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER}/geckodriver-v${GECKODRIVER}-linux64.tar.gz
 coin --to ${DIR} raw https://ftp.mozilla.org/pub/firefox/releases/${FIREFOX}/linux-x86_64/en-US/firefox-${FIREFOX}.tar.bz2
 curl https://raw.githubusercontent.com/mguillem/JSErrorCollector/master/dist/JSErrorCollector.xpi -o  JSErrorCollector.xpi
