@@ -30,20 +30,15 @@ def module_setup(request, user_domain):
 def module_teardown(user_domain):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
-    run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD)
-    run_scp('root@{0}:/var/log/sam.log {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/sam.log {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
-    run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
-    #run_ssh(user_domain, 'netstat -l', password=LOGS_SSH_PASSWORD)
-
-    print('postfix systemd logs')
-    run_ssh(user_domain, 'journalctl | grep postfix', password=LOGS_SSH_PASSWORD)
-
-    print('dovecot systemd logs')
-    run_ssh(user_domain, 'journalctl | grep dovecot', password=LOGS_SSH_PASSWORD)
+    print('systemd logs')
+    run_ssh(user_domain, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
 
 
 @pytest.fixture(scope='function')
