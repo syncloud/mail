@@ -37,7 +37,7 @@ def module_teardown(user_domain):
     os.mkdir(mail_log_dir)
     run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD)
 
-    run_ssh(user_domain, 'netstat -l', password=LOGS_SSH_PASSWORD)
+    #run_ssh(user_domain, 'netstat -l', password=LOGS_SSH_PASSWORD)
 
     print('postfix systemd logs')
     run_ssh(user_domain, 'journalctl | grep postfix', password=LOGS_SSH_PASSWORD)
