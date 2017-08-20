@@ -135,9 +135,9 @@ def test_filesystem_mailbox(user_domain):
 
 
 def test_starttls(user_domain):
-    run_ssh(user_domain, "{0}/openssl/bin/openssl version -a".format(DIR))
+    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
     run_ssh(user_domain,
-            "echo \"A Logout\" | {0}/openssl/bin/openssl s_client -connect localhost:143 -starttls imap".format(DIR),
+            "echo \"A Logout\" | /openssl/bin/openssl s_client -connect localhost:143 -starttls imap",
             password=DEVICE_PASSWORD)
 
 
