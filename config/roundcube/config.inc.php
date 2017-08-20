@@ -2,9 +2,9 @@
 
 $config = array();
 
-$config['log_dir'] = '/opt/data/mail/log/';
+$config['log_dir'] = '{{ app_data_dir }}/log/';
 
-$config['db_dsnw'] = 'pgsql://mail:@unix(/opt/data/mail/postgresql)/mail';
+$config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
 
 $config['default_host'] = 'localhost';
 
@@ -25,5 +25,5 @@ $config['imap_conn_options'] = array(
       'allow_self_signed' => true,
       'verify_depth' => 3,
        'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-       'cafile' => '/opt/data/platform/syncloud.ca.crt', ), 
+       'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt', ),
     );

@@ -26,7 +26,7 @@ submission inet n       -       n       -       -       smtpd
   -o smtpd_relay_restrictions=permit_sasl_authenticated,reject
   -o milter_macro_daemon_name=ORIGINATING
   -o smtpd_sasl_type=dovecot
-  -o smtpd_sasl_path=/opt/data/mail/dovecot/private/auth
+  -o smtpd_sasl_path={{ app_data_dir }}/dovecot/private/auth
 
 #smtps     inet  n       -       n       -       -       smtpd
 #  -o syslog_name=postfix/smtps
@@ -133,4 +133,4 @@ scache    unix  -       -       n       -       1       scache
 #  ${nexthop} ${user}
 
 dovecot unix - n n - - pipe
-  flags=DRhu user=dovecot:dovecot argv=/opt/app/mail/dovecot/libexec/dovecot/dovecot-lda -c /opt/app/mail/config/dovecot/dovecot.conf -f ${sender} -d ${user}
+  flags=DRhu user=dovecot:dovecot argv={{ app_dir }}/dovecot/libexec/dovecot/dovecot-lda -c {{ app_dir }}/config/dovecot/dovecot.conf -f ${sender} -d ${user}

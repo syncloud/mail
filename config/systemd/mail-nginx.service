@@ -6,11 +6,11 @@ After=mail-php-fpm.service
 [Service]
 User=mail
 Type=forking
-PIDFile=/opt/app/mail/nginx/logs/nginx.pid
-ExecStartPre=/opt/app/mail/nginx/sbin/nginx -t -c /opt/app/mail/config/nginx/nginx.conf -p /opt/app/mail/nginx
-ExecStart=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -p /opt/app/mail/nginx
-ExecReload=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -s reload -p /opt/app/mail/nginx
-ExecStop=/opt/app/mail/nginx/sbin/nginx -c /opt/app/mail/config/nginx/nginx.conf -s stop -p /opt/app/mail/nginx
+PIDFile={{ app_dir }}/nginx/logs/nginx.pid
+ExecStartPre={{ app_dir }}/nginx/sbin/nginx -t -c {{ app_dir }}/config/nginx/nginx.conf -p {{ app_dir }}/nginx
+ExecStart={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx/nginx.conf -p {{ app_dir }}/nginx
+ExecReload={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx/nginx.conf -s reload -p {{ app_dir }}/nginx
+ExecStop={{ app_dir }}/nginx/sbin/nginx -c {{ app_dir }}/config/nginx/nginx.conf -s stop -p {{ app_dir }}/nginx
 
 [Install]
 WantedBy=multi-user.target

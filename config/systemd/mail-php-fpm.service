@@ -6,8 +6,8 @@ Description=mail php fpm
 [Service]
 User=mail
 Type=forking
-PIDFile=/opt/data/mail/php-fpm.pid
-ExecStart=/opt/app/mail/bin/service.php-fpm.sh
+PIDFile={{ app_data_dir }}/php-fpm.pid
+ExecStart={{ app_dir }}/bin/service.php-fpm.sh
 RemainAfterExit=yes
 
 [Install]

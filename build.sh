@@ -11,6 +11,11 @@ ROUNDCUBE_VERSION=1.3.0
 ARCH=$(uname -m)
 VERSION=$1
 
+if [ -n "$DRONE" ]; then
+    echo "running under drone, removing coin cache"
+    rm -rf ${DIR}/.coin.cache
+fi
+
 rm -rf lib
 mkdir lib
 
@@ -36,13 +41,13 @@ coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 
 coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 
+
+#cp ${DIR}/config/postgresql/postgresql.conf ${BUILD_DIR}/postgresql/share/postgresql.conf.sample
+
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
-
-cp ${DIR}/config/postgresql/postgresql.conf ${BUILD_DIR}/postgresql/share/postgresql.conf.sample
-
-cp -r bin ${BUILD_DIR}
-cp -r config ${BUILD_DIR}
-cp -r lib ${BUILD_DIR}
+cp -r ${DIR}/bin ${BUILD_DIR}
+cp -r ${DIR}/config ${BUILD_DIR}/config.templates
+cp -r ${DIR}/lib ${BUILD_DIR}
 
 mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app

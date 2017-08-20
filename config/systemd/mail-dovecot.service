@@ -2,9 +2,9 @@
 Description = Mail Dovecot
 
 [Service]
-Environment=LD_LIBRARY_PATH=/opt/app/mail/dovecot/lib/dovecot
+Environment=LD_LIBRARY_PATH={{ app_dir }}/dovecot/lib/dovecot
 Type=simple
-ExecStart=/opt/app/mail/dovecot/sbin/dovecot -F -c /opt/app/mail/config/dovecot/dovecot.conf
+ExecStart={{ app_dir }}/dovecot/sbin/dovecot -F -c {{ app_dir }}/config/dovecot/dovecot.conf
 NonBlocking=yes
 
 [Install]

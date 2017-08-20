@@ -28,24 +28,24 @@
 # See the files in examples/chroot-setup for setting up Postfix chroot
 # environments on different UNIX systems.
 #
-queue_directory = /opt/data/mail/spool
+queue_directory = {{ app_data_dir }}/spool
 
 # The command_directory parameter specifies the location of all
 # postXXX commands.
 #
-command_directory = /opt/app/mail/postfix/usr/sbin
+command_directory = {{ app_dir }}/postfix/usr/sbin
 
 # The daemon_directory parameter specifies the location of all Postfix
 # daemon programs (i.e. programs listed in the master.cf file). This
 # directory must be owned by root.
 #
-daemon_directory = /opt/app/mail/postfix/usr/libexec/postfix
+daemon_directory = {{ app_dir }}/postfix/usr/libexec/postfix
 
 # The data_directory parameter specifies the location of Postfix-writable
 # data files (caches, random numbers). This directory must be owned
 # by the mail_owner account (see below).
 #
-data_directory = /opt/data/mail/data
+data_directory = {{ app_data_dir }}/data
 
 # QUEUE AND PROCESS OWNERSHIP
 #
@@ -384,7 +384,7 @@ relayhost =
 #alias_maps = hash:/etc/aliases
 #alias_maps = hash:/etc/aliases, nis:mail.aliases
 #alias_maps = netinfo:/aliases
-alias_maps = ldap:/opt/app/mail/config/postfix/ldap-aliases.cf
+alias_maps = ldap:{{ app_dir }}/config/postfix/ldap-aliases.cf
 
 # The alias_database parameter specifies the alias database(s) that
 # are built with "newaliases" or "sendmail -bi".  This is a separate
@@ -445,7 +445,7 @@ recipient_delimiter = +
 #
 #mailbox_command = /some/where/procmail
 #mailbox_command = /some/where/procmail -a "$EXTENSION"
-mailbox_command = /opt/app/mail/dovecot/libexec/dovecot/dovecot-lda -f "$SENDER" -a "$RECIPIENT"
+mailbox_command = {{ app_dir }}/dovecot/libexec/dovecot/dovecot-lda -f "$SENDER" -a "$RECIPIENT"
 
 # The mailbox_transport specifies the optional transport in master.cf
 # to use after processing aliases and .forward files. This parameter
@@ -624,17 +624,17 @@ debugger_command =
 # sendmail_path: The full pathname of the Postfix sendmail command.
 # This is the Sendmail-compatible mail posting interface.
 # 
-sendmail_path = /opt/app/mail/postfix/usr/sbin/sendmail
+sendmail_path = {{ app_dir }}/postfix/usr/sbin/sendmail
 
 # newaliases_path: The full pathname of the Postfix newaliases command.
 # This is the Sendmail-compatible command to build alias databases.
 #
-newaliases_path = /opt/app/mail/postfix/usr/bin/newaliases
+newaliases_path = {{ app_dir }}/postfix/usr/bin/newaliases
 
 # mailq_path: The full pathname of the Postfix mailq command.  This
 # is the Sendmail-compatible mail queue listing command.
 # 
-mailq_path = /opt/app/mail/postfix/usr/bin/mailq
+mailq_path = {{ app_dir }}/postfix/usr/bin/mailq
 
 # setgid_group: The group for mail submission and queue management
 # commands.  This must be a group name with a numerical group ID that
@@ -648,19 +648,19 @@ html_directory = no
 
 # manpage_directory: The location of the Postfix on-line manual pages.
 #
-manpage_directory = /opt/app/mail/postfix/usr/local/man
+manpage_directory = {{ app_dir }}/postfix/usr/local/man
 
 # sample_directory: The location of the Postfix sample configuration files.
 # This parameter is obsolete as of Postfix 2.1.
 #
-sample_directory = /opt/app/mail/postfix/etc/postfix
+sample_directory = {{ app_dir }}/postfix/etc/postfix
 
 # readme_directory: The location of the Postfix README files.
 #
 readme_directory = no
 inet_protocols = ipv4
 
-smtpd_sasl_path = /opt/data/mail/dovecot/private/auth
+smtpd_sasl_path = {{ app_data_dir }}/dovecot/private/auth
 smtpd_sasl_auth_enable = yes
 
 dovecot_destination_recipient_limit = 1
