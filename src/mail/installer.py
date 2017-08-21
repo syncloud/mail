@@ -75,7 +75,6 @@ class MailInstaller:
             join(app_data_dir, 'dovecot'),
             join(app_data_dir, 'dovecot', 'private'),
             join(app_data_dir, 'data'),
-            join(app_data_dir, 'postgresql'),
             join(app_data_dir, 'config')
         ]
 
