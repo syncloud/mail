@@ -47,7 +47,7 @@ class MailInstaller:
         linux.useradd('dovecot')
         linux.useradd(USER_NAME)
         
-        database_path = '{0}/database'.format(app_data_dir)
+        database_path = '{0}/database'.format(self.app_data_dir)
 
         variables = {
             'app_dir': self.app_dir,
