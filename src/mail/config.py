@@ -1,16 +1,11 @@
 from ConfigParser import ConfigParser
 from os.path import isfile, join
 
-default_config_path = '/opt/app/mail/config'
-default_config_file = join(default_config_path, 'mail.cfg')
-
-default_user_config_path = '/opt/data/mail'
-default_user_config_file = join(default_user_config_path, 'user_mail.cfg')
-
 
 class Config:
 
-    def __init__(self, filename=default_config_file):
+    def __init__(self, config_dir):
+        filename = join(config_dir, 'mail.cfg')
         self.parser = ConfigParser()
         self.parser.read(filename)
         self.filename = filename
@@ -61,7 +56,8 @@ class Config:
 
 class UserConfig:
 
-    def __init__(self, filename=default_user_config_file):
+    def __init__(self, config_dir):
+        filename = join(config_dir, 'user_mail.cfg')
         self.parser = ConfigParser()
         self.parser.read(filename)
         self.filename = filename
