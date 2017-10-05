@@ -37,7 +37,8 @@ class MailInstaller:
         self.app_domain_name = self.app.app_domain_name()
         self.app_dir = self.app.get_install_dir()
         self.app_data_dir = self.app.get_data_dir()
-        self.config = Config(self.app_data_dir)
+        self.config_path = join(self.app_data_dir, 'config')
+        self.config = Config(self.config_path)
 
     def install(self):
 
@@ -61,9 +62,8 @@ class MailInstaller:
         }
 
         templates_path = join(self.app_dir, 'config.templates')
-        config_path = join(self.app_data_dir, 'config')
-
-        gen.generate_files(templates_path, config_path, variables)
+        
+        gen.generate_files(templates_path, self.config_path, variables)
 
         self.log.info(fs.chownpath(self.app_dir, USER_NAME, recursive=True))
 
@@ -100,7 +100,7 @@ class MailInstaller:
         self.generate_dovecot_config(self.config)
         self.generate_php_config(self.config)
 
-        user_config = UserConfig(self.app_data_dir)
+        user_config = UserConfig(self.config_path)
 
         is_first_time = not user_config.is_activated()
 
