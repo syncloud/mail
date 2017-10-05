@@ -51,7 +51,7 @@ class MailInstaller:
 
         variables = {
             'app_dir': self.app_dir,
-            'app_data_dir': app_data_dir,
+            'app_data_dir': self.app_data_dir,
             'db_psql_path': database_path,
             'db_psql_port': PSQL_PORT,
             'db_name': DB_NAME,
@@ -67,15 +67,15 @@ class MailInstaller:
 
         self.log.info(fs.chownpath(self.app_dir, USER_NAME, recursive=True))
 
-        fs.chownpath(app_data_dir, USER_NAME)
+        fs.chownpath(self.app_data_dir, USER_NAME)
 
         data_dirs = [
-            join(app_data_dir, 'config'),
-            join(app_data_dir, 'log'),
-            join(app_data_dir, 'spool'),
-            join(app_data_dir, 'dovecot'),
-            join(app_data_dir, 'dovecot', 'private'),
-            join(app_data_dir, 'data')
+            join(self.app_data_dir, 'config'),
+            join(self.app_data_dir, 'log'),
+            join(self.app_data_dir, 'spool'),
+            join(self.app_data_dir, 'dovecot'),
+            join(self.app_data_dir, 'dovecot', 'private'),
+            join(self.app_data_dir, 'data')
         ]
 
         for data_dir in data_dirs:
@@ -86,7 +86,7 @@ class MailInstaller:
         fs.makepath(box_data_dir)
         fs.chownpath(box_data_dir, 'dovecot')
 
-        dovecot_lda_error_log = join(app_data_dir, 'log', 'dovecot-lda.error.log')
+        dovecot_lda_error_log = join(self.app_data_dir, 'log', 'dovecot-lda.error.log')
         fs.touchfile(dovecot_lda_error_log)
         fs.chownpath(dovecot_lda_error_log, 'dovecot')
 
@@ -100,7 +100,7 @@ class MailInstaller:
         self.generate_dovecot_config(self.config)
         self.generate_php_config(self.config)
 
-        user_config = UserConfig(app_data_die)
+        user_config = UserConfig(self.app_data_dir)
 
         is_first_time = not user_config.is_activated()
 
