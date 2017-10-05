@@ -82,7 +82,7 @@ class MailInstaller:
             fs.makepath(data_dir)
             fs.chownpath(data_dir, USER_NAME)
 
-        box_data_dir = join(app_data_dir, 'box')
+        box_data_dir = join(self.app_data_dir, 'box')
         fs.makepath(box_data_dir)
         fs.chownpath(box_data_dir, 'dovecot')
 
@@ -90,7 +90,7 @@ class MailInstaller:
         fs.touchfile(dovecot_lda_error_log)
         fs.chownpath(dovecot_lda_error_log, 'dovecot')
 
-        dovecot_lda_info_log = join(app_data_dir, 'log', 'dovecot-lda.info.log')
+        dovecot_lda_info_log = join(self.app_data_dir, 'log', 'dovecot-lda.info.log')
         fs.touchfile(dovecot_lda_info_log)
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
