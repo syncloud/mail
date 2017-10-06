@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=forking
-ExecStart={{ app_dir }}/postfix/usr/sbin/postfix -c {{ app_dir }}/config/postfix start
-ExecStop={{ app_dir }}/postfix/usr/sbin/postfix -c {{ app_dir }}/config/postfix stop
+ExecStart={{ app_dir }}/postfix/usr/sbin/postfix -c {{ app_data_dir }}/config/postfix start
+ExecStop={{ app_dir }}/postfix/usr/sbin/postfix -c {{ app_data_dir }}/config/postfix stop
 Restart=always
 
 [Install]
