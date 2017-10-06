@@ -105,7 +105,7 @@ class MailInstaller:
         is_first_time = not user_config.is_activated()
 
         if is_first_time:
-            self.database_init(self.app_data_dir, database_path, USER_NAME)
+            self.database_init(database_path, USER_NAME)
 
         self.log.info("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRES)
@@ -124,13 +124,13 @@ class MailInstaller:
         self.app.add_port(143, 'TCP')
         self.app.add_port(587, 'TCP')
 
-    def database_init(self, app_data_dir, database_path, user_name):
+    def database_init(self, database_path, user_name):
 
         self.log.info("initializing database")
-        psql_initdb = join(app_install_dir, 'postgresql/bin/initdb')
+        psql_initdb = join(self.app_dir, 'postgresql/bin/initdb')
         self.log.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
         postgresql_conf_to = join(database_path, 'postgresql.conf')
-        postgresql_conf_from = join(app_data_dir, 'config', 'postgresql', 'postgresql.conf')
+        postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql', 'postgresql.conf')
         shutil.copy(postgresql_conf_from, postgresql_conf_to)
 
     def remove(self):
