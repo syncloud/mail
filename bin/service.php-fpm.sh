@@ -10,4 +10,4 @@ CONFIG_DIR=$1
 
 export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
 
-exec $DIR/php/sbin/php-fpm -y ${CONFIG_DIR}/config/php/php-fpm.conf -c ${CONFIG_DIR}/config/php/php.ini
+exec $DIR/php/sbin/php-fpm -y ${CONFIG_DIR}/php/php-fpm.conf -c ${CONFIG_DIR}/php/php.ini
