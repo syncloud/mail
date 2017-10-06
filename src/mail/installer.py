@@ -100,7 +100,7 @@ class MailInstaller:
         self.generate_dovecot_config(self.config)
         self.generate_php_config(self.config)
 
-        user_config = UserConfig(self.config_path)
+        user_config = UserConfig(self.app_data_dir)
 
         is_first_time = not user_config.is_activated()
 
