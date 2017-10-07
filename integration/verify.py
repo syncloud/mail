@@ -12,6 +12,7 @@ import requests
 from requests.adapters import HTTPAdapter
 
 from integration.util.ssh import run_scp, run_ssh
+from integration.util.helper import retry_func
 
 SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
@@ -95,7 +96,9 @@ def test_running_smtp(user_domain):
 
 
 def test_running_pop3(user_domain):
-    print(check_output('nc -zv -w 1 {0} 110'.format(user_domain), shell=True))
+    cmd = 'nc -zv -w 1 {0} 110'.format(user_domain)
+    func = lambda: print(check_output(cmd, shell=True))
+    retry_func(func, message=cmd, retry=5)
 
 
 def test_running_roundcube(user_domain):
