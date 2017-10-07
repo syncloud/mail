@@ -97,8 +97,9 @@ def test_running_smtp(user_domain):
 
 def test_running_pop3(user_domain):
     cmd = 'nc -zv -w 1 {0} 110'.format(user_domain)
-    func = lambda: print(check_output(cmd, shell=True))
-    retry_func(func, message=cmd, retry=5)
+    func = lambda: check_output(cmd, shell=True)
+    result=retry_func(func, message=cmd, retry=5)
+    print(result)
 
 
 def test_running_roundcube(user_domain):
