@@ -146,9 +146,9 @@ class MailInstaller:
 
     def initialize(self, config, user_config, db_name, db_user, db_pass):
         self.log.info("initialization")
-        postgres.execute_sql("ALTER USER {0} WITH PASSWORD '{0}';".format(db_user, db_pass), database="postgres")
-        postgres.execute_sql("create database {0};".format(db_name), database="postgres")
-        postgres.execute_file(config.db_init_file(), database=db_name)
+        postgres.execute_sql(config, "ALTER USER {0} WITH PASSWORD '{0}';".format(db_user, db_pass), database="postgres")
+        postgres.execute_sql(config, "create database {0};".format(db_name), database="postgres")
+        postgres.execute_file(config, config.db_init_file(), database=db_name)
         user_config.set_activated(True)
 
     def prepare_storage(self):
