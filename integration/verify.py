@@ -98,7 +98,7 @@ def test_running_smtp(user_domain):
 def test_running_pop3(user_domain):
     cmd = 'nc -zv -w 1 {0} 110'.format(user_domain)
     func = lambda: check_output(cmd, shell=True)
-    result=retry_func(func, message=cmd, retry=5)
+    result=retry_func(func, message=cmd, retries=5)
     print(result)
 
 
