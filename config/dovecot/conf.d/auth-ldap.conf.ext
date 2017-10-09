@@ -6,7 +6,7 @@ passdb {
   driver = ldap
 
   # Path for LDAP configuration file, see example-config/dovecot-ldap.conf.ext
-  args = {{ app_dir }}/config/dovecot/dovecot-ldap.conf.ext
+  args = {{ app_data_dir }}/config/dovecot/dovecot-ldap.conf.ext
 }
 
 # "prefetch" user database means that the passdb already provided the
@@ -18,7 +18,7 @@ passdb {
 
 #userdb {
 #  driver = ldap
-#  args = {{ app_dir }}/config/dovecot/dovecot-ldap.conf.ext
+#  args = {{ app_data_dir }}/config/dovecot/dovecot-ldap.conf.ext
   
   # Default fields can be used to specify defaults that LDAP may override
   #default_fields = home=/home/virtual/%u

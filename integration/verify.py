@@ -37,6 +37,8 @@ def module_teardown(user_domain):
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
     run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    
+    run_ssh(user_domain, 'ls -la /opt/data/mail/log/', password=LOGS_SSH_PASSWORD, throw=False)
 
     print('systemd logs')
     run_ssh(user_domain, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
