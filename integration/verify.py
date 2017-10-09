@@ -105,7 +105,7 @@ def test_running_pop3(user_domain):
 
 
 def test_running_roundcube(user_domain):
-    print(check_output('nc -zv -w 1 {0}'.format(user_domain), shell=True))
+    print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
 
 
 def test_dovecot_auth(user_domain):
