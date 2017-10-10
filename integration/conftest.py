@@ -48,17 +48,18 @@ def installer(request):
 def device_host(request):
     return request.config.getoption("--device-host")
     
+APP_NAME='mail'
 
 SAM_PLATFORM_DATA_DIR='/opt/data/platform'
 SNAPD_PLATFORM_DATA_DIR='/var/snap/platform/common'
 DATA_DIR=''
 
-SAM_DATA_DIR='/opt/data/nextcloud'
-SNAPD_DATA_DIR='/var/snap/nextcloud/common'
+SAM_DATA_DIR='/opt/data/{0}'.format(APP_NAME)
+SNAPD_DATA_DIR='/var/snap/{0}/common'.format(APP_NAME)
 DATA_DIR=''
 
-SAM_APP_DIR='/opt/app/nextcloud'
-SNAPD_APP_DIR='/snap/nextcloud/current'
+SAM_APP_DIR='/opt/app/{0}'.format(APP_NAME)
+SNAPD_APP_DIR='/snap/{0}/current'.format(APP_NAME)
 APP_DIR=''
 
 @pytest.fixture(scope="session")
