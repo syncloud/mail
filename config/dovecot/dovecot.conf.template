@@ -32,7 +32,7 @@ default_internal_user = maildrop
 #listen = *, ::
 
 # Base directory where to store runtime data.
-base_dir = /opt/data/mail/dovecot/
+base_dir = {{ app_data_dir }}/dovecot/
 
 # Name of this instance. In multi-instance setup doveadm and other commands
 # can use -i <instance_name> to select which instance is used (an alternative
@@ -97,7 +97,7 @@ dict {
 # Most of the actual configuration gets included below. The filenames are
 # first sorted by their ASCII value and parsed in that order. The 00-prefixes
 # in filenames are intended to make it easier to understand the ordering.
-!include /opt/app/mail/config/dovecot/conf.d/*.conf
+!include {{ app_data_dir }}/config/dovecot/conf.d/*.conf
 
 # A config file can also tried to be included without giving an error if
 # it's not found:

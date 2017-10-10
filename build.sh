@@ -7,9 +7,14 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=mail
-ROUNDCUBE_VERSION=1.3.0
+ROUNDCUBE_VERSION=1.3.1
 ARCH=$(uname -m)
 VERSION=$1
+
+if [ -n "$DRONE" ]; then
+    echo "running under drone, removing coin cache"
+    rm -rf ${DIR}/.coin.cache
+fi
 
 rm -rf lib
 mkdir lib
@@ -30,7 +35,8 @@ DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postfix-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/rsyslog-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
+mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 
@@ -38,11 +44,13 @@ coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/d
 
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
-cp ${DIR}/config/postgresql/postgresql.conf ${BUILD_DIR}/postgresql/share/postgresql.conf.sample
+#https://github.com/roundcube/roundcubemail/issues/5949
+rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
 
-cp -r bin ${BUILD_DIR}
-cp -r config ${BUILD_DIR}
-cp -r lib ${BUILD_DIR}
+cp -r ${DIR}/bin ${BUILD_DIR}
+cp -r ${DIR}/config ${BUILD_DIR}/config.templates
+cp -r ${BUILD_DIR}/postfix/opt/data/mail/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
+cp -r ${DIR}/lib ${BUILD_DIR}
 
 mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app

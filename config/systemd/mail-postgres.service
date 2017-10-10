@@ -7,11 +7,10 @@ After=network.target
 User=mail
 Type=forking
 SyslogIdentifier=mail.postgres
-PIDFile=/opt/data/mail/database/postmaster.pid
-ExecStartPre=/opt/app/mail/bin/initdb
-ExecStart=/opt/app/mail/postgresql/bin/pg_ctl -w -s -D /opt/data/mail/database start
-ExecReload=/opt/app/mail/postgresql/bin/pg_ctl -s -D /opt/data/mail/database reload
-ExecStop=/opt/app/mail/postgresql/bin/pg_ctl -s -D /opt/data/mail/database stop -m fast
+PIDFile={{ app_data_dir }}/database/postmaster.pid
+ExecStart={{ app_dir }}/postgresql/bin/pg_ctl -w -s -D {{ app_data_dir }}/database start
+ExecReload={{ app_dir }}/postgresql/bin/pg_ctl -s -D {{ app_data_dir }}/database reload
+ExecStop={{ app_dir }}/postgresql/bin/pg_ctl -s -D {{ app_data_dir }}/database stop -m fast
 
 # Due to PostgreSQL's use of shared memory, OOM killer is often overzealous in
 # killing Postgres

@@ -1,67 +1,76 @@
 from ConfigParser import ConfigParser
 from os.path import isfile, join
 
-default_config_path = '/opt/app/mail/config'
-default_config_file = join(default_config_path, 'mail.cfg')
-
-default_user_config_path = '/opt/data/mail'
-default_user_config_file = join(default_user_config_path, 'user_mail.cfg')
-
 
 class Config:
 
-    def __init__(self, filename=default_config_file):
+    def __init__(self, config_dir):
+        filename = join(config_dir, 'mail.cfg')
         self.parser = ConfigParser()
-        self.parser.read(filename)
         self.filename = filename
 
     def app_name(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'app_name')
 
     def install_path(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'install_path')
 
     def data_dir(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'data_dir')
 
     def bin_dir(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'bin_dir')
 
     def root_path(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'root_path')
 
     def port(self):
+        self.parser.read(self.filename)
         return self.parser.getint('mail', 'port')
 
     def psql(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'psql')
 
     def db_socket(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'db_socket')
 
     def postfix_main_config_file(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'postfix_main_config_file')
 
     def roundcube_config_file_template(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'roundcube_config_file_template')
 
     def roundcube_config_file(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'roundcube_config_file')
 
     def dovecot_config_file(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'dovecot_config_file')
 
     def db_init_file(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'db_init_file')
 
     def php_ini(self):
+        self.parser.read(self.filename)
         return self.parser.get('mail', 'php_ini')
 
 
 
 class UserConfig:
 
-    def __init__(self, filename=default_user_config_file):
+    def __init__(self, config_dir):
+        filename = join(config_dir, 'user_mail.cfg')
         self.parser = ConfigParser()
         self.parser.read(filename)
         self.filename = filename
