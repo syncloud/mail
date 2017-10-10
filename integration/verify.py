@@ -59,9 +59,6 @@ def test_start(module_setup):
 def test_activate_device(auth, user_domain):
     email, password, domain, release = auth
 
-    run_ssh(user_domain, '/opt/app/sam/bin/sam update --release {0}'.format(release), password=DEFAULT_DEVICE_PASSWORD)
-    run_ssh(user_domain, '/opt/app/sam/bin/sam --debug upgrade platform', password=DEFAULT_DEVICE_PASSWORD)
-
     response = requests.post('http://{0}:81/rest/activate'.format(user_domain),
                              data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
                                    'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
@@ -108,10 +105,10 @@ def test_running_roundcube(user_domain):
     print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
 
 
-def test_dovecot_auth(user_domain):
+def test_dovecot_auth(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '/opt/app/mail/dovecot/bin/doveadm -c /opt/app/mail/config/dovecot/dovecot.conf  auth test {0} {1}'
-            .format(DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
+            '{0}/bin/doveadm -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
+            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
 
 
 def test_postfix_auth(user_domain):
@@ -172,10 +169,10 @@ def get_message_count(user_domain):
     return int(selected[1][0])
 
 
-def test_postfix_ldap_aliases(user_domain):
+def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '/opt/app/mail/postfix/usr/sbin/postmap -q {0}@{1} ldap:/opt/app/mail/config/postfix/ldap-aliases.cf'
-            .format(DEVICE_USER, user_domain), password=DEVICE_PASSWORD)
+            '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
+            .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
 
 def test_upgrade(app_archive_path, user_domain):
