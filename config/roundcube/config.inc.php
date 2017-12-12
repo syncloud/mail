@@ -26,6 +26,5 @@ $config['imap_conn_options'] = array(
       'verify_depth' => 3,
        'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
        'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt',
-      'capath' => '/etc/ssl/certs',
        ),
     );
