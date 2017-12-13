@@ -11,8 +11,11 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from integration.util.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
+from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, \
+    get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
+from syncloudlib.integration.loop import loop_device_cleanup
+from syncloudlib.integration.ssh import run_scp, run_ssh
 
 SYNCLOUD_INFO = 'syncloud.info'
 DEVICE_USER = 'user'
@@ -21,6 +24,26 @@ DEFAULT_DEVICE_PASSWORD = 'syncloud'
 LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
 DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
+
+
+@pytest.fixture(scope="session")
+def platform_data_dir(installer):
+    return get_data_dir(installer, 'platform')
+
+
+@pytest.fixture(scope="session")
+def data_dir(installer):
+    return get_data_dir(installer, 'mail')
+         
+
+@pytest.fixture(scope="session")
+def app_dir(installer):
+    return get_app_dir(installer, 'mail')
+
+
+@pytest.fixture(scope="session")
+def service_prefix(installer):
+    return get_service_prefix(installer)
 
 
 @pytest.fixture(scope="session")
@@ -135,9 +158,9 @@ def test_mail_sending(user_domain, device_domain):
 
 def test_filesystem_mailbox(user_domain):
     run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
+    
 
-
-def test_starttls(user_domain):
+def test_imap_openssl_starttls(user_domain):
     run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
     run_ssh(user_domain,
             "echo \"A Logout\" | /openssl/bin/openssl s_client -connect localhost:143 -starttls imap",
@@ -174,6 +197,17 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
             '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
+
+
+def test_imap_php_cert_self_signed(user_domain, platform_data_dir, service_prefix):
+
+    #run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    #run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    #run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+    
+    run_scp('{0}/../config/roundcube/config.inc.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/php.ssl.imap.test.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php", password=DEVICE_PASSWORD)
 
 def test_upgrade(app_archive_path, user_domain):
     run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)

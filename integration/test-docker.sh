@@ -62,7 +62,8 @@ sshpass -p syncloud scp -o StrictHostKeyChecking=no install-${INSTALLER}.sh root
 sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /installer.sh ${INSTALLER_VERSION} ${RELEASE}
 
 pip2 install -r ${DIR}/../src/dev_requirements.txt
-
+wget http://artifact.syncloud.org/cert/cert.tar.gz
+tar xf cert.tar.gz
 wget http://artifact.syncloud.org/3rdparty/openssl-${ARCH}.tar.gz
 sshpass -p syncloud scp -o StrictHostKeyChecking=no openssl-${ARCH}.tar.gz root@${DEVICE_HOST}:/openssl-${ARCH}.tar.gz
 sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} tar xf /openssl-${ARCH}.tar.gz -C /
