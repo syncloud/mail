@@ -160,13 +160,6 @@ def test_filesystem_mailbox(user_domain):
     run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
     
 
-def test_imap_openssl_starttls(user_domain):
-    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client -connect localhost:143 -starttls imap",
-            password=DEVICE_PASSWORD)
-
-
 def test_mail_receiving(user_domain):
 
     message_count = 0
@@ -197,17 +190,39 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
             '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
-
-
-def test_imap_php_cert_self_signed(user_domain, platform_data_dir, service_prefix, app_dir):
-
-    #run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-    #run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-    #run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+def test_imap_openssl_self_signed(user_domain, platform_data_dir):
+    enable_self_signed_cert(user_domain, platform_data_dir)
+    imap_openssl(user_domain, platform_data_dir, '{0}/syncloud.ca.crt'.format(platform_data_dir), 'selfsigned')
     
+    
+def imap_openssl(user_domain, ca_file, name):
+    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
+    output = run_ssh(user_domain,
+            "echo \"A Logout\" | /openssl/bin/openssl s_client -CAfile={0} -connect localhost:143 -starttls imap".format(ca_file),
+            password=DEVICE_PASSWORD)
+    open('{0}/openssl.{1}.log'.format(LOG_DIR, name)) as f:
+        f.write(output)
+
+
+def test_imap_php_self_signed(user_domain, platform_data_dir, service_prefix, app_dir):
+
+    enable_self_signed_cert(user_domain, platform_data_dir)
     run_scp('{0}/../config/roundcube/config.inc.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_scp('{0}/php.ssl.imap.test.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php".format(app_dir), password=DEVICE_PASSWORD)
+
+
+def enable_self_signed_cert(user_domain, platform_data_dir):
+    run_ssh(user_domain, '{0}/config/tls/default.crt {0}/syncloud.crt'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, '{0}/config/tls/default.key {0}/syncloud.key'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+
+
+def enable_real_cert(user_domain, platform_data_dir):
+    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+
 
 def test_upgrade(app_archive_path, user_domain):
     run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
