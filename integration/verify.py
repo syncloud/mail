@@ -209,16 +209,16 @@ def imap_openssl(user_domain, ca_file, name):
         f.write(output)
 
 
-def test_imap_php_self_signed(user_domain, platform_data_dir, service_prefix, app_dir):
+def test_imap_php_self_signed(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
 
     enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
-    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned')
+    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned', data_dir)
 
     
-def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir):
+def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
 
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned')
+    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned', data_dir)
     
     
 def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
