@@ -197,7 +197,7 @@ def test_imap_openssl_self_signed(user_domain, platform_data_dir, service_prefix
 
 def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, '-CAfile /etc/certs/DST_Root_CA_X3.pem', 'real')
+    imap_openssl(user_domain, '-CAfile /etc/ssl/certs/DST_Root_CA_X3.pem', 'real')
     
     
 def imap_openssl(user_domain, ca_file, name):
