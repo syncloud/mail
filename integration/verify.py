@@ -197,13 +197,13 @@ def test_imap_openssl_self_signed(user_domain, platform_data_dir, service_prefix
 
 def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, '', 'real')
+    imap_openssl(user_domain, '-CAfile /etc/certs/DST_Root_CA_X3.pem', 'real')
     
     
 def imap_openssl(user_domain, ca_file, name):
     run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
     output = run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -starttls imap".format(ca_file),
+            "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -verify 3 -starttls imap".format(ca_file),
             password=DEVICE_PASSWORD)
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
