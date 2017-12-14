@@ -192,12 +192,12 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
 
 def test_imap_openssl_self_signed(user_domain, platform_data_dir, service_prefix):
     enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, platform_data_dir, '-CAfile={0}/syncloud.ca.crt'.format(platform_data_dir), 'selfsigned')
+    imap_openssl(user_domain, '-CAfile={0}/syncloud.ca.crt'.format(platform_data_dir), 'selfsigned')
 
 
 def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, platform_data_dir, '', 'real')
+    imap_openssl(user_domain, '', 'real')
     
     
 def imap_openssl(user_domain, ca_file, name):
