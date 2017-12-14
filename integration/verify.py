@@ -221,9 +221,9 @@ def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir):
     imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned')
     
     
-def imap_php(user_domain, platform_data_dir, app_dir, name):
+def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
   
-    run_scp('{0}/config/roundcube/config.inc.php root@{1}:/'.format(platform_data_dir, user_domain), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/config/roundcube/config.inc.php root@{1}:/'.format(data_dir, user_domain), password=LOGS_SSH_PASSWORD)
     run_scp('{0}/php.ssl.imap.test.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     output = run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php".format(app_dir), password=DEVICE_PASSWORD, throw=False)
     with open('{0}/php.{1}.log'.format(LOG_DIR, name), 'w') as f:
