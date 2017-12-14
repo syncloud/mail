@@ -231,8 +231,8 @@ def imap_php(user_domain, platform_data_dir, app_dir, name):
         
 
 def enable_self_signed_cert(user_domain, platform_data_dir, service_prefix):
-    run_ssh(user_domain, '{0}/config/tls/default.crt {0}/syncloud.crt'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
-    run_ssh(user_domain, '{0}/config/tls/default.key {0}/syncloud.key'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, 'cp {0}/config/tls/default.crt {0}/syncloud.crt'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, 'cp {0}/config/tls/default.key {0}/syncloud.key'.format(platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
