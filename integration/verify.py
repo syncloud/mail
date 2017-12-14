@@ -205,7 +205,7 @@ def imap_openssl(user_domain, ca_file, name):
     output = run_ssh(user_domain,
             "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -starttls imap".format(ca_file),
             password=DEVICE_PASSWORD)
-    open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
+    with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
 
 
@@ -226,7 +226,7 @@ def imap_php(user_domain, platform_data_dir, app_dir, name):
     run_scp('{0}/../config/roundcube/config.inc.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_scp('{0}/php.ssl.imap.test.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     output = run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php".format(app_dir), password=DEVICE_PASSWORD, throw=False)
-    open('{0}/php.{1}.log'.format(LOG_DIR, name), 'w') as f:
+    with open('{0}/php.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
         
 
