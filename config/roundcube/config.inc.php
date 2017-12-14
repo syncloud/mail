@@ -6,8 +6,6 @@ $config['log_dir'] = '{{ app_data_dir }}/log/';
 
 $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
 
-$config['default_host'] = 'localhost';
-
 $config['support_url'] = '';
 $config['des_key'] = '46adfbf655e235b60f56f881';
 
