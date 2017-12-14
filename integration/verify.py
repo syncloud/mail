@@ -199,7 +199,7 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
 
 
 
-def test_imap_php_cert_self_signed(user_domain, platform_data_dir, service_prefix):
+def test_imap_php_cert_self_signed(user_domain, platform_data_dir, service_prefix, app_dir):
 
     #run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     #run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
@@ -207,7 +207,7 @@ def test_imap_php_cert_self_signed(user_domain, platform_data_dir, service_prefi
     
     run_scp('{0}/../config/roundcube/config.inc.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_scp('{0}/php.ssl.imap.test.php root@{1}:/'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-    run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php", password=DEVICE_PASSWORD)
+    run_ssh(user_domain, "{0}/bin/php -f /php.ssl.imap.test.php".format(app_dir), password=DEVICE_PASSWORD)
 
 def test_upgrade(app_archive_path, user_domain):
     run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
