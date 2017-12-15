@@ -201,23 +201,26 @@ def test_imap_php_generated(user_domain, platform_data_dir, service_prefix, app_
     imap_php(user_domain, platform_data_dir, app_dir, 'generated', data_dir)
 
 
-def test_enable_real_cert():
-    enable_real_cert(user_domain, platform_data_dir, service_prefix)
+def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
+    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
-def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
+def test_imap_openssl_real(user_domain):
     imap_openssl(user_domain, '-CApath /etc/ssl/certs', 'real', 'build.syncloud.info')
 
 
-def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
+def test_imap_php_real(user_domain, platform_data_dir, app_dir, data_dir):
     imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
 
     
 def imap_openssl(user_domain, ca, name, server_name):
     run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    output = run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -servername {1} -verify 3 -starttls imap".format(ca, server_name),
-            password=DEVICE_PASSWORD)
+    output = run_ssh(user_domain, "echo \"A Logout\" | "
+                                  "/openssl/bin/openssl s_client {0} -connect localhost:143 "
+                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name),
+                     password=DEVICE_PASSWORD)
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
     
@@ -234,12 +237,6 @@ def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
 def enable_self_signed_cert(user_domain, platform_data_dir, service_prefix):
     run_ssh(user_domain, 'cp {0}/config/tls/default.crt {0}/syncloud.crt'.format(platform_data_dir), password=DEVICE_PASSWORD)
     run_ssh(user_domain, 'cp {0}/config/tls/default.key {0}/syncloud.key'.format(platform_data_dir), password=DEVICE_PASSWORD)
-    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
-
-
-def enable_real_cert(user_domain, platform_data_dir, service_prefix):
-    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
