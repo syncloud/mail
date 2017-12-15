@@ -192,12 +192,11 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
 
 
 def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
-    #enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt'.format(platform_data_dir), 'generated', 'localhost')
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+                 'generated', 'localhost')
 
 
 def test_imap_php_generated(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
-    #enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
     imap_php(user_domain, platform_data_dir, app_dir, 'generated', data_dir)
 
 
@@ -208,7 +207,8 @@ def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
 
 
 def test_imap_openssl_real(user_domain):
-    imap_openssl(user_domain, '-CApath /etc/ssl/certs', 'real', 'build.syncloud.info')
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs',
+                 'real', 'build.syncloud.info')
 
 
 def test_imap_php_real(user_domain, platform_data_dir, app_dir, data_dir):
@@ -223,6 +223,7 @@ def imap_openssl(user_domain, ca, name, server_name):
                      password=DEVICE_PASSWORD)
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
+    assert 'Verify return code: 0 (ok)' in output
     
     
 def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
@@ -233,12 +234,6 @@ def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
     with open('{0}/php.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
         
-
-def enable_self_signed_cert(user_domain, platform_data_dir, service_prefix):
-    run_ssh(user_domain, 'cp {0}/config/tls/default.crt {0}/syncloud.crt'.format(platform_data_dir), password=DEVICE_PASSWORD)
-    run_ssh(user_domain, 'cp {0}/config/tls/default.key {0}/syncloud.key'.format(platform_data_dir), password=DEVICE_PASSWORD)
-    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
-
 
 def test_upgrade(app_archive_path, user_domain):
     run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
