@@ -206,8 +206,8 @@ def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
     run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
-def test_imap_openssl_real(user_domain):
-    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs',
+def test_imap_openssl_real(user_domain, platform_data_dir):
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
                  'real', 'build.syncloud.info')
 
 
