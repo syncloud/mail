@@ -190,15 +190,28 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
             '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
-def test_imap_openssl_self_signed(user_domain, platform_data_dir, service_prefix):
-    enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt'.format(platform_data_dir), 'fake', 'localhost')
+
+def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
+    #enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt'.format(platform_data_dir), 'generated', 'localhost')
+
+
+def test_imap_php_generated(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
+    #enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
+    imap_php(user_domain, platform_data_dir, app_dir, 'generated', data_dir)
+
+
+def test_enable_real_cert():
+    enable_real_cert(user_domain, platform_data_dir, service_prefix)
 
 
 def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
-    enable_real_cert(user_domain, platform_data_dir, service_prefix)
     imap_openssl(user_domain, '-CApath /etc/ssl/certs', 'real', 'build.syncloud.info')
-    
+
+
+def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
+    imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
+
     
 def imap_openssl(user_domain, ca, name, server_name):
     run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
@@ -207,18 +220,6 @@ def imap_openssl(user_domain, ca, name, server_name):
             password=DEVICE_PASSWORD)
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
-
-
-def test_imap_php_self_signed(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
-
-    enable_self_signed_cert(user_domain, platform_data_dir, service_prefix)
-    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned', data_dir)
-
-    
-def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
-
-    enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
     
     
 def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
