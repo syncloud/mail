@@ -197,13 +197,13 @@ def test_imap_openssl_self_signed(user_domain, platform_data_dir, service_prefix
 
 def test_imap_openssl_real(user_domain, platform_data_dir, service_prefix):
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_openssl(user_domain, '-CAfile /etc/ssl/certs/DST_Root_CA_X3.pem', 'real', 'build.syncloud.info')
+    imap_openssl(user_domain, '-CApath /etc/ssl/certs', 'real', 'build.syncloud.info')
     
     
-def imap_openssl(user_domain, ca_file, name, server_name):
+def imap_openssl(user_domain, ca, name, server_name):
     run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
     output = run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -servername {1} -verify 3 -starttls imap".format(ca_file, server_name),
+            "echo \"A Logout\" | /openssl/bin/openssl s_client {0} -connect localhost:143 -servername {1} -verify 3 -starttls imap".format(ca, server_name),
             password=DEVICE_PASSWORD)
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
@@ -218,7 +218,7 @@ def test_imap_php_self_signed(user_domain, platform_data_dir, service_prefix, ap
 def test_imap_php_real(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
 
     enable_real_cert(user_domain, platform_data_dir, service_prefix)
-    imap_php(user_domain, platform_data_dir, app_dir, 'selfsigned', data_dir)
+    imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
     
     
 def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
