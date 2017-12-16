@@ -45,14 +45,6 @@ class Config:
         self.parser.read(self.filename)
         return self.parser.get('mail', 'postfix_main_config_file')
 
-    def roundcube_config_file_template(self):
-        self.parser.read(self.filename)
-        return self.parser.get('mail', 'roundcube_config_file_template')
-
-    def roundcube_config_file(self):
-        self.parser.read(self.filename)
-        return self.parser.get('mail', 'roundcube_config_file')
-
     def dovecot_config_file(self):
         self.parser.read(self.filename)
         return self.parser.get('mail', 'dovecot_config_file')

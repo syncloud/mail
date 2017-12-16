@@ -14,12 +14,13 @@ $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 $config['plugins'] = array();
-
+$config['mail_domain'] = '{{ device_domain_name }}'
 $config['default_host'] = 'tls://localhost';
 
 $config['imap_conn_options'] = array(
   'ssl' => array(
       'verify_peer' => true,
+      'peer_name' => '{{ device_domain_name }}',
       'allow_self_signed' => true,
       'verify_depth' => 3,
       'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH:!SSLv2:!SSLv3',
