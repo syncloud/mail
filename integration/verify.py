@@ -83,9 +83,10 @@ def test_start(module_setup):
 def test_activate_device(auth, user_domain):
     email, password, domain, release = auth
 
-    response = requests.post('http://{0}:81/rest/activate'.format(user_domain),
-                             data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
-                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
+    response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
+                             data={'full_domain': user_domain, 
+                                   'device_username': DEVICE_USER, 
+                                   'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200, response.text
     global LOGS_SSH_PASSWORD
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
