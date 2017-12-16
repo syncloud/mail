@@ -47,8 +47,8 @@ def service_prefix(installer):
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, user_domain):
-    request.addfinalizer(lambda: module_teardown(user_domain))
+def module_setup(request, user_domain, app_dir, data_dir, platform_data_dir):
+    request.addfinalizer(lambda: module_teardown(user_domain, app_dir, data_dir, platform_data_dir))
 
 
 def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
