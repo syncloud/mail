@@ -196,8 +196,8 @@ def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
                  'generated', 'localhost')
 
 
-def test_imap_php_generated(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
-    imap_php(user_domain, platform_data_dir, app_dir, 'generated', data_dir)
+#def test_imap_php_generated(user_domain, platform_data_dir, service_prefix, app_dir, data_dir):
+#    imap_php(user_domain, platform_data_dir, app_dir, 'generated', data_dir)
 
 
 def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
@@ -211,8 +211,8 @@ def test_imap_openssl_real(user_domain, platform_data_dir):
                  'real', 'build.syncloud.info')
 
 
-def test_imap_php_real(user_domain, platform_data_dir, app_dir, data_dir):
-    imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
+#def test_imap_php_real(user_domain, platform_data_dir, app_dir, data_dir):
+#    imap_php(user_domain, platform_data_dir, app_dir, 'real', data_dir)
 
     
 def imap_openssl(user_domain, ca, name, server_name):
