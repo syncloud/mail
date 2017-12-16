@@ -51,17 +51,18 @@ def module_setup(request, user_domain):
     request.addfinalizer(lambda: module_teardown(user_domain))
 
 
-def module_teardown(user_domain):
+def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
-    run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/log/* {2}'.format(user_domain, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/sam.log {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
-    run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    
-    run_ssh(user_domain, 'ls -la /opt/data/mail/log/', password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/config/rouncube/config.inc.php {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+   
+    run_ssh(user_domain, 'ls -la {0}/log/'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     print('systemd logs')
     run_ssh(user_domain, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
