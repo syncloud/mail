@@ -2,6 +2,8 @@ from os.path import isdir, join
 import shutil
 
 from subprocess import check_output
+
+from os import symlink, os
 from syncloud_app import logger
 
 from syncloud_platform.gaplib import fs, linux, gen
@@ -100,6 +102,11 @@ class MailInstaller:
         dovecot_lda_info_log = join(self.app_data_dir, 'log', 'dovecot-lda.info.log')
         fs.touchfile(dovecot_lda_info_log)
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
+
+        config_file = join(self.app_dir, 'roundcube', 'config', 'config.inc.php')
+        if os.path.exists(config_file):
+            os.remove(config_file)
+        os.symlink(join(self.config_path, 'roundcube', 'config.inc.php'), config_file)
 
         self.log.info("setup configs")
 
