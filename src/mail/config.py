@@ -41,18 +41,9 @@ class Config:
         self.parser.read(self.filename)
         return self.parser.get('mail', 'db_socket')
 
-    def dovecot_config_file(self):
-        self.parser.read(self.filename)
-        return self.parser.get('mail', 'dovecot_config_file')
-
     def db_init_file(self):
         self.parser.read(self.filename)
         return self.parser.get('mail', 'db_init_file')
-
-    def php_ini(self):
-        self.parser.read(self.filename)
-        return self.parser.get('mail', 'php_ini')
-
 
 
 class UserConfig:

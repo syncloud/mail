@@ -53,7 +53,8 @@ class MailInstaller:
             'db_password': DB_PASS,
             'platform_data_dir': self.platform_app.get_data_dir(),
             'device_domain_name': self.device_domain_name,
-            'app_domain_name': self.app_domain_name
+            'app_domain_name': self.app_domain_name,
+            'timezone': get_localzone()
         }
 
         templates_path = join(self.app_dir, 'config.templates')
@@ -101,8 +102,6 @@ class MailInstaller:
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
         self.log.info("setup configs")
-        self.generate_dovecot_config(self.config)
-        self.generate_php_config(self.config)
 
         user_config = UserConfig(self.app_data_dir)
 
@@ -164,23 +163,5 @@ class MailInstaller:
     def update_domain(self):
 
         self.regenerate_configs()
-        self.generate_dovecot_config(self.config)
         self.app.restart_service(SYSTEMD_DOVECOT)
         self.app.restart_service(SYSTEMD_POSTFIX)
-
-
-    def generate_dovecot_config(self, config):
-
-        template_file_name = '{0}.template'.format(config.dovecot_config_file())
-        shutil.copyfile(template_file_name, config.dovecot_config_file())
-        with open(config.dovecot_config_file(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write('postmaster_address = postmaster@{0}\n'.format(self.device_domain_name))
-
-    def generate_php_config(self, config):
-        
-        template_file_name = '{0}.template'.format(config.php_ini())
-        shutil.copyfile(template_file_name, config.php_ini())
-        with open(config.php_ini(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write("date.timezone = '{0}'\n".format(get_localzone()))
