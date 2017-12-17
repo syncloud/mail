@@ -103,10 +103,9 @@ class MailInstaller:
         fs.touchfile(dovecot_lda_info_log)
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
-        config_file = join(self.app_dir, 'roundcube', 'config', 'config.inc.php')
-        if os.path.exists(config_file):
-            os.remove(config_file)
-        os.symlink(join(self.config_path, 'roundcube', 'config.inc.php'), config_file)
+        config_file = join(self.config_path, 'roundcube', 'config.inc.php')
+        config_file_link = join(self.app_dir, 'roundcube', 'config', 'config.inc.php')
+        os.symlink(config_file, config_file_link)
 
         self.log.info("setup configs")
 
