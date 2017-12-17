@@ -14,7 +14,7 @@ $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 $config['plugins'] = array();
-$config['mail_domain'] = '{{ device_domain_name }}'
+$config['mail_domain'] = '{{ device_domain_name }}';
 $config['default_host'] = 'tls://localhost';
 
 $config['imap_conn_options'] = array(
