@@ -82,11 +82,11 @@ def test_start(module_setup):
     os.mkdir(LOG_DIR)
 
 
-def test_activate_device(auth, user_domain):
+def test_activate_device(auth, device_domain):
     email, password, domain, release = auth
 
     response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
-                             data={'full_domain': user_domain, 
+                             data={'full_domain': device_domain, 
                                    'device_username': DEVICE_USER, 
                                    'device_password': DEVICE_PASSWORD})
     assert response.status_code == 200, response.text

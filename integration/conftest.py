@@ -31,7 +31,7 @@ def device_domain(request):
     
 @pytest.fixture(scope='session')
 def user_domain(device_domain):
-    return 'mail.{0}'.format(device_domain, SYNCLOUD_INFO)
+    return 'mail.{0}'.format(device_domain)
 
 
 @pytest.fixture(scope='session')
