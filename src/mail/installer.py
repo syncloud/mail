@@ -52,7 +52,8 @@ class MailInstaller:
             'db_user': DB_USER,
             'db_password': DB_PASS,
             'platform_data_dir': self.platform_app.get_data_dir(),
-            'device_domain_name': self.device_domain_name
+            'device_domain_name': self.device_domain_name,
+            'app_domain_name': self.app_domain_name
         }
 
         templates_path = join(self.app_dir, 'config.templates')
@@ -100,7 +101,6 @@ class MailInstaller:
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
         self.log.info("setup configs")
-        self.generate_postfix_config(self.config)
         self.generate_dovecot_config(self.config)
         self.generate_php_config(self.config)
 
@@ -164,20 +164,10 @@ class MailInstaller:
     def update_domain(self):
 
         self.regenerate_configs()
-        self.generate_postfix_config(self.config)
         self.generate_dovecot_config(self.config)
         self.app.restart_service(SYSTEMD_DOVECOT)
         self.app.restart_service(SYSTEMD_POSTFIX)
 
-    def generate_postfix_config(self, config):
-        
-        template_file_name = '{0}.template'.format(config.postfix_main_config_file())
-        shutil.copyfile(template_file_name, config.postfix_main_config_file())
-        with open(config.postfix_main_config_file(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
-            config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
-            config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
 
     def generate_dovecot_config(self, config):
 

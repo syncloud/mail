@@ -665,3 +665,7 @@ smtpd_sasl_auth_enable = yes
 
 dovecot_destination_recipient_limit = 1
 virtual_transport = dovecot
+
+mydomain = {{ device_domain_name }}
+myhostname = {{ app_domain_name }}
+virtual_mailbox_domains = {{ device_domain_name }}

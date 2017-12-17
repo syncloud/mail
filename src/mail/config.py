@@ -41,10 +41,6 @@ class Config:
         self.parser.read(self.filename)
         return self.parser.get('mail', 'db_socket')
 
-    def postfix_main_config_file(self):
-        self.parser.read(self.filename)
-        return self.parser.get('mail', 'postfix_main_config_file')
-
     def dovecot_config_file(self):
         self.parser.read(self.filename)
         return self.parser.get('mail', 'dovecot_config_file')
