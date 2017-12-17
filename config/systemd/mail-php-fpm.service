@@ -1,7 +1,5 @@
 [Unit]
 Description=mail php fpm
-#Requires=owncloud-postgresql.service
-#After=owncloud-postgresql.service
 
 [Service]
 User=mail

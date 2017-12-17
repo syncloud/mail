@@ -59,17 +59,16 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
 
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
+    run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'journalctl | tail -200 > {0}/log/systemctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD)
+
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:{1}/config/roundcube/config.inc.php {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:{1}/config/postfix/main.cf {2}/postfix.main.cf'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
-    run_ssh(user_domain, 'ls -la {0}/log/'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-
-    print('systemd logs')
-    run_ssh(user_domain, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
-
-
+    
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()
