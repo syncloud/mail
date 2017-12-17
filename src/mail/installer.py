@@ -3,7 +3,7 @@ import shutil
 
 from subprocess import check_output
 
-from os import symlink, os
+import os
 from syncloud_app import logger
 
 from syncloud_platform.gaplib import fs, linux, gen
