@@ -3,6 +3,7 @@
 $config = array();
 
 $config['log_dir'] = '{{ app_data_dir }}/log/';
+$config['debug_level'] = 1;
 
 $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
 
