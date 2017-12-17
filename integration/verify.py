@@ -60,6 +60,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:{1}/config/roundcube/config.inc.php {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
    
     run_ssh(user_domain, 'ls -la {0}/log/'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
