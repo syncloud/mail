@@ -85,7 +85,7 @@ def test_start(module_setup):
 def test_activate_device(auth, device_domain):
     email, password, domain, release = auth
 
-    response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
+    response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(device_domain),
                              data={'full_domain': device_domain, 
                                    'device_username': DEVICE_USER, 
                                    'device_password': DEVICE_PASSWORD})
