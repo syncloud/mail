@@ -63,8 +63,8 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/ > {1}/log/roundcubemail.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/config/ > {1}/log/roundcubemail.config.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/logs/ > {1}/log/roundcubemail.logs.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'journalctl | tail -200 > {0}/log/systemctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD)
-    run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, 'journalctl | tail -200 > {0}/log/systemctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
