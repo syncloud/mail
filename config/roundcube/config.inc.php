@@ -10,7 +10,7 @@ $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/
 $config['support_url'] = '';
 $config['des_key'] = '46adfbf655e235b60f56f881';
 
-$config['smtp_server'] = '127.0.0.1';
+$config['smtp_server'] = 'localhost';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 

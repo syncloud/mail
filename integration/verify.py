@@ -68,6 +68,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
 
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/mesages* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     config_dir = join(LOG_DIR, 'config')
     os.mkdir(config_dir)
     run_scp('-r root@{0}:{1}/config/* {2}'.format(user_domain, data_dir, config_dir), password=LOGS_SSH_PASSWORD, throw=False)
