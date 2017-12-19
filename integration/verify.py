@@ -251,9 +251,9 @@ def imap_php(user_domain, platform_data_dir, app_dir, name, data_dir):
         f.write(output)
         
 
-def test_upgrade(app_archive_path, user_domain):
-    run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
-    __local_install(app_archive_path, user_domain)
+#def test_upgrade(app_archive_path, user_domain):
+#    run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
+#    __local_install(app_archive_path, user_domain)
 
 
 def __local_install(app_archive_path, device_host):
