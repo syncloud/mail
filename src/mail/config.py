@@ -41,9 +41,30 @@ class Config:
         self.parser.read(self.filename)
         return self.parser.get('mail', 'db_socket')
 
+    def postfix_main_config_file(self):
+        self.parser.read(self.filename)
+        return self.parser.get('mail', 'postfix_main_config_file')
+
+    def roundcube_config_file_template(self):
+        self.parser.read(self.filename)
+        return self.parser.get('mail', 'roundcube_config_file_template')
+
+    def roundcube_config_file(self):
+        self.parser.read(self.filename)
+        return self.parser.get('mail', 'roundcube_config_file')
+
+    def dovecot_config_file(self):
+        self.parser.read(self.filename)
+        return self.parser.get('mail', 'dovecot_config_file')
+
     def db_init_file(self):
         self.parser.read(self.filename)
         return self.parser.get('mail', 'db_init_file')
+
+    def php_ini(self):
+        self.parser.read(self.filename)
+        return self.parser.get('mail', 'php_ini')
+
 
 
 class UserConfig:
