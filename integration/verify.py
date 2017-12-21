@@ -59,10 +59,6 @@ def test_start(module_setup):
 def test_activate_device(auth, user_domain, device_domain):
     email, password, domain, release = auth
 
-#    response = requests.post('http://{0}:81/rest/activate'.format(user_domain),
-#                             data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
-#                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
-                                   
     response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
                              data={'full_domain': device_domain,
                                    'device_username': DEVICE_USER,
@@ -143,13 +139,6 @@ def test_filesystem_mailbox(user_domain):
     run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
 
 
-def test_starttls(user_domain):
-    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client -connect localhost:143 -starttls imap",
-            password=DEVICE_PASSWORD)
-
-
 def test_mail_receiving(user_domain):
 
     message_count = 0
@@ -179,6 +168,33 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
             '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
+
+
+def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+                 'generated', 'localhost')
+
+
+#def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
+#    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+#    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+#    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+
+
+#def test_imap_openssl_real(user_domain, platform_data_dir):
+#    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+#                 'real', 'build.syncloud.info')
+
+
+def imap_openssl(user_domain, ca, name, server_name):
+    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
+    output = run_ssh(user_domain, "echo \"A Logout\" | "
+                                  "/openssl/bin/openssl s_client {0} -connect localhost:143 "
+                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name),
+                     password=DEVICE_PASSWORD)
+    with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
+        f.write(output)
+    assert 'Verify return code: 0 (ok)' in output
 
 
 def test_upgrade(app_archive_path, user_domain):
