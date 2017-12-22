@@ -203,15 +203,15 @@ def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
                  'generated', 'localhost')
 
 
-#def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
-#    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
+    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
-#def test_imap_openssl_real(user_domain, platform_data_dir):
-#    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
-#                 'real', 'build.syncloud.info')
+def test_imap_openssl_real(user_domain, platform_data_dir):
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+                 'real', 'build.syncloud.info')
 
 
 def imap_openssl(user_domain, ca, name, server_name):
