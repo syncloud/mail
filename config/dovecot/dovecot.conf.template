@@ -102,3 +102,8 @@ dict {
 # A config file can also tried to be included without giving an error if
 # it's not found:
 #!include_try local.conf
+
+auth_verbose=yes
+auth_debug=yes
+mail_debug=yes
+verbose_ssl=yes
