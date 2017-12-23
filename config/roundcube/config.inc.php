@@ -1,7 +1,9 @@
 <?php
 
 $config = array();
-
+$config['imap_debug'] = true;
+$config['ldap_debug'] = true;
+$config['smtp_debug'] = true;
 $config['log_dir'] = '{{ app_data_dir }}/log/';
 
 $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
