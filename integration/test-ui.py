@@ -55,7 +55,7 @@ def test_web_with_selenium(driver, user_domain, device_domain):
         shutil.rmtree(screenshot_dir)
     os.mkdir(screenshot_dir)
 
-    driver.get("http://{0}".format(user_domain))
+    driver.get("https://{0}".format(user_domain))
     
     time.sleep(2)
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
