@@ -1,0 +1,13 @@
+--- program/include/iniset.php.bak	2017-12-26 22:35:08.332279559 +0000
++++ program/include/iniset.php	2017-12-26 23:12:55.341669360 +0000
+@@ -28,6 +28,10 @@
+     define('INSTALL_PATH', dirname($_SERVER['SCRIPT_FILENAME']).'/');
+ }
+
++if (getenv('RCMAIL_CONFIG_DIR')) {
++    define('RCMAIL_CONFIG_DIR', getenv('RCMAIL_CONFIG_DIR'));
++}
++
+ if (!defined('RCMAIL_CONFIG_DIR')) {
+     define('RCMAIL_CONFIG_DIR', INSTALL_PATH . 'config');
+ }

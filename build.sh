@@ -40,12 +40,13 @@ mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 
-#coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
-coin --to ${BUILD_DIR} raw https://github.com/cyberb/roundcubemail/archive/${ROUNDCUBE_VERSION}.zip
+coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
+cd ${BUILD_DIR}/roundcubemail
+patch -p0 < ${DIR}/patches/config-override.patch
 
 #https://github.com/roundcube/roundcubemail/issues/5949
-#rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
+rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
 
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
