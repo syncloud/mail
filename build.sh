@@ -45,9 +45,6 @@ mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 cd ${BUILD_DIR}/roundcubemail
 patch -p0 < ${DIR}/patches/config-override.patch
 
-#https://github.com/roundcube/roundcubemail/issues/5949
-rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
-
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
 cp -r ${BUILD_DIR}/postfix/opt/data/mail/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
