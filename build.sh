@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=mail
-ROUNDCUBE_VERSION=1.3.1
+ROUNDCUBE_VERSION=1.3.3
 ARCH=$(uname -m)
 VERSION=$1
 
@@ -40,8 +40,8 @@ mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
 
-coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
-
+#coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
+coin --to ${BUILD_DIR} raw https://github.com/cyberb/roundcubemail/archive/${ROUNDCUBE_VERSION}.zip
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
 #https://github.com/roundcube/roundcubemail/issues/5949
