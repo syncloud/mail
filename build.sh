@@ -45,7 +45,7 @@ coin --to ${BUILD_DIR} raw https://github.com/cyberb/roundcubemail/archive/${ROU
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
 #https://github.com/roundcube/roundcubemail/issues/5949
-rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
+#rm ${BUILD_DIR}/roundcubemail/vendor/pear/net_smtp/README.rst
 
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
