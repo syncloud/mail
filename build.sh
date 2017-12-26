@@ -44,7 +44,7 @@ coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/d
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 cd ${BUILD_DIR}/roundcubemail
 patch -p0 < ${DIR}/patches/config-override.patch
-
+cd ${DIR}
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
 cp -r ${BUILD_DIR}/postfix/opt/data/mail/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
