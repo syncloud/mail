@@ -173,7 +173,7 @@ def test_mail_receiving(user_domain):
     retry = 0
     retries = 3
     while retry < retries:
-        message_count = get_message_count(user_domain)
+        message_count = retry_func(lambda: get_message_count(user_domain), message='get message count', retries=5)
         if message_count > 0:
             break
         retry += 1
