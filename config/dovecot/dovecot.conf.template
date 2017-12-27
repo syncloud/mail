@@ -107,3 +107,5 @@ auth_verbose=yes
 auth_debug=yes
 mail_debug=yes
 verbose_ssl=yes
+
+postmaster_address = postmaster@{{ device_domain_name }}

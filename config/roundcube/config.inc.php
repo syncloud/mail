@@ -21,13 +21,16 @@ $config['plugins'] = array();
 
 $config['default_host'] = 'tls://localhost';
 
+$config['mail_domain'] = '{{ device_domain_name }}';
+
 $config['imap_conn_options'] = array(
   'ssl' => array(
+      'peer_name'] = '{{ device_domain_name }}',
       'verify_peer' => true,
       'allow_self_signed' => true,
       'verify_depth' => 3,
-       'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-       'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt',
-       'capath' => '/etc/ssl/certs',
-       ),
-    );
+      'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
+      'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt',
+      'capath' => '/etc/ssl/certs',
+  ),
+);
