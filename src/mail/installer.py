@@ -163,6 +163,6 @@ class MailInstaller:
 
     def update_domain(self):
 
-        self.regenerate_configs() - 
+        self.regenerate_configs()
         self.app.restart_service(SYSTEMD_DOVECOT)
         
