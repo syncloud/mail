@@ -46,7 +46,7 @@ class MailInstaller:
         variables = {
             'app_dir': self.app_dir,
             'app_data_dir': self.app_data_dir,
-            'db_psql_path': database_path,
+            'db_psql_path': self.database_path,
             'db_psql_port': PSQL_PORT,
             'db_name': DB_NAME,
             'db_user': DB_USER,
