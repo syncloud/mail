@@ -69,7 +69,8 @@ def test_web_with_selenium(driver, user_domain, device_domain):
     driver.get_screenshot_as_file(join(screenshot_dir, 'login.png'))
     password.send_keys(Keys.RETURN)
 
-    #time.sleep(10)
+    time.sleep(10)
+    driver.get_screenshot_as_file(join(screenshot_dir, 'login_progress.png')) 
 
     username = '{0}@{1}'.format(DEVICE_USER, device_domain)
     #print('found: {0}'.format(username in page))
