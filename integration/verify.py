@@ -11,7 +11,10 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from integration.util.ssh import run_scp, run_ssh
+from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, \
+    get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
+from syncloudlib.integration.loop import loop_device_cleanup
+from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
 
 SYNCLOUD_INFO = 'syncloud.info'
@@ -23,26 +26,51 @@ DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 
 
+def platform_data_dir(installer):
+    return get_data_dir(installer, 'platform')
+
+    
 @pytest.fixture(scope="session")
-def module_setup(request, user_domain):
-    request.addfinalizer(lambda: module_teardown(user_domain))
+def data_dir(installer):
+    return get_data_dir(installer, 'mail')
 
 
-def module_teardown(user_domain):
+@pytest.fixture(scope="session")
+def app_dir(installer):
+    return get_app_dir(installer, 'mail')
+    
+
+@pytest.fixture(scope="session")
+def service_prefix(installer):
+    return get_service_prefix(installer)
+
+
+@pytest.fixture(scope="session")
+def module_setup(request, user_domain, app_dir, data_dir, platform_data_dir):
+    request.addfinalizer(lambda: module_teardown(user_domain, app_dir, data_dir, platform_data_dir))
+
+
+def module_teardown(user_domain, app_dir, data_dir, platform_data_dir): 
     platform_log_dir = join(LOG_DIR, 'platform_log')
     os.mkdir(platform_log_dir)
-    run_scp('root@{0}:/opt/data/platform/log/* {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/log/* {2}'.format(user_domain, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
     run_scp('root@{0}:/var/log/sam.log {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
-    run_scp('root@{0}:/opt/data/mail/log/*.log {1}'.format(user_domain, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    
-    run_ssh(user_domain, 'ls -la /opt/data/mail/log/', password=LOGS_SSH_PASSWORD, throw=False)
-
-    print('systemd logs')
-    run_ssh(user_domain, 'journalctl | tail -200', password=LOGS_SSH_PASSWORD)
-
+    run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/roundcubemail/ > {1}/log/roundcubemail.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/roundcubemail/config/ > {1}/log/roundcubemail.config.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/roundcubemail/logs/ > {1}/log/roundcubemail.logs.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'journalctl | tail -200 > {0}/log/systemctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/messages* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/*syslog* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
+    config_dir = join(LOG_DIR, 'config')
+    os.mkdir(config_dir)
+    run_scp('-r root@{0}:{1}/config/* {2}'.format(user_domain, data_dir, config_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
@@ -56,12 +84,14 @@ def test_start(module_setup):
     os.mkdir(LOG_DIR)
 
 
-def test_activate_device(auth, user_domain):
+def test_activate_device(auth, user_domain, device_domain):
     email, password, domain, release = auth
 
-    response = requests.post('http://{0}:81/rest/activate'.format(user_domain),
-                             data={'main_domain': SYNCLOUD_INFO, 'redirect_email': email, 'redirect_password': password,
-                                   'user_domain': domain, 'device_username': DEVICE_USER, 'device_password': DEVICE_PASSWORD})
+    response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
+                             data={'full_domain': device_domain,
+                                   'device_username': DEVICE_USER,
+                                   'device_password': DEVICE_PASSWORD})     
+                                           
     assert response.status_code == 200, response.text
     global LOGS_SSH_PASSWORD
     LOGS_SSH_PASSWORD = DEVICE_PASSWORD
@@ -137,20 +167,13 @@ def test_filesystem_mailbox(user_domain):
     run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
 
 
-def test_starttls(user_domain):
-    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    run_ssh(user_domain,
-            "echo \"A Logout\" | /openssl/bin/openssl s_client -connect localhost:143 -starttls imap",
-            password=DEVICE_PASSWORD)
-
-
 def test_mail_receiving(user_domain):
 
     message_count = 0
     retry = 0
     retries = 3
     while retry < retries:
-        message_count = get_message_count(user_domain)
+        message_count = retry_func(lambda: get_message_count(user_domain), message='get message count', retries=5)
         if message_count > 0:
             break
         retry += 1
@@ -173,6 +196,33 @@ def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
             '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
+
+
+def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+                 'generated', 'localhost')
+
+
+def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
+    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+
+
+def test_imap_openssl_real(user_domain, platform_data_dir):
+    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+                 'real', 'build.syncloud.info')
+
+
+def imap_openssl(user_domain, ca, name, server_name):
+    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
+    output = run_ssh(user_domain, "echo \"A Logout\" | "
+                                  "/openssl/bin/openssl s_client {0} -connect localhost:143 "
+                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name),
+                     password=DEVICE_PASSWORD)
+    with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
+        f.write(output)
+    assert 'Verify return code: 0 (ok)' in output
 
 
 def test_upgrade(app_archive_path, user_domain):

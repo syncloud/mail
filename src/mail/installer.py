@@ -37,9 +37,32 @@ class MailInstaller:
         self.app_domain_name = self.app.app_domain_name()
         self.app_dir = self.app.get_install_dir()
         self.app_data_dir = self.app.get_data_dir()
+        self.database_path = '{0}/database'.format(self.app_data_dir)
         self.config_path = join(self.app_data_dir, 'config')
         self.config = Config(self.config_path)
 
+    def regenerate_configs(self):
+    
+        variables = {
+            'app_dir': self.app_dir,
+            'app_data_dir': self.app_data_dir,
+            'db_psql_path': self.database_path,
+            'db_psql_port': PSQL_PORT,
+            'db_name': DB_NAME,
+            'db_user': DB_USER,
+            'db_password': DB_PASS,
+            'platform_data_dir': self.platform_app.get_data_dir(),
+            'device_domain_name': self.device_domain_name,
+            'app_domain_name': self.app_domain_name,
+            'timezone': get_localzone()
+        }
+
+        templates_path = join(self.app_dir, 'config.templates')
+        
+        gen.generate_files(templates_path, self.config_path, variables)
+        
+        self.log.info(fs.chownpath(self.config_path, USER_NAME, recursive=True))
+    
     def install(self):
 
         linux.fix_locale()
@@ -48,23 +71,8 @@ class MailInstaller:
         linux.useradd('dovecot')
         linux.useradd(USER_NAME)
         
-        database_path = '{0}/database'.format(self.app_data_dir)
-
-        variables = {
-            'app_dir': self.app_dir,
-            'app_data_dir': self.app_data_dir,
-            'db_psql_path': database_path,
-            'db_psql_port': PSQL_PORT,
-            'db_name': DB_NAME,
-            'db_user': DB_USER,
-            'db_password': DB_PASS,
-            'platform_data_dir': self.platform_app.get_data_dir()
-        }
-
-        templates_path = join(self.app_dir, 'config.templates')
+        self.regenerate_configs()
         
-        gen.generate_files(templates_path, self.config_path, variables)
-
         self.log.info(fs.chownpath(self.app_dir, USER_NAME, recursive=True))
 
         fs.chownpath(self.app_data_dir, USER_NAME)
@@ -95,17 +103,13 @@ class MailInstaller:
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
         self.log.info("setup configs")
-        self.generate_postfix_config(self.config)
-        self.generate_roundcube_config(self.config)
-        self.generate_dovecot_config(self.config)
-        self.generate_php_config(self.config)
-
+        
         user_config = UserConfig(self.app_data_dir)
 
         is_first_time = not user_config.is_activated()
 
         if is_first_time:
-            self.database_init(database_path, USER_NAME)
+            self.database_init(self.database_path, USER_NAME)
 
         self.log.info("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRES)
@@ -159,40 +163,6 @@ class MailInstaller:
 
     def update_domain(self):
 
-        self.generate_postfix_config(self.config)
-        self.generate_roundcube_config(self.config)
-        self.generate_dovecot_config(self.config)
-        self.app.restart_service(SYSTEMD_POSTFIX)
-
-    def generate_roundcube_config(self, config):
-        shutil.copyfile(config.roundcube_config_file_template(), config.roundcube_config_file())
-        with open(config.roundcube_config_file(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write("$config['mail_domain'] = '{0}';\n".format(self.device_domain_name))
-            config_file.write("$config['imap_conn_options']['ssl']['peer_name'] = '{0}';\n".format(self.device_domain_name))
-
-    def generate_postfix_config(self, config):
+        self.regenerate_configs()
+        self.app.restart_service(SYSTEMD_DOVECOT)
         
-        template_file_name = '{0}.template'.format(config.postfix_main_config_file())
-        shutil.copyfile(template_file_name, config.postfix_main_config_file())
-        with open(config.postfix_main_config_file(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write('mydomain = {0}\n'.format(self.device_domain_name))
-            config_file.write('myhostname = {0}\n'.format(self.app_domain_name))
-            config_file.write('virtual_mailbox_domains = {0}\n'.format(self.device_domain_name))
-
-    def generate_dovecot_config(self, config):
-
-        template_file_name = '{0}.template'.format(config.dovecot_config_file())
-        shutil.copyfile(template_file_name, config.dovecot_config_file())
-        with open(config.dovecot_config_file(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write('postmaster_address = postmaster@{0}\n'.format(self.device_domain_name))
-
-    def generate_php_config(self, config):
-        
-        template_file_name = '{0}.template'.format(config.php_ini())
-        shutil.copyfile(template_file_name, config.php_ini())
-        with open(config.php_ini(), "a") as config_file:
-            config_file.write('\n')
-            config_file.write("date.timezone = '{0}'\n".format(get_localzone()))
