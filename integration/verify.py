@@ -26,6 +26,7 @@ DIR = dirname(__file__)
 LOG_DIR = join(DIR, 'log')
 
 
+@pytest.fixture(scope="session")
 def platform_data_dir(installer):
     return get_data_dir(installer, 'platform')
 
