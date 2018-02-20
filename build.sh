@@ -7,7 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=mail
-ROUNDCUBE_VERSION=1.3.3
+ROUNDCUBE_VERSION=1.3.4
 ARCH=$(uname -m)
 VERSION=$1
 
