@@ -24,8 +24,6 @@ coin --to lib py https://pypi.python.org/packages/ec/6b/b3fcd16215e3742c67a740fb
 coin --to lib py https://pypi.python.org/packages/source/t/tzlocal/tzlocal-1.2.2.tar.gz
 coin --to lib py https://pypi.python.org/packages/source/p/pytz/pytz-2016.1.tar.gz
 
-cp -r ${DIR}/src lib/syncloud-mail-${VERSION}
-
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
