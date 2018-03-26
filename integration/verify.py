@@ -76,7 +76,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()
-    session.post('http://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('https://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD}, verify=False)
     return session
 
 
@@ -104,8 +104,8 @@ def test_running_platform_web(user_domain):
 
 def test_platform_rest(device_host):
     session = requests.session()
-    session.mount('http://{0}'.format(device_host), HTTPAdapter(max_retries=5))
-    response = session.get('http://{0}'.format(device_host), timeout=60)
+    session.mount('https://{0}'.format(device_host), HTTPAdapter(max_retries=5))
+    response = session.get('https://{0}'.format(device_host), timeout=60, verify=False)
     assert response.status_code == 200
 
 
