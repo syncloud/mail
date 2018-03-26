@@ -1,2 +1,5 @@
 from installer import MailInstaller
-MailInstaller().install()
+installer = MailInstaller()
+installer.install()
+installer.start()
+installer.configure()

@@ -121,6 +121,8 @@ class MailInstaller:
         if is_first_time:
             self.database_init(self.database_path, USER_NAME)
 
+    def start(self):
+    
         self.log.info("setup systemd")
         self.app.add_service(SYSTEMD_POSTGRES)
         self.app.add_service(SYSTEMD_POSTFIX)
@@ -128,6 +130,8 @@ class MailInstaller:
         self.app.add_service(SYSTEMD_PHP_FPM)
         self.app.add_service(SYSTEMD_NGINX)
 
+    def configure(self):
+    
         if is_first_time:
             self.initialize(self.config, user_config, DB_NAME, DB_USER, DB_PASS)
 
