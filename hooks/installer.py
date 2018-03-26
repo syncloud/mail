@@ -50,8 +50,10 @@ class MailInstaller:
         self.database_path = '{0}/database'.format(self.app_data_dir)
         self.config_path = join(self.app_data_dir, 'config')
         self.config = Config(self.config_path)
+        self.user_config = UserConfig(self.app_data_dir)
 
-    def regenerate_configs(self):
+
+def regenerate_configs(self):
     
         variables = {
             'app_dir': self.app_dir,
@@ -72,7 +74,7 @@ class MailInstaller:
         gen.generate_files(templates_path, self.config_path, variables)
         
         self.log.info(fs.chownpath(self.config_path, USER_NAME, recursive=True))
-    
+
     def install(self):
 
         linux.fix_locale()
@@ -113,12 +115,8 @@ class MailInstaller:
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
 
         self.log.info("setup configs")
-        
-        user_config = UserConfig(self.app_data_dir)
 
-        is_first_time = not user_config.is_activated()
-
-        if is_first_time:
+        if not self.user_config.is_activated():
             self.database_init(self.database_path, USER_NAME)
 
     def start(self):
@@ -132,8 +130,8 @@ class MailInstaller:
 
     def configure(self):
     
-        if is_first_time:
-            self.initialize(self.config, user_config, DB_NAME, DB_USER, DB_PASS)
+        if not self.user_config.is_activated():
+            self.initialize(self.config, self.user_config, DB_NAME, DB_USER, DB_PASS)
 
         self.prepare_storage()
 
