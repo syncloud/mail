@@ -53,7 +53,7 @@ class MailInstaller:
         self.user_config = UserConfig(self.app_data_dir)
 
 
-def regenerate_configs(self):
+    def regenerate_configs(self):
     
         variables = {
             'app_dir': self.app_dir,
