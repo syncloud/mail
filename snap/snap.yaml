@@ -1,40 +1,60 @@
 apps:
-  mongodb:
-    command: bin/service.mongodb.sh start
+  postfix:
+    user: mail
+    command: bin/service.postfix.sh start
+    stop-command: bin/service.postfix.sh stop
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [php-fpm]
+  dovecot:
+    user: mail
+    command: bin/service.dovecot.sh start
+    pre-start-command: bin/service.dovecot.sh pre-start
     daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
-    post-start-command: bin/service.mongodb.sh post-start
-    before: [server]
-    start-timeout: 600s
-  server:
-    command: bin/service.server.sh start
-    start-timeout: 600s
-    daemon: simple
+    before: [php-fpm]
+  postgresql:
+    user: mail
+    command: bin/service.postgres.sh start
+    daemon: forking
     plugs:
     - network
     - network-bind
     restart-condition: always
-    pre-start-commamd: bin/service.mongodb.sh post-start
-    post-start-command: bin/service.server.sh post-start
-    after: [mongodb]
+    before: [php-fpm]
+  php-fpm:
+    user: mail
+    command: bin/service.php-fpm.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    post-start-command: bin/service.php-fpm.sh post-start
+    after: [postgres]
+    before: [nginx]
+  
   nginx:
     command: bin/service.nginx.sh start
+    user: mail
     daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
-    pre-start-command: bin/service.server.sh post-start
     pre-start-command: bin/service.nginx.sh pre-start
-    post-start-command: bin/service.nginx.sh post-start
     stop-command: bin/service.nginx.sh stop
-    reload-command: bin/service.nginx.sh reload
-    after: [server]
+    post-start-command: bin/service.nginx.sh post-start
+    after: [php-fpm, postgres]
+
 confinement: strict
-description: Rocket.Chat
+description: Mail
 grade: stable
-name: rocketchat
-summary: Rocket.Chat
+name: mail
+summary: Mail
