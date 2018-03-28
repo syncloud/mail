@@ -1,7 +1,7 @@
 [Unit]
 Description=mail php fpm
-Requires=mail.postgresql.service
-After=mail.postgresql.service
+Requires=mail.postgres.service
+After=mail.postgres.service
 
 [Service]
 User=mail
