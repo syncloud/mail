@@ -3,6 +3,11 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
+if [[ -z "$2" ]]; then
+    echo "usage $0 version installer"
+    exit 1
+fi
+
 export TMPDIR=/tmp
 export TMP=/tmp
 
@@ -10,14 +15,10 @@ NAME=mail
 ROUNDCUBE_VERSION=1.3.4
 ARCH=$(uname -m)
 VERSION=$1
+INSTALLER=$2
 
-if [ -n "$DRONE" ]; then
-    echo "running under drone, removing coin cache"
-    rm -rf ${DIR}/.coin.cache
-fi
-
-rm -rf lib
-mkdir lib
+rm -rf ${DIR}/lib
+mkdir ${DIR}/lib
 
 coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
 coin --to lib py https://pypi.python.org/packages/ec/6b/b3fcd16215e3742c67a740fbb313e78f38741da5e40ee97681c9f9472aa5/syncloud-lib-27.tar.gz#md5=fa82721a7da75f570cd4ba8b4ce7a779
@@ -53,5 +54,26 @@ mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app
 echo ${VERSION} > build/${NAME}/META/version
 
-echo "zipping"
-tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
+if [ $INSTALLER == "sam" ]; then
+
+    echo "zipping"
+    rm -rf ${NAME}*.tar.gz
+    tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
+
+else
+
+    echo "snapping"
+    SNAP_DIR=${DIR}/build/snap
+    ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
+    rm -rf ${DIR}/*.snap
+    mkdir ${SNAP_DIR}
+    cp -r ${BUILD_DIR}/* ${SNAP_DIR}/
+    cp -r ${DIR}/snap/meta ${SNAP_DIR}/
+    cp ${DIR}/snap/snap.yaml ${SNAP_DIR}/meta/snap.yaml
+    echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
+    echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml
+    echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
+
+    mksquashfs ${SNAP_DIR} ${DIR}/${NAME}_${VERSION}_${ARCH}.snap -noappend -comp xz -no-xattrs -all-root
+
+fi
