@@ -3,18 +3,16 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
 if [[ -z "$1" ]]; then
-    echo "usage $0 [start]"
+    echo "usage $0 [action]"
     exit 1
 fi
 
-export LD_LIBRARY_PATH=${DIR}/php/lib:${DIR}/postgresql/lib
-
 case $1 in
 start)
-    exec $DIR/php/sbin/php-fpm -y ${SNAP_COMMON}/config/php/php-fpm.conf -c ${SNAP_COMMON}/config/php/php.ini
+    exec $DIR/postfix/usr/sbin/postfix -c ${SNAP_COMMON}/config/postfix start
     ;;
-post-start)
-    timeout 5 /bin/bash -c 'until [ -S '${SNAP_COMMON}'/log/php5-fpm.sock ]; do echo "waiting for ${SNAP_COMMON}/log/php5-fpm.sock"; sleep 1; done'
+stop)
+    exec $DIR/postfix/usr/sbin/postfix -c ${SNAP_COMMON}/config/postfix stop
     ;;
 *)
     echo "not valid command"
