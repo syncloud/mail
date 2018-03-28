@@ -2,10 +2,10 @@
 Description = Mail Dovecot
 
 [Service]
-Environment=LD_LIBRARY_PATH={{ app_dir }}/dovecot/lib/dovecot
+Environment=SNAP_COMMON={{ app_data_dir }}
 Type=simple
-ExecStartPre=/bin/rm -rf {{ app_data_dir }}/dovecot/master.pid
-ExecStart={{ app_dir }}/dovecot/sbin/dovecot -F -c {{ app_data_dir }}/config/dovecot/dovecot.conf
+ExecStartPre={{ app_dir }}/bin/service.dovecot.sh pre-start
+ExecStart={{ app_dir }}/bin/service.dovecot.sh start
 NonBlocking=yes
 
 [Install]
