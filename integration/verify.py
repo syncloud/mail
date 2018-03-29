@@ -117,8 +117,8 @@ def test_platform_rest(device_host):
 #     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host):
-    __local_install(app_archive_path, device_host)
+def test_install(app_archive_path, device_host, installer):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
 def test_running_smtp(user_domain):
@@ -226,12 +226,7 @@ def imap_openssl(user_domain, ca, name, server_name):
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(app_archive_path, user_domain):
-    run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
-    __local_install(app_archive_path, user_domain)
+def test_upgrade(app_archive_path, user_domain, installer):
+    local_remove(device_host, DEVICE_PASSWORD, installer, 'mail')
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
-
-def __local_install(app_archive_path, device_host):
-    run_scp('{0} root@{1}:/app.tar.gz'.format(app_archive_path, device_host), password=DEVICE_PASSWORD)
-    run_ssh(device_host, '/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
-    time.sleep(3)
