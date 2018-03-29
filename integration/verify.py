@@ -226,7 +226,7 @@ def imap_openssl(user_domain, ca, name, server_name):
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(app_archive_path, user_domain, installer):
+def test_upgrade(device_host, app_archive_path, user_domain, installer):
     local_remove(device_host, DEVICE_PASSWORD, installer, 'mail')
     local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
