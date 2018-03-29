@@ -3,5 +3,5 @@
 import os, sys
 sys.path.append(os.path.join(os.environ['SNAP'], 'hooks'))
 
-from installer import NextcloudInstaller
-NextcloudInstaller().configure()
+from installer import MailInstaller
+MailInstaller().configure()
