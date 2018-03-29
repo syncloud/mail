@@ -28,7 +28,7 @@ SYSTEMD_POSTFIX = 'mail.postfix'
 SYSTEMD_DOVECOT = 'mail.dovecot'
 SYSTEMD_NGINX = 'mail.nginx'
 SYSTEMD_PHP_FPM = 'mail.php-fpm'
-SYSTEMD_POSTGRES = 'mail.postgres'
+SYSTEMD_POSTGRES = 'mail.postgresql'
 
 USER_NAME = 'mail'
 APP_NAME = 'mail'

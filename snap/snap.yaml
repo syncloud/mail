@@ -30,7 +30,7 @@ apps:
     before: [php-fpm]
   postgresql:
     user: mail
-    command: bin/service.postgres.sh start
+    command: bin/service.postgresql.sh start
     daemon: forking
     plugs:
     - network
@@ -46,7 +46,7 @@ apps:
     - network-bind
     restart-condition: always
     post-start-command: bin/service.php-fpm.sh post-start
-    after: [postgres]
+    after: [postgresql]
     before: [nginx]
   
   nginx:
