@@ -48,7 +48,7 @@ def driver():
 
 def test_web_with_selenium(driver, user_domain, device_domain):
 
-    wait_driver = WebDriverWait(driver, 20)
+    wait_driver = WebDriverWait(driver, 60)
 
     screenshot_dir = join(DIR, 'screenshot')
     if exists(screenshot_dir):
