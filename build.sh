@@ -21,7 +21,7 @@ rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
 
 coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
-coin --to lib py https://pypi.python.org/packages/c8/c2/a670c1d6405f2ca67f87fd34391290db504217a7a77871811788e75331b6/syncloud-lib-44.tar.gz#md5=c792320a95912adb2263860df38a9102
+coin --to lib py https://pypi.python.org/packages/c9/0d/f49388f198779701bb1d3ad936521e994498e37a246ee0a8f0e2349f5ab0/syncloud-lib-45.tar.gz#md5=81503e40a5bef362dc698bdddc3d85c6
 coin --to lib py https://pypi.python.org/packages/source/t/tzlocal/tzlocal-1.2.2.tar.gz
 coin --to lib py https://pypi.python.org/packages/source/p/pytz/pytz-2016.1.tar.gz
 
