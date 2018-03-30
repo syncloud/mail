@@ -45,7 +45,7 @@ class MailInstaller:
         self.app_url = urls.get_app_url(APP_NAME)
         self.app_domain_name = urls.get_app_domain_name(APP_NAME)
         self.platform_data_dir = paths.get_data_dir('platform')
-        self.device_domain_name = utls.get_device_domain_name()
+        self.device_domain_name = urls.get_device_domain_name()
         
         self.database_path = '{0}/database'.format(self.app_data_dir)
         self.config_path = join(self.app_data_dir, 'config')
