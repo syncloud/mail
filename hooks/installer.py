@@ -14,8 +14,9 @@ import shutil
 from subprocess import check_output
 from syncloud_app import logger
 
+from syncloud_platform.application import api
 from syncloud_platform.gaplib import fs, linux, gen
-from syncloudlib.application import paths, urls, storage
+from syncloudlib.application import paths, urls, storage, ports
 
 from config import Config
 from config import UserConfig
@@ -120,13 +121,13 @@ class MailInstaller:
             self.database_init(self.database_path, USER_NAME)
 
     def start(self):
-    
+        app = api.get_app_setup(APP_NAME)
         self.log.info("setup systemd")
-        self.app.add_service(SYSTEMD_POSTGRES)
-        self.app.add_service(SYSTEMD_POSTFIX)
-        self.app.add_service(SYSTEMD_DOVECOT)
-        self.app.add_service(SYSTEMD_PHP_FPM)
-        self.app.add_service(SYSTEMD_NGINX)
+        app.add_service(SYSTEMD_POSTGRES)
+        app.add_service(SYSTEMD_POSTFIX)
+        app.add_service(SYSTEMD_DOVECOT)
+        app.add_service(SYSTEMD_PHP_FPM)
+        app.add_service(SYSTEMD_NGINX)
 
     def configure(self):
     
@@ -135,10 +136,10 @@ class MailInstaller:
 
         self.prepare_storage()
 
-        self.app.add_port(25, 'TCP')
-        self.app.add_port(110, 'TCP')
-        self.app.add_port(143, 'TCP')
-        self.app.add_port(587, 'TCP')
+        ports.add_port(25, 'TCP')
+        ports.add_port(110, 'TCP')
+        ports.add_port(143, 'TCP')
+        ports.add_port(587, 'TCP')
 
     def database_init(self, database_path, user_name):
 
@@ -150,12 +151,12 @@ class MailInstaller:
         shutil.copy(postgresql_conf_from, postgresql_conf_to)
 
     def remove(self):
-
-        self.app.remove_service(SYSTEMD_NGINX)
-        self.app.remove_service(SYSTEMD_PHP_FPM)
-        self.app.remove_service(SYSTEMD_DOVECOT)
-        self.app.remove_service(SYSTEMD_POSTFIX)
-        self.app.remove_service(SYSTEMD_POSTGRES)
+        app = api.get_app_setup(APP_NAME)
+        app.remove_service(SYSTEMD_NGINX)
+        app.remove_service(SYSTEMD_PHP_FPM)
+        app.remove_service(SYSTEMD_DOVECOT)
+        app.remove_service(SYSTEMD_POSTFIX)
+        app.remove_service(SYSTEMD_POSTGRES)
 
         if isdir(self.app_dir):
             shutil.rmtree(self.app_dir)
@@ -168,7 +169,7 @@ class MailInstaller:
         user_config.set_activated(True)
 
     def prepare_storage(self):
-        app_storage_dir = self.app.init_storage(USER_NAME)
+        app_storage_dir = storage.init_storage(USER_NAME)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
