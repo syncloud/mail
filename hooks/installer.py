@@ -15,8 +15,7 @@ from subprocess import check_output
 from syncloud_app import logger
 
 from syncloud_platform.gaplib import fs, linux, gen
-
-from syncloud_platform.application import api
+from syncloudlib.application import paths, urls, storage
 
 from config import Config
 from config import UserConfig
@@ -41,12 +40,13 @@ DB_PASS = 'mail'
 class MailInstaller:
     def __init__(self):
         self.log = logger.get_logger('mail_installer')
-        self.app = api.get_app_setup(APP_NAME)
-        self.platform_app = api.get_app_setup('platform')
-        self.device_domain_name = self.app.device_domain_name()
-        self.app_domain_name = self.app.app_domain_name()
-        self.app_dir = self.app.get_install_dir()
-        self.app_data_dir = self.app.get_data_dir()
+        self.app_dir = paths.get_app_dir(APP_NAME)
+        self.app_data_dir = paths.get_data_dir(APP_NAME)
+        self.app_url = urls.get_app_url(APP_NAME)
+        self.app_domain_name = urls.get_app_domain_name(APP_NAME)
+        self.platform_data_dir = paths.get_data_dir('platform')
+        self.device_domain_name = utls.get_device_domain_name()
+        
         self.database_path = '{0}/database'.format(self.app_data_dir)
         self.config_path = join(self.app_data_dir, 'config')
         self.config = Config(self.config_path)
@@ -63,7 +63,7 @@ class MailInstaller:
             'db_name': DB_NAME,
             'db_user': DB_USER,
             'db_password': DB_PASS,
-            'platform_data_dir': self.platform_app.get_data_dir(),
+            'platform_data_dir': self.platform_data_dir,
             'device_domain_name': self.device_domain_name,
             'app_domain_name': self.app_domain_name,
             'timezone': get_localzone()
