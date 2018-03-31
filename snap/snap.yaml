@@ -20,13 +20,9 @@ apps:
     restart-condition: always
     sockets:
       sock1:
-        listen-stream: "127.0.0.1:143"
+        listen-stream: 143
       sock2:
-        listen-stream: "[::]:143"
-      sock3:
-        listen-stream: "127.0.0.1:993"
-      sock4:
-        listen-stream: "[::]:993"
+        listen-stream: 993
     before: [php-fpm]
   postgresql:
     user: mail
