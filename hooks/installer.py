@@ -169,7 +169,7 @@ class MailInstaller:
         user_config.set_activated(True)
 
     def prepare_storage(self):
-        app_storage_dir = storage.init_storage(USER_NAME)
+        app_storage_dir = storage.init_storage(APP_NAME, USER_NAME)
         tmp_storage_path = join(app_storage_dir, 'tmp')
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
