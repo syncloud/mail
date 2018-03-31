@@ -86,8 +86,6 @@ class MailInstaller:
         
         self.regenerate_configs()
         
-        self.log.info(fs.chownpath(self.app_dir, USER_NAME, recursive=True))
-
         fs.chownpath(self.app_data_dir, USER_NAME)
 
         data_dirs = [
@@ -123,6 +121,7 @@ class MailInstaller:
     def start(self):
         app = api.get_app_setup(APP_NAME)
         self.log.info("setup systemd")
+        fs.chownpath(self.app_dir, USER_NAME, recursive=True)
         app.add_service(SYSTEMD_POSTGRES)
         app.add_service(SYSTEMD_POSTFIX)
         app.add_service(SYSTEMD_DOVECOT)
