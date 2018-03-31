@@ -135,12 +135,14 @@ class MailInstaller:
             self.initialize(self.config, self.user_config, DB_NAME, DB_USER, DB_PASS)
 
         self.prepare_storage()
-
-        ports.add_port(25, 'TCP')
-        ports.add_port(110, 'TCP')
-        ports.add_port(143, 'TCP')
-        ports.add_port(587, 'TCP')
-
+        try:
+            ports.add_port(25, 'TCP')
+            ports.add_port(110, 'TCP')
+            ports.add_port(143, 'TCP')
+            ports.add_port(587, 'TCP')
+        except Exception, e:
+            self.log.warn("failed to add ports: {0}".format(e.message))
+   
     def database_init(self, database_path, user_name):
 
         self.log.info("initializing database")
