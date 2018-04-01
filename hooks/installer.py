@@ -87,7 +87,7 @@ class MailInstaller:
         
         self.regenerate_configs()
         
-        fs.chownpath(self.app_data_dir, USER_NAME)
+        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
         data_dirs = [
             join(self.app_data_dir, 'config'),
