@@ -55,7 +55,7 @@ class MailInstaller:
 
 
     def regenerate_configs(self):
-    
+        
         variables = {
             'app_dir': self.app_dir,
             'app_data_dir': self.app_data_dir,
@@ -83,6 +83,7 @@ class MailInstaller:
         linux.useradd('maildrop')
         linux.useradd('dovecot')
         linux.useradd(USER_NAME)
+        fs.makepath(join(self.app_data_dir, 'nginx'))
         
         self.regenerate_configs()
         
