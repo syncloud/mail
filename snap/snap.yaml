@@ -1,6 +1,5 @@
 apps:
   postfix:
-    user: mail
     command: bin/service.postfix.sh start
     stop-command: bin/service.postfix.sh stop
     daemon: forking
@@ -10,7 +9,6 @@ apps:
     restart-condition: always
     before: [php-fpm]
   dovecot:
-    user: mail
     command: bin/service.dovecot.sh start
     pre-start-command: bin/service.dovecot.sh pre-start
     daemon: simple
