@@ -45,9 +45,6 @@ mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 cd ${BUILD_DIR}/roundcubemail
 patch -p0 < ${DIR}/patches/roundcubemail.patch
 
-cd ${BUILD_DIR}/dovecot
-patch -p0 < ${DIR}/patches/dovecot.patch
-
 cd ${DIR}
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
