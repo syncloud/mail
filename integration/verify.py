@@ -60,6 +60,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
     run_ssh(user_domain, 'ls -la {0}/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/dovecot/ > {0}/log/dovecot.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/log.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/ > {1}/log/roundcubemail.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/config/ > {1}/log/roundcubemail.config.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
