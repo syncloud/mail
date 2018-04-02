@@ -16,11 +16,11 @@ apps:
     - network
     - network-bind
     restart-condition: always
-    sockets:
-      sock1:
-        listen-stream: 143
-      sock2:
-        listen-stream: 993
+#    sockets:
+#      sock1:
+#        listen-stream: 143
+#      sock2:
+#        listen-stream: 993
     before: [php-fpm]
   postgresql:
     user: mail
