@@ -8,7 +8,7 @@ if [[ -z "$1" ]]; then
 fi
 
 export LD_LIBRARY_PATH=${DIR}/dovecot/lib/dovecot
-
+export DOVECOT_BINDIR=${DIR}/dovecot/bin
 case $1 in
 pre-start)
     /bin/rm -rf ${SNAP_COMMON}/dovecot/master.pid
