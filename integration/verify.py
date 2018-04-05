@@ -198,7 +198,7 @@ def get_message_count(user_domain):
 
 def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
+            '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
 
