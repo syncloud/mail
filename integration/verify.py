@@ -167,8 +167,8 @@ def test_mail_sending(user_domain, device_domain):
     server.quit()
 
 
-def test_filesystem_mailbox(user_domain):
-    run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
+def test_filesystem_mailbox(user_domain, data_dir):
+    run_ssh(user_domain, 'find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
 
 
 def test_mail_receiving(user_domain):
