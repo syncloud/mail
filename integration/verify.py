@@ -139,10 +139,10 @@ def test_running_roundcube(user_domain):
     print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
 
 
-def test_dovecot_auth(user_domain, app_dir, data_dir):
-    run_ssh(user_domain,
-            '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
-            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD, env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
+#def test_dovecot_auth(user_domain, app_dir, data_dir):
+#    run_ssh(user_domain,
+#            '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
+#            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD, env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
 def test_postfix_auth(user_domain):
