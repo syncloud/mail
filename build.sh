@@ -32,7 +32,13 @@ mkdir -p ${BUILD_DIR}
 DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postfix-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot-${ARCH}.tar.gz
+
+if [ $INSTALLER == "sam" ]; then
+    coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot-${ARCH}.tar.gz
+else
+    coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot_snap-${ARCH}.tar.gz
+fi
+
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/rsyslog-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
