@@ -9,7 +9,7 @@ fi
 
 ARCH=$(dpkg --print-architecture)
 VERSION=rc
-if [ "$VERSION" == "rc" || "$VERSION" == "rc" ]; then
+if [[ "$VERSION" == "rc" ]] || [[ "$VERSION" == "rc" ]]; then
     VERSION=$(http://apps.syncloud.org/releases/$VERSION/snapd.version)
 fi
 
