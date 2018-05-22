@@ -9,8 +9,8 @@ fi
 
 ARCH=$(dpkg --print-architecture)
 VERSION=rc
-if [[ "$VERSION" == "rc" ]] || [[ "$VERSION" == "rc" ]]; then
-    VERSION=$(http://apps.syncloud.org/releases/$VERSION/snapd.version)
+if [[ "$VERSION" == "rc" ]] || [[ "$VERSION" == "stable" ]] || [[ "$VERSION" == "master" ]]; then
+    VERSION=$(curl http://apps.syncloud.org/releases/$VERSION/snapd.version)
 fi
 
 SNAPD=snapd-${VERSION}-${ARCH}.tar.gz
