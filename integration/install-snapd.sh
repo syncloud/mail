@@ -8,7 +8,10 @@ if [[ -z "$1" ]]; then
 fi
 
 ARCH=$(dpkg --print-architecture)
-VERSION=180401
+VERSION=rc
+if [ "$VERSION" == "rc" || "$VERSION" == "rc" ]; then
+    VERSION=$(http://apps.syncloud.org/releases/$VERSION/snapd.version)
+fi
 
 SNAPD=snapd-${VERSION}-${ARCH}.tar.gz
 wget http://apps.syncloud.org/apps/${SNAPD} --progress=dot:giga
