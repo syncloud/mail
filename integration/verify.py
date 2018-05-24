@@ -59,11 +59,16 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
 
     mail_log_dir = join(LOG_DIR, 'mail_log')
     os.mkdir(mail_log_dir)
-    run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/dovecot/ > {0}/log/data.dovecot.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/ > {0}/log/data.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/box/ > {0}/log/data.box.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/log.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/ > {1}/log/roundcubemail.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/config/ > {1}/log/roundcubemail.config.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/roundcubemail/logs/ > {1}/log/roundcubemail.logs.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'journalctl | tail -200 > {0}/log/systemctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'journalctl > {0}/log/journalctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, 'netstat -nlp > {0}/log/netstat.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
@@ -76,7 +81,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
     session = requests.session()
-    session.post('http://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD})
+    session.post('https://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD}, verify=False)
     return session
 
 
@@ -104,8 +109,8 @@ def test_running_platform_web(user_domain):
 
 def test_platform_rest(device_host):
     session = requests.session()
-    session.mount('http://{0}'.format(device_host), HTTPAdapter(max_retries=5))
-    response = session.get('http://{0}'.format(device_host), timeout=60)
+    session.mount('https://{0}'.format(device_host), HTTPAdapter(max_retries=5))
+    response = session.get('https://{0}'.format(device_host), timeout=60, verify=False)
     assert response.status_code == 200
 
 
@@ -117,8 +122,8 @@ def test_platform_rest(device_host):
 #     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host):
-    __local_install(app_archive_path, device_host)
+def test_install(app_archive_path, device_host, installer):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
 def test_running_smtp(user_domain):
@@ -138,8 +143,8 @@ def test_running_roundcube(user_domain):
 
 def test_dovecot_auth(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '{0}/dovecot/bin/doveadm -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
-            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD)
+            '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
+            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD, env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
 def test_postfix_auth(user_domain):
@@ -164,8 +169,8 @@ def test_mail_sending(user_domain, device_domain):
     server.quit()
 
 
-def test_filesystem_mailbox(user_domain):
-    run_ssh(user_domain, 'find /opt/data/mail/box', password=DEVICE_PASSWORD)
+def test_filesystem_mailbox(user_domain, data_dir):
+    run_ssh(user_domain, 'find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
 
 
 def test_mail_receiving(user_domain):
@@ -195,7 +200,7 @@ def get_message_count(user_domain):
 
 def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '{0}/postfix/usr/sbin/postmap -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
+            '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
 
 
@@ -207,7 +212,7 @@ def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
 def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
     run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
     run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-    run_ssh(user_domain, "systemctl restart {0}mail-dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+    run_ssh(user_domain, "systemctl restart {0}mail.dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
 def test_imap_openssl_real(user_domain, platform_data_dir):
@@ -226,12 +231,7 @@ def imap_openssl(user_domain, ca, name, server_name):
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(app_archive_path, user_domain):
-    run_ssh(user_domain, '/opt/app/sam/bin/sam --debug remove mail', password=DEVICE_PASSWORD)
-    __local_install(app_archive_path, user_domain)
+def test_upgrade(device_host, app_archive_path, user_domain, installer):
+    local_remove(device_host, DEVICE_PASSWORD, installer, 'mail')
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
-
-def __local_install(app_archive_path, device_host):
-    run_scp('{0} root@{1}:/app.tar.gz'.format(app_archive_path, device_host), password=DEVICE_PASSWORD)
-    run_ssh(device_host, '/opt/app/sam/bin/sam --debug install /app.tar.gz', password=DEVICE_PASSWORD)
-    time.sleep(3)

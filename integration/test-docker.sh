@@ -19,25 +19,27 @@ FIREFOX=52.0
 ARCH=$(uname -m)
 
 if [ $ARCH == "x86_64" ]; then
-    TEST_SUITE="verify.py test-ui.py"
     SNAP_ARCH=amd64
 else
-    TEST_SUITE=verify.py
     SNAP_ARCH=armhf
 fi
 
 if [ $INSTALLER == "snapd" ]; then
     ARCHIVE=${APP}_${VERSION}_${SNAP_ARCH}.snap
-    INSTALLER_VERSION=170523
 else
     ARCHIVE=${APP}-${VERSION}-${ARCH}.tar.gz
-    INSTALLER_VERSION=89
 fi
 APP_ARCHIVE_PATH=$(realpath "$ARCHIVE")
 
 cd ${DIR}
 
 echo ${APP_ARCHIVE_PATH}
+
+if [ "$ARCH" == "x86_64" ]; then
+    TEST_SUITE="verify.py test-ui.py"
+else
+    TEST_SUITE=verify.py
+fi
 
 cd ${DIR}
 
@@ -59,9 +61,10 @@ done
 set -e
 
 sshpass -p syncloud scp -o StrictHostKeyChecking=no install-${INSTALLER}.sh root@${DEVICE_HOST}:/installer.sh
-sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /installer.sh ${INSTALLER_VERSION} ${RELEASE}
 
-pip2 install -r ${DIR}/../src/dev_requirements.txt
+sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /installer.sh ${RELEASE}
+
+pip2 install -r ${DIR}/dev_requirements.txt
 wget http://artifact.syncloud.org/cert/cert.tar.gz
 tar xf cert.tar.gz
 wget http://artifact.syncloud.org/3rdparty/openssl-${ARCH}.tar.gz

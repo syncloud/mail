@@ -1,0 +1,12 @@
+#!/snap/platform/current/python/bin/python
+
+import os, sys
+sys.path.append(os.path.join(os.environ['SNAP'], 'hooks'))
+
+import logging
+from syncloud_app import logger
+
+logger.init(logging.DEBUG, console=True, line_format='%(message)s')
+
+from installer import MailInstaller
+MailInstaller().install()

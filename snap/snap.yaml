@@ -1,0 +1,63 @@
+apps:
+  postfix:
+    command: bin/service.postfix.sh start
+    stop-command: bin/service.postfix.sh stop
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [php-fpm]
+  dovecot:
+    command: bin/service.dovecot.sh start
+    pre-start-command: bin/service.dovecot.sh pre-start
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+#    sockets:
+#      sock1:
+#        listen-stream: 143
+#      sock2:
+#        listen-stream: 993
+    before: [php-fpm]
+  postgresql:
+    user: mail
+    command: bin/service.postgresql.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [php-fpm]
+  php-fpm:
+    user: mail
+    command: bin/service.php-fpm.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    post-start-command: bin/service.php-fpm.sh post-start
+    after: [postgresql]
+    before: [nginx]
+  
+  nginx:
+    command: bin/service.nginx.sh start
+    user: mail
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    pre-start-command: bin/service.nginx.sh pre-start
+    stop-command: bin/service.nginx.sh stop
+    post-start-command: bin/service.nginx.sh post-start
+    after: [php-fpm, postgresql]
+
+confinement: strict
+description: Mail
+grade: stable
+name: mail
+summary: Mail

@@ -22,6 +22,9 @@
 #soft_bounce = no
 
 # LOCAL PATHNAME INFORMATION
+
+meta_directory = {{ app_data_dir }}/config/postfix
+
 #
 # The queue_directory specifies the location of the Postfix queue.
 # This is also the root directory of Postfix daemons that run chrooted.
