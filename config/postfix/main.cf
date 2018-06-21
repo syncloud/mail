@@ -663,9 +663,6 @@ sample_directory = {{ app_dir }}/postfix/etc/postfix
 readme_directory = no
 inet_protocols = ipv4
 
-smtpd_sasl_path = {{ app_data_dir }}/dovecot/private/auth
-smtpd_sasl_auth_enable = yes
-
 dovecot_destination_recipient_limit = 1
 virtual_transport = dovecot
 
@@ -678,4 +675,6 @@ smtpd_tls_key_file = {{ platform_data_dir }}/syncloud.key
 smtpd_tls_received_header = yes
 smtpd_tls_security_level = may
 smtpd_tls_auth_only = no
-smtpd_sasl_type = dovecot
+
+smtp_sasl_auth_enable = yes
+smtp_tls_security_level = may
