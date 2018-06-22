@@ -61,7 +61,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     os.mkdir(mail_log_dir)
     run_ssh(user_domain, 'ls -la {0}/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/dovecot/ > {0}/log/data.dovecot.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix -c {1}/config/postfix -v > {1}/log/postfix.test.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v > {1}/log/postfix.test.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/ > {0}/log/data.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/box/ > {0}/log/data.box.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/log.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)

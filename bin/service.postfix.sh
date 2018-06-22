@@ -6,6 +6,7 @@ if [[ -z "$1" ]]; then
     echo "usage $0 [action]"
     exit 1
 fi
+export LD_LIBRARY_PATH=${DIR}/postfix/lib
 
 case $1 in
 start)
