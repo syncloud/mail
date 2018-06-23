@@ -142,7 +142,7 @@ def test_running_roundcube(user_domain):
     print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
 
 
-def test_postfix_status(app_dir, data_dir):
+def test_postfix_status(user_domain, app_dir, data_dir):
     run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
    
 def test_dovecot_auth(user_domain, app_dir, data_dir):
