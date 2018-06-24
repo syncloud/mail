@@ -149,10 +149,10 @@ def test_postfix_status(user_domain, app_dir, data_dir):
 def test_postfix_check(user_domain, app_dir, data_dir):
     run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
 
-def test_postfix_smtpd(user_domain, app_dir, data_dir):
-    run_ssh(user_domain, '{0}/postfix/usr/libexec/postfix/smtpd -h > {1}/log/postfix.smtpd.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, 
-    env_vars='LD_LIBRARY_PATH={0}/postfix/lib'.format(app_dir),
-    throw=False)
+# def test_postfix_smtpd(user_domain, app_dir, data_dir):
+#     run_ssh(user_domain, '{0}/postfix/usr/libexec/postfix/smtpd -h > {1}/log/postfix.smtpd.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD,
+#     env_vars='LD_LIBRARY_PATH={0}/postfix/lib'.format(app_dir),
+#     throw=False)
 
 def test_dovecot_auth(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
