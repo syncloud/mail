@@ -58,6 +58,9 @@ cp -r ${BUILD_DIR}/postfix/opt/data/mail/config/postfix/postfix-files ${BUILD_DI
 cp -r ${DIR}/lib ${BUILD_DIR}
 cp -r ${DIR}/hooks ${BUILD_DIR}
 
+mv ${BUILD_DIR}/postfix/usr/sbin/postfix ${BUILD_DIR}/postfix/usr/sbin/postfix.bin
+cp ${DIR}/patches/postfix ${BUILD_DIR}/postfix/usr/sbin/postfix
+
 mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app
 echo ${VERSION} > build/${NAME}/META/version
