@@ -671,7 +671,7 @@ myhostname = {{ app_domain_name }}
 virtual_mailbox_domains = {{ device_domain_name }}
 
 smtpd_sasl_path = {{ app_data_dir }}/dovecot/private/auth
-smtpd_sasl_auth_enable = yes
+#smtpd_sasl_auth_enable = yes
 
 #smtpd_tls_cert_file = {{ platform_data_dir }}/syncloud.crt
 #smtpd_tls_key_file = {{ platform_data_dir }}/syncloud.key
