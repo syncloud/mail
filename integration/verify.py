@@ -144,15 +144,18 @@ def test_running_roundcube(user_domain):
 
 
 def test_postfix_status(user_domain, app_dir, data_dir):
-    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain,
+            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
+                app_dir, data_dir),
+            password=LOGS_SSH_PASSWORD, throw=False)
+
 
 def test_postfix_check(user_domain, app_dir, data_dir):
-    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain,
+            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
+                app_dir, data_dir),
+            password=LOGS_SSH_PASSWORD, throw=False)
 
-#def test_postfix_smtpd(user_domain, app_dir, data_dir):
-#    run_ssh(user_domain, '{0}/postfix/usr/libexec/postfix/smtpd -h > {1}/log/postfix.smtpd.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, 
-#    env_vars='LD_LIBRARY_PATH={0}/postfix/lib'.format(app_dir),
-#    throw=False)
 
 def test_dovecot_auth(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
@@ -161,16 +164,22 @@ def test_dovecot_auth(user_domain, app_dir, data_dir):
             password=DEVICE_PASSWORD, 
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
+
 def test_postfix_smtp_shell(user_domain):
-    print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+    print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
+        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+
+
+def test_postfix_submission_shell(user_domain):
+    print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
+        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+
 
 def test_postfix_auth(user_domain):
     server = smtplib.SMTP(user_domain, timeout=10)
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
-def test_postfix_submission_shell(user_domain):
-    print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
 
 def test_postfix_submission_lib(user_domain, device_domain):
     server = smtplib.SMTP('{0}:587'.format(user_domain), timeout=10)
