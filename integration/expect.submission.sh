@@ -5,7 +5,7 @@ set host [lindex $argv 0]
 set port [lindex $argv 1]
 set user [lindex $argv 2]
 set password [lindex $argv 3]
-spawn telnet $host port
+spawn telnet $host $port
 expect "login:" 
 send "$user "
 expect "Password:"
