@@ -161,7 +161,7 @@ def test_dovecot_auth(user_domain, app_dir, data_dir):
             password=DEVICE_PASSWORD, 
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
-def test_postfix_smtp_shell(user_domain):
+def test_postfix_smtp_shell(user_domain, data_dir):
     print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/log/expect.smtp.log 2>&1'.format(DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, data_dir), shell=True))
 
 def test_postfix_auth(user_domain):
@@ -169,7 +169,7 @@ def test_postfix_auth(user_domain):
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
-def test_postfix_submission_shell(user_domain):
+def test_postfix_submission_shell(user_domain, data_dir):
     print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/log/expect.submission.log 2>&1'.format(DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, data_dir), shell=True))
 
 def test_postfix_submission_lib(user_domain, device_domain):
