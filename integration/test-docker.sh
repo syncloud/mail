@@ -18,6 +18,9 @@ GECKODRIVER=0.14.0
 FIREFOX=52.0
 ARCH=$(uname -m)
 
+
+apt install -y expect telnet
+
 if [ $ARCH == "x86_64" ]; then
     SNAP_ARCH=amd64
 else

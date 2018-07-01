@@ -61,6 +61,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     os.mkdir(mail_log_dir)
     run_ssh(user_domain, 'ls -la {0}/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/dovecot/ > {0}/log/data.dovecot.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/ > {0}/log/data.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/box/ > {0}/log/data.box.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/log.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
@@ -72,6 +73,7 @@ def module_teardown(user_domain, app_dir, data_dir, platform_data_dir):
     run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    run_scp('root@{0}:/var/log/mail/errors {2}/var.log.mail.errors.log'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/messages* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
     run_scp('root@{0}:/var/log/*syslog* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
     config_dir = join(LOG_DIR, 'config')
@@ -141,10 +143,36 @@ def test_running_roundcube(user_domain):
     print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
 
 
+def test_postfix_status(user_domain, app_dir, data_dir):
+    run_ssh(user_domain,
+            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
+                app_dir, data_dir),
+            password=LOGS_SSH_PASSWORD, throw=False)
+
+
+def test_postfix_check(user_domain, app_dir, data_dir):
+    run_ssh(user_domain,
+            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
+                app_dir, data_dir),
+            password=LOGS_SSH_PASSWORD, throw=False)
+
+
 def test_dovecot_auth(user_domain, app_dir, data_dir):
     run_ssh(user_domain,
-            '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3}'
-            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), password=DEVICE_PASSWORD, env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
+            '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3} > {1}/log/doveadm.auth.test.log 2>&1'
+            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), 
+            password=DEVICE_PASSWORD, 
+            env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
+
+
+def test_postfix_smtp_shell(user_domain):
+    print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
+        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+
+
+def test_postfix_submission_shell(user_domain):
+    print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
+        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
 
 
 def test_postfix_auth(user_domain):
@@ -153,7 +181,7 @@ def test_postfix_auth(user_domain):
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
 
-def test_mail_sending(user_domain, device_domain):
+def test_postfix_submission_lib(user_domain, device_domain):
     server = smtplib.SMTP('{0}:587'.format(user_domain), timeout=10)
     server.set_debuglevel(1)
     server.ehlo()

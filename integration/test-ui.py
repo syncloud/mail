@@ -75,7 +75,7 @@ def test_web_with_selenium(driver, user_domain, device_domain):
     username = '{0}@{1}'.format(DEVICE_USER, device_domain)
     #print('found: {0}'.format(username in page))
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
-
+    time.sleep(10)
     driver.get_screenshot_as_file(join(screenshot_dir, 'main.png'))
 
     page = driver.page_source.encode("utf-8")
