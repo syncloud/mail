@@ -8,5 +8,5 @@ from syncloud_app import logger
 
 logger.init(logging.DEBUG, console=True, line_format='%(message)s')
 
-from installer import MailInstaller
+from mail_hooks import MailInstaller
 MailInstaller().install()

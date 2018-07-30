@@ -1,2 +1,2 @@
-from installer import MailInstaller
+from mail_hooks import MailInstaller
 MailInstaller().remove()
