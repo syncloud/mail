@@ -8,10 +8,10 @@ if [ "$#" -lt 7 ]; then
 fi
 
 ARCH=$(uname -m)
+DOMAIN=$3
 VERSION=$4
 RELEASE=$5
 INSTALLER=$6
-DOMAIN=$3-${ARCH}-${DRONE_BRANCH}
 DEVICE_HOST=$7
 
 APP=mail
