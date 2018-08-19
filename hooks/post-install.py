@@ -1,4 +1,4 @@
-from installer import MailInstaller
+from mail_hooks import MailInstaller
 installer = MailInstaller()
 installer.install()
 installer.start()
