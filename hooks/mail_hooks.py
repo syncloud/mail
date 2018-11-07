@@ -74,8 +74,6 @@ class MailInstaller:
 
     def install(self):
 
-        linux.fix_locale()
-
         linux.useradd('maildrop')
         linux.useradd('dovecot')
         linux.useradd(USER_NAME)
