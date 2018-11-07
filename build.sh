@@ -21,7 +21,7 @@ rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
 
 coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
-coin --to lib py https://pypi.python.org/packages/c9/0d/f49388f198779701bb1d3ad936521e994498e37a246ee0a8f0e2349f5ab0/syncloud-lib-45.tar.gz#md5=81503e40a5bef362dc698bdddc3d85c6
+coin --to lib py https://files.pythonhosted.org/packages/5f/40/3aaf52c8306dbeb6e7fc3d793c9653d5b8cc2a8998098cef584ae2028b80/syncloud-lib-52.tar.gz
 coin --to lib py https://pypi.python.org/packages/source/t/tzlocal/tzlocal-1.2.2.tar.gz
 coin --to lib py https://pypi.python.org/packages/source/p/pytz/pytz-2016.1.tar.gz
 
@@ -62,26 +62,17 @@ mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app
 echo ${VERSION} > build/${NAME}/META/version
 
-if [ $INSTALLER == "sam" ]; then
 
-    echo "zipping"
-    rm -rf ${NAME}*.tar.gz
-    tar cpzf ${DIR}/${NAME}-${VERSION}-${ARCH}.tar.gz -C ${DIR}/build/ ${NAME}
+echo "snapping"
+SNAP_DIR=${DIR}/build/snap
+ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
+rm -rf ${DIR}/*.snap
+mkdir ${SNAP_DIR}
+cp -r ${BUILD_DIR}/* ${SNAP_DIR}/
+cp -r ${DIR}/snap/meta ${SNAP_DIR}/
+cp ${DIR}/snap/snap.yaml ${SNAP_DIR}/meta/snap.yaml
+echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
+echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml
+echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
 
-else
-
-    echo "snapping"
-    SNAP_DIR=${DIR}/build/snap
-    ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
-    rm -rf ${DIR}/*.snap
-    mkdir ${SNAP_DIR}
-    cp -r ${BUILD_DIR}/* ${SNAP_DIR}/
-    cp -r ${DIR}/snap/meta ${SNAP_DIR}/
-    cp ${DIR}/snap/snap.yaml ${SNAP_DIR}/meta/snap.yaml
-    echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
-    echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml
-    echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
-
-    mksquashfs ${SNAP_DIR} ${DIR}/${NAME}_${VERSION}_${ARCH}.snap -noappend -comp xz -no-xattrs -all-root
-
-fi
+mksquashfs ${SNAP_DIR} ${DIR}/${NAME}_${VERSION}_${ARCH}.snap -noappend -comp xz -no-xattrs -all-root
