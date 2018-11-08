@@ -4,6 +4,7 @@ import sys
 
 from os.path import isdir, join
 import shutil
+import logging
 
 from subprocess import check_output
 from syncloud_app import logger
