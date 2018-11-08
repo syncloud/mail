@@ -20,11 +20,6 @@ INSTALLER=$2
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
 
-coin --to lib py https://pypi.python.org/packages/2.7/r/requests/requests-2.7.0-py2.py3-none-any.whl
-coin --to lib py https://files.pythonhosted.org/packages/5f/40/3aaf52c8306dbeb6e7fc3d793c9653d5b8cc2a8998098cef584ae2028b80/syncloud-lib-52.tar.gz
-coin --to lib py https://pypi.python.org/packages/source/t/tzlocal/tzlocal-1.2.2.tar.gz
-coin --to lib py https://pypi.python.org/packages/source/p/pytz/pytz-2016.1.tar.gz
-
 rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
@@ -32,18 +27,15 @@ mkdir -p ${BUILD_DIR}
 DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
 
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postfix-${ARCH}.tar.gz
-
-if [ $INSTALLER == "sam" ]; then
-    coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot-${ARCH}.tar.gz
-else
-    coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot_snap-${ARCH}.tar.gz
-fi
-
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot_snap-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/rsyslog-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
 mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
 coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
+coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
+
+${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
 coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
@@ -61,7 +53,6 @@ cp -r ${DIR}/hooks ${BUILD_DIR}
 mkdir build/${NAME}/META
 echo ${NAME} > build/${NAME}/META/app
 echo ${VERSION} > build/${NAME}/META/version
-
 
 echo "snapping"
 SNAP_DIR=${DIR}/build/snap
