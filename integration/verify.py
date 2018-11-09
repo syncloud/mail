@@ -27,23 +27,23 @@ LOG_DIR = join(DIR, 'log')
 
 
 @pytest.fixture(scope="session")
-def platform_data_dir(installer):
-    return get_data_dir(installer, 'platform')
+def platform_data_dir():
+    return get_data_dir('platform')
 
     
 @pytest.fixture(scope="session")
-def data_dir(installer):
-    return get_data_dir(installer, 'mail')
+def data_dir():
+    return get_data_dir('mail')
 
 
 @pytest.fixture(scope="session")
-def app_dir(installer):
-    return get_app_dir(installer, 'mail')
+def app_dir():
+    return get_app_dir('mail')
     
 
 @pytest.fixture(scope="session")
-def service_prefix(installer):
-    return get_service_prefix(installer)
+def service_prefix():
+    return get_service_prefix()
 
 
 @pytest.fixture(scope="session")
@@ -116,8 +116,8 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host, installer):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
+def test_install(app_archive_path, device_host):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
 
 
 def test_access_change_event(user_domain):
@@ -257,7 +257,7 @@ def imap_openssl(user_domain, ca, name, server_name):
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(device_host, app_archive_path, user_domain, installer):
-    local_remove(device_host, DEVICE_PASSWORD, installer, 'mail')
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
+def test_upgrade(device_host, app_archive_path, user_domain):
+    local_remove(device_host, DEVICE_PASSWORD, 'mail')
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
 

@@ -15,8 +15,6 @@ INSTALLER=$6
 DEVICE_HOST=$7
 
 APP=mail
-GECKODRIVER=0.14.0
-FIREFOX=52.0
 
 apt install -y expect telnet
 

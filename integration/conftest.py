@@ -10,7 +10,6 @@ def pytest_addoption(parser):
     parser.addoption("--password", action="store")
     parser.addoption("--domain", action="store")
     parser.addoption("--release", action="store")
-    parser.addoption("--installer", action="store")
     parser.addoption("--device-host", action="store")
     parser.addoption("--app-archive-path", action="store")
 
@@ -40,62 +39,5 @@ def app_archive_path(request):
 
 
 @pytest.fixture(scope='session')
-def installer(request):
-    return request.config.getoption("--installer")
-
-
-@pytest.fixture(scope='session')
 def device_host(request):
     return request.config.getoption("--device-host")
-    
-APP_NAME='mail'
-
-SAM_PLATFORM_DATA_DIR='/opt/data/platform'
-SNAPD_PLATFORM_DATA_DIR='/var/snap/platform/common'
-DATA_DIR=''
-
-SAM_DATA_DIR='/opt/data/{0}'.format(APP_NAME)
-SNAPD_DATA_DIR='/var/snap/{0}/common'.format(APP_NAME)
-DATA_DIR=''
-
-SAM_APP_DIR='/opt/app/{0}'.format(APP_NAME)
-SNAPD_APP_DIR='/snap/{0}/current'.format(APP_NAME)
-APP_DIR=''
-
-@pytest.fixture(scope="session")
-def platform_data_dir(installer):
-    if installer == 'sam':
-        return SAM_PLATFORM_DATA_DIR
-    else:
-        return SNAPD_PLATFORM_DATA_DIR
-        
-@pytest.fixture(scope="session")
-def data_dir(installer):
-    if installer == 'sam':
-        return SAM_DATA_DIR
-    else:
-        return SNAPD_DATA_DIR
-
-
-@pytest.fixture(scope="session")
-def app_dir(installer):
-    if installer == 'sam':
-        return SAM_APP_DIR
-    else:
-        return SNAPD_APP_DIR
-
-
-@pytest.fixture(scope="session")
-def service_prefix(installer):
-    if installer == 'sam':
-        return ''
-    else:
-        return 'snap.'
-
-
-@pytest.fixture(scope="session")
-def ssh_env_vars(installer):
-    if installer == 'sam':
-        return ''
-    if installer == 'snapd':
-        return 'SNAP_COMMON={0} '.format(SNAPD_DATA_DIR)
