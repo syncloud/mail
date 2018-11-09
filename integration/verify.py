@@ -118,7 +118,7 @@ def test_platform_rest(device_host):
 
 def test_access_change_event(user_domain):
     run_ssh(user_domain,
-            '/snap/platform/current/python/bin/python /snap/mail/current/hools/access-change.py',
+            '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py',
              password=LOGS_SSH_PASSWORD)
 
 
