@@ -2,20 +2,15 @@ from os.path import dirname, join, abspath, isdir
 from os import listdir
 import sys
 
-app_path = abspath(join(dirname(__file__), '..'))
-
-lib_path = join(app_path, 'lib')
-libs = [join(lib_path, item) for item in listdir(lib_path) if isdir(join(lib_path, item))]
-map(lambda l: sys.path.insert(0, l), libs)
-
 from os.path import isdir, join
 import shutil
+import logging
 
 from subprocess import check_output
 from syncloud_app import logger
 
-from syncloud_platform.application import api
-from syncloud_platform.gaplib import fs, linux, gen
+from syncloudlib import fs, linux, gen
+
 from syncloudlib.application import paths, urls, storage, ports
 
 from config import Config
@@ -24,11 +19,7 @@ import postgres
 from tzlocal import get_localzone
 
 
-SYSTEMD_POSTFIX = 'mail.postfix'
 SYSTEMD_DOVECOT = 'mail.dovecot'
-SYSTEMD_NGINX = 'mail.nginx'
-SYSTEMD_PHP_FPM = 'mail.php-fpm'
-SYSTEMD_POSTGRES = 'mail.postgresql'
 
 USER_NAME = 'mail'
 APP_NAME = 'mail'
@@ -36,6 +27,8 @@ PSQL_PORT = 5432
 DB_NAME = 'mail'
 DB_USER = 'mail'
 DB_PASS = 'mail'
+
+logger.init(logging.DEBUG, console=True, line_format='%(message)s')
 
 
 class MailInstaller:
@@ -78,8 +71,6 @@ class MailInstaller:
 
     def install(self):
 
-        linux.fix_locale()
-
         linux.useradd('maildrop')
         linux.useradd('dovecot')
         linux.useradd(USER_NAME)
@@ -119,16 +110,6 @@ class MailInstaller:
         if not self.user_config.is_activated():
             self.database_init(self.database_path, USER_NAME)
 
-    def start(self):
-        app = api.get_app_setup(APP_NAME)
-        self.log.info("setup systemd")
-        fs.chownpath(self.app_dir, USER_NAME, recursive=True)
-        app.add_service(SYSTEMD_POSTGRES)
-        app.add_service(SYSTEMD_POSTFIX)
-        app.add_service(SYSTEMD_DOVECOT)
-        app.add_service(SYSTEMD_PHP_FPM)
-        app.add_service(SYSTEMD_NGINX)
-
     def configure(self):
     
         if not self.user_config.is_activated():
@@ -152,17 +133,6 @@ class MailInstaller:
         postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql', 'postgresql.conf')
         shutil.copy(postgresql_conf_from, postgresql_conf_to)
 
-    def remove(self):
-        app = api.get_app_setup(APP_NAME)
-        app.remove_service(SYSTEMD_NGINX)
-        app.remove_service(SYSTEMD_PHP_FPM)
-        app.remove_service(SYSTEMD_DOVECOT)
-        app.remove_service(SYSTEMD_POSTFIX)
-        app.remove_service(SYSTEMD_POSTGRES)
-
-        if isdir(self.app_dir):
-            shutil.rmtree(self.app_dir)
-
     def initialize(self, config, user_config, db_name, db_user, db_pass):
         self.log.info("initialization")
         postgres.execute_sql(config, "ALTER USER {0} WITH PASSWORD '{0}';".format(db_user, db_pass), database="postgres")
@@ -176,8 +146,9 @@ class MailInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
-    def update_domain(self):
+#TODO: need to implement platform api restart call
+#    def update_domain(self):
 
-        self.regenerate_configs()
-        self.app.restart_service(SYSTEMD_DOVECOT)
+#        self.regenerate_configs()
+#        self.app.restart_service(SYSTEMD_DOVECOT)
         

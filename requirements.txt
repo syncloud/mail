@@ -1,0 +1,4 @@
+requests==2.7.0
+syncloud-lib==52
+tzlocal==1.2.2
+pytz==2016.1
