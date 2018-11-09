@@ -5,18 +5,10 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 app=mail
 branch=$1
 build_number=$2
-installer=$3
 bucket=apps.syncloud.org
-ARCH=$(uname -m)
 
-mkdir -p /opt/app
-SAMCMD=/opt/app/sam/bin/sam
-
-FILE_NAME=${app}-${build_number}-${ARCH}.tar.gz
-if [ $installer == "snapd" ]; then
-  ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
-  FILE_NAME=${app}_${build_number}_${ARCH}.snap
-fi
+ARCH=$(dpkg-architecture -q DEB_HOST_ARCH)
+FILE_NAME=${app}_${build_number}_${ARCH}.snap
 
 if [ "${branch}" == "master" ] || [ "${branch}" == "stable" ] ; then
 
@@ -26,6 +18,8 @@ if [ "${branch}" == "master" ] || [ "${branch}" == "stable" ] ; then
     branch=rc
   fi
 
-  ${SAMCMD} release $branch $branch --override ${app}=${build_number}
+  printf ${build_number} > ${app}.version
+  s3cmd put ${app}.version s3://${bucket}/releases/${branch}/${app}.version
 
 fi
+
