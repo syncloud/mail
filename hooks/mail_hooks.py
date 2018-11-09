@@ -11,7 +11,7 @@ from syncloud_app import logger
 
 from syncloudlib import fs, linux, gen
 
-from syncloudlib.application import paths, urls, storage, ports
+from syncloudlib.application import paths, urls, storage, ports, service
 
 from config import Config
 from config import UserConfig
@@ -146,9 +146,8 @@ class MailInstaller:
         fs.makepath(tmp_storage_path)
         fs.chownpath(tmp_storage_path, USER_NAME)
 
-#TODO: need to implement platform api restart call
-#    def update_domain(self):
+    def update_domain(self):
 
-#        self.regenerate_configs()
-#        self.app.restart_service(SYSTEMD_DOVECOT)
+        self.regenerate_configs()
+        service.restart(SYSTEMD_DOVECOT)
         

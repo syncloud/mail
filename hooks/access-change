@@ -1,2 +1,4 @@
+#!/snap/mail/current/python/bin/python
+
 from mail_hooks import MailInstaller
 MailInstaller().update_domain()

@@ -116,12 +116,10 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-# def test_external_mode(syncloud_session):
-#     response = syncloud_session.get('http://localhost/rest/settings/set_external_access',
-#                                     params={'external_access': 'true'},
-#                                     timeout=60)
-#     assert '"success": true' in response.text
-#     assert response.status_code == 200
+def test_access_change_event(user_domain):
+    run_ssh(user_domain,
+            '/snap/platform/current/python/bin/python /snap/mail/current/hools/access-change.py',
+             password=LOGS_SSH_PASSWORD)
 
 
 def test_install(app_archive_path, device_host, installer):
