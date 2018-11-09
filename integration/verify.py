@@ -116,14 +116,14 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
+def test_install(app_archive_path, device_host, installer):
+    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
+
+
 def test_access_change_event(user_domain):
     run_ssh(user_domain,
             '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py',
              password=LOGS_SSH_PASSWORD)
-
-
-def test_install(app_archive_path, device_host, installer):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path, installer)
 
 
 def test_running_smtp(user_domain):
