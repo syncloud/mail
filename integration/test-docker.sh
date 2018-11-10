@@ -51,9 +51,9 @@ do
 done
 set -e
 
-sshpass -p syncloud scp -o StrictHostKeyChecking=no install.sh root@${DEVICE_HOST}:/installer.sh
+sshpass -p syncloud scp -o StrictHostKeyChecking=no install.sh root@${DEVICE_HOST}:/install.sh
 
-sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /installer.sh ${RELEASE}
+sshpass -p syncloud ssh -o StrictHostKeyChecking=no root@${DEVICE_HOST} /install.sh ${RELEASE}
 
 pip2 install -r ${DIR}/dev_requirements.txt
 #wget http://artifact.syncloud.org/cert/cert.tar.gz
