@@ -3,8 +3,8 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$2" ]]; then
-    echo "usage $0 version installer"
+if [[ -z "$1" ]]; then
+    echo "usage $0 version"
     exit 1
 fi
 
@@ -15,7 +15,6 @@ NAME=mail
 ROUNDCUBE_VERSION=1.3.6
 ARCH=$(uname -m)
 VERSION=$1
-INSTALLER=$2
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
