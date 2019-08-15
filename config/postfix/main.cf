@@ -678,3 +678,5 @@ smtpd_tls_key_file = {{ platform_data_dir }}/syncloud.key
 smtpd_tls_received_header = yes
 smtpd_tls_security_level = may
 smtpd_tls_auth_only = no
+
+smtp_tls_security_level = may
