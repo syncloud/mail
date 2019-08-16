@@ -70,8 +70,8 @@ def test_activate_device(device):
     assert response.status_code == 200, response.text
 
 
-def test_running_platform_web(user_domain):
-    print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
+def test_running_platform_web(app_domain):
+    print(check_output('nc -zv -w 1 {0} 80'.format(app_domain), shell=True))
 
 
 def test_platform_rest(device_host):
@@ -85,67 +85,67 @@ def test_install(app_archive_path, device_host):
     local_install(device_host, DEVICE_PASSWORD, app_archive_path)
 
 
-def test_access_change_event(user_domain):
-    run_ssh(user_domain,
+def test_access_change_event(app_domain):
+    run_ssh(app_domain,
             '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py',
              password=LOGS_SSH_PASSWORD)
 
 
-def test_running_smtp(user_domain):
-    print(check_output('nc -zv -w 1 {0} 25'.format(user_domain), shell=True))
+def test_running_smtp(app_domain):
+    print(check_output('nc -zv -w 1 {0} 25'.format(app_domain), shell=True))
 
 
-def test_running_pop3(user_domain):
-    cmd = 'nc -zv -w 1 {0} 110'.format(user_domain)
+def test_running_pop3(app_domain):
+    cmd = 'nc -zv -w 1 {0} 110'.format(app_domain)
     func = lambda: check_output(cmd, shell=True)
     result=retry_func(func, message=cmd, retries=5)
     print(result)
 
 
-def test_running_roundcube(user_domain):
-    print(check_output('nc -zv -w 1 {0} 80'.format(user_domain), shell=True))
+def test_running_roundcube(app_domain):
+    print(check_output('nc -zv -w 1 {0} 80'.format(app_domain), shell=True))
 
 
-def test_postfix_status(user_domain, app_dir, data_dir):
-    run_ssh(user_domain,
+def test_postfix_status(app_domain, app_dir, data_dir):
+    run_ssh(app_domain,
             '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
                 app_dir, data_dir),
             password=LOGS_SSH_PASSWORD, throw=False)
 
 
-def test_postfix_check(user_domain, app_dir, data_dir):
-    run_ssh(user_domain,
+def test_postfix_check(app_domain, app_dir, data_dir):
+    run_ssh(app_domain,
             '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
                 app_dir, data_dir),
             password=LOGS_SSH_PASSWORD, throw=False)
 
 
-def test_dovecot_auth(user_domain, app_dir, data_dir):
-    run_ssh(user_domain,
+def test_dovecot_auth(app_domain, app_dir, data_dir):
+    run_ssh(app_domain,
             '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3} > {1}/log/doveadm.auth.test.log 2>&1'
             .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), 
             password=DEVICE_PASSWORD, 
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
-def test_postfix_smtp_shell(user_domain):
+def test_postfix_smtp_shell(app_domain):
     print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
-        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+        DIR, app_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
 
 
-def test_postfix_submission_shell(user_domain):
+def test_postfix_submission_shell(app_domain):
     print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
-        DIR, user_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+        DIR, app_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
 
 
-def test_postfix_auth(user_domain):
-    server = smtplib.SMTP(user_domain, timeout=10)
+def test_postfix_auth(app_domain):
+    server = smtplib.SMTP(app_domain, timeout=10)
     server.set_debuglevel(1)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
 
 
-def test_postfix_submission_lib(user_domain, device_domain):
-    server = smtplib.SMTP('{0}:587'.format(user_domain), timeout=10)
+def test_postfix_submission_lib(app_domain, device_domain):
+    server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
     #server.starttls()
@@ -160,17 +160,17 @@ def test_postfix_submission_lib(user_domain, device_domain):
     server.quit()
 
 
-def test_filesystem_mailbox(user_domain, data_dir):
+def test_filesystem_mailbox(app_domain, data_dir):
         device.run_ssh('find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
 
 
-def test_mail_receiving(user_domain):
+def test_mail_receiving(app_domain):
 
     message_count = 0
     retry = 0
     retries = 3
     while retry < retries:
-        message_count = retry_func(lambda: get_message_count(user_domain), message='get message count', retries=5)
+        message_count = retry_func(lambda: get_message_count(app_domain), message='get message count', retries=5)
         if message_count > 0:
             break
         retry += 1
@@ -179,9 +179,9 @@ def test_mail_receiving(user_domain):
     assert message_count == 1
 
 
-def get_message_count(user_domain):
+def get_message_count(app_domain):
     imaplib.Debug = 4
-    server = imaplib.IMAP4_SSL(user_domain)
+    server = imaplib.IMAP4_SSL(app_domain)
     server.login(DEVICE_USER, DEVICE_PASSWORD)
     selected = server.select('inbox')
     server.logout()
@@ -189,40 +189,39 @@ def get_message_count(user_domain):
     return int(selected[1][0])
 
 
-def test_postfix_ldap_aliases(user_domain, app_dir, data_dir):
-    run_ssh(user_domain,
+def test_postfix_ldap_aliases(app_domain, app_dir, data_dir):
+    run_ssh(app_domain,
             '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
-            .format(app_dir, DEVICE_USER, user_domain, data_dir), password=DEVICE_PASSWORD)
+            .format(app_dir, DEVICE_USER, app_domain, data_dir), password=DEVICE_PASSWORD)
 
 
-def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
-    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+def test_imap_openssl_generated(device, platform_data_dir, service_prefix):
+    imap_openssl(app_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
                  'generated', 'localhost')
 
 
-#def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
-#    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#        device.run_ssh("systemctl restart {0}mail.dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+#def test_enable_real_cert(device, platform_data_dir, service_prefix):
+#    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, app_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+#    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, app_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
+#    device.run_ssh("systemctl restart {0}mail.dovecot".format(service_prefix))
 
 
-#def test_imap_openssl_real(user_domain, platform_data_dir):
-#    imap_openssl(user_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
+#def test_imap_openssl_real(app_domain, platform_data_dir):
+#    imap_openssl(app_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
 #                 'real', 'build.syncloud.info')
 
 
-def imap_openssl(user_domain, ca, name, server_name):
-        device.run_ssh("/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    output =     device.run_ssh("echo \"A Logout\" | "
+def imap_openssl(device, ca, name, server_name):
+    device.run_ssh("/openssl/bin/openssl version -a")
+    output = device.run_ssh("echo \"A Logout\" | "
                                   "/openssl/bin/openssl s_client {0} -connect localhost:143 "
-                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name),
-                     password=DEVICE_PASSWORD)
+                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name))
     with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(device_host, app_archive_path, user_domain):
+def test_upgrade(device_host, app_archive_path, app_domain):
     local_remove(device_host, DEVICE_PASSWORD, 'mail')
     local_install(device_host, DEVICE_PASSWORD, app_archive_path)
 
