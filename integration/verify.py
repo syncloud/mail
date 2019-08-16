@@ -41,7 +41,7 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir)
     
         device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
         device.scp_from_device('/var/log/mail*', mail_log_dir, throw=False)
-        device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(data_dir), mail_log_dir, throw=False)
+        device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
         device.scp_from_device('/var/log/messages*', mail_log_dir, throw=False)
         device.scp_from_device('/var/log/*syslog*', mail_log_dir, throw=False) 
         config_dir = join(LOG_DIR, 'config')
@@ -49,12 +49,6 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
 
     request.addfinalizer(module_teardown)
-
-@pytest.fixture(scope='function')
-def syncloud_session(device_host):
-    session = requests.session()
-    session.post('https://{0}/rest/login'.format(device_host), data={'name': DEVICE_USER, 'password': DEVICE_PASSWORD}, verify=False)
-    return session
 
 
 def test_start(module_setup, device_host, log_dir, app, device):
