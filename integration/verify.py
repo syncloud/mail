@@ -11,39 +11,9 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from syncloudlib.integration.installer import local_install, wait_for_sam, wait_for_rest, local_remove, \
-    get_data_dir, get_app_dir, get_service_prefix, get_ssh_env_vars
-from syncloudlib.integration.loop import loop_device_cleanup
+from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
-
-SYNCLOUD_INFO = 'syncloud.info'
-DEVICE_USER = 'user'
-DEVICE_PASSWORD = 'password'
-DEFAULT_DEVICE_PASSWORD = 'syncloud'
-LOGS_SSH_PASSWORD = DEFAULT_DEVICE_PASSWORD
-DIR = dirname(__file__)
-LOG_DIR = join(DIR, 'log')
-
-
-@pytest.fixture(scope="session")
-def platform_data_dir():
-    return get_data_dir('platform')
-
-    
-@pytest.fixture(scope="session")
-def data_dir():
-    return get_data_dir('mail')
-
-
-@pytest.fixture(scope="session")
-def app_dir():
-    return get_app_dir('mail')
-    
-
-@pytest.fixture(scope="session")
-def service_prefix():
-    return get_service_prefix()
 
 
 @pytest.fixture(scope="session")
