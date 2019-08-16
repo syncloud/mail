@@ -57,7 +57,7 @@ def syncloud_session(device_host):
     return session
 
 
-def test_start(module_setup):
+def test_start(module_setup, device_host, log_dir, app, device):
     shutil.rmtree(log_dir, ignore_errors=True)
     os.mkdir(log_dir)
     add_host_alias(app, device_host)
