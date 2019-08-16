@@ -14,41 +14,41 @@ from requests.adapters import HTTPAdapter
 from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
+TMP_DIR = '/tmp/syncloud'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, user_domain, app_dir, data_dir, platform_data_dir):
-    request.addfinalizer(lambda: module_teardown(user_domain, app_dir, data_dir, platform_data_dir))
+def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir):
+    def module_teardown(): 
+        platform_log_dir = join(log_dir, 'platform')
+        os.mkdir(platform_log_dir)
+        device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
+        mail_log_dir = join(log_dir, 'mail_log')
+        os.mkdir(mail_log_dir)
+        device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/ > {1}/ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/dovecot/ > {1}/data.dovecot.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {2}/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/ > {1}/data.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/box/ > {1}/data.box.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/log/ > {1}/log.ls.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/roundcubemail/ > {2}/roundcubemail.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/roundcubemail/config/ > {2}/roundcubemail.config.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
+        device.run_ssh('ls -la {0}/roundcubemail/logs/ > {2}/roundcubemail.logs.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
+        device.run_ssh('journalctl > {1}/journalctl.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('netstat -nlp > {1}/netstat.log'.format(data_dir, TMP_DIR), throw=False)
+        device.run_ssh('DATA_DIR={1} {0}/bin/php -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
+    
+        device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
+        device.scp_from_device('/var/log/mail*', mail_log_dir, throw=False)
+        device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(data_dir), mail_log_dir, throw=False)
+        device.scp_from_device('/var/log/messages*', mail_log_dir, throw=False)
+        device.scp_from_device('/var/log/*syslog*', mail_log_dir, throw=False) 
+        config_dir = join(LOG_DIR, 'config')
+        os.mkdir(config_dir)
+        device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
 
-
-def module_teardown(user_domain, app_dir, data_dir, platform_data_dir): 
-    platform_log_dir = join(LOG_DIR, 'platform_log')
-    os.mkdir(platform_log_dir)
-    run_scp('root@{0}:{1}/log/* {2}'.format(user_domain, platform_data_dir, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
-    run_scp('root@{0}:/var/log/sam.log {1}'.format(user_domain, platform_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-
-    mail_log_dir = join(LOG_DIR, 'mail_log')
-    os.mkdir(mail_log_dir)
-    run_ssh(user_domain, 'ls -la {0}/ > {0}/log/ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/dovecot/ > {0}/log/data.dovecot.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/ > {0}/log/data.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/box/ > {0}/log/data.box.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/log/ > {0}/log/log.ls.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/roundcubemail/ > {1}/log/roundcubemail.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/roundcubemail/config/ > {1}/log/roundcubemail.config.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'ls -la {0}/roundcubemail/logs/ > {1}/log/roundcubemail.logs.ls.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'journalctl > {0}/log/journalctl.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'netstat -nlp > {0}/log/netstat.log'.format(data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_ssh(user_domain, 'DATA_DIR={1} {0}/bin/php -i > {1}/log/php.info.log'.format(app_dir, data_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_scp('root@{0}:{1}/log/*.log {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_scp('root@{0}:/var/log/mail* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_scp('root@{0}:/var/log/mail/errors {2}/var.log.mail.errors.log'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_scp('root@{0}:/var/log/messages* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False)
-    run_scp('root@{0}:/var/log/*syslog* {2}'.format(user_domain, data_dir, mail_log_dir), password=LOGS_SSH_PASSWORD, throw=False) 
-    config_dir = join(LOG_DIR, 'config')
-    os.mkdir(config_dir)
-    run_scp('-r root@{0}:{1}/config/* {2}'.format(user_domain, data_dir, config_dir), password=LOGS_SSH_PASSWORD, throw=False)
+    request.addfinalizer(module_teardown)
 
 @pytest.fixture(scope='function')
 def syncloud_session(device_host):
@@ -58,21 +58,16 @@ def syncloud_session(device_host):
 
 
 def test_start(module_setup):
-    shutil.rmtree(LOG_DIR, ignore_errors=True)
-    os.mkdir(LOG_DIR)
+    shutil.rmtree(log_dir, ignore_errors=True)
+    os.mkdir(log_dir)
+    add_host_alias(app, device_host)
+    print(check_output('date', shell=True))
+    device.run_ssh('date', retries=20)
 
 
-def test_activate_device(auth, user_domain, device_domain):
-    email, password, domain, release = auth
-
-    response = requests.post('http://{0}:81/rest/activate_custom_domain'.format(user_domain),
-                             data={'full_domain': device_domain,
-                                   'device_username': DEVICE_USER,
-                                   'device_password': DEVICE_PASSWORD})     
-                                           
+def test_activate_device(device):
+    response = device.activate()
     assert response.status_code == 200, response.text
-    global LOGS_SSH_PASSWORD
-    LOGS_SSH_PASSWORD = DEVICE_PASSWORD
 
 
 def test_running_platform_web(user_domain):
@@ -166,7 +161,7 @@ def test_postfix_submission_lib(user_domain, device_domain):
 
 
 def test_filesystem_mailbox(user_domain, data_dir):
-    run_ssh(user_domain, 'find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
+        device.run_ssh('find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
 
 
 def test_mail_receiving(user_domain):
@@ -208,7 +203,7 @@ def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
 #def test_enable_real_cert(user_domain, platform_data_dir, service_prefix):
 #    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
 #    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, user_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    run_ssh(user_domain, "systemctl restart {0}mail.dovecot".format(service_prefix), password=DEVICE_PASSWORD)
+#        device.run_ssh("systemctl restart {0}mail.dovecot".format(service_prefix), password=DEVICE_PASSWORD)
 
 
 #def test_imap_openssl_real(user_domain, platform_data_dir):
@@ -217,8 +212,8 @@ def test_imap_openssl_generated(user_domain, platform_data_dir, service_prefix):
 
 
 def imap_openssl(user_domain, ca, name, server_name):
-    run_ssh(user_domain, "/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
-    output = run_ssh(user_domain, "echo \"A Logout\" | "
+        device.run_ssh("/openssl/bin/openssl version -a", password=DEVICE_PASSWORD)
+    output =     device.run_ssh("echo \"A Logout\" | "
                                   "/openssl/bin/openssl s_client {0} -connect localhost:143 "
                                   "-servername {1} -verify 3 -starttls imap".format(ca, server_name),
                      password=DEVICE_PASSWORD)
