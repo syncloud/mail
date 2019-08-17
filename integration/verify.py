@@ -82,7 +82,10 @@ def test_access_change_event(device, app_domain):
 
 
 def test_running_smtp(app_domain):
-    print(check_output('nc -zv -w 1 {0} 25'.format(app_domain), shell=True))
+    cmd = 'nc -zv -w 1 {0} 25'.format(app_domain)
+    func = lambda: check_output(cmd, shell=True)
+    result=retry_func(func, message=cmd, retries=5)
+    print(result)
 
 
 def test_running_pop3(app_domain):
