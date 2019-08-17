@@ -183,6 +183,9 @@ def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user
 
 
 def test_imap_openssl(device, platform_data_dir, log_dir):
+    device.run_ssh("wget http://artifact.syncloud.org/3rdparty/openssl-$(uname -m).tar.gz -O /openssl.tar.gz")
+    device.run_ssh("tar xf /openssl.tar.gz -C /")
+    device.run_ssh("ls -la /openssl/bin/openssl")
     device.run_ssh("/openssl/bin/openssl version -a")
     output = device.run_ssh("echo \"A Logout\" | "
                                   "/openssl/bin/openssl s_client -CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
