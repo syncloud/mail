@@ -34,7 +34,7 @@ local build(arch) = {
               "DOMAIN=$(cat domain)",
               "NAME=$(cat name)",
               "cd integration",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=$NAME --device-user=gogs"
+              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=$NAME"
             ]
         },
         if arch == "arm" then {} else
@@ -46,8 +46,8 @@ local build(arch) = {
               "DOMAIN=$(cat domain)",
               "NAME=$(cat name)",
               "cd integration",
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=$NAME --device-user=gogs",
-              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=$NAME --device-user=gogs",
+              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=$NAME",
+              "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=$NAME",
             ],
             volumes: [{
                 name: "shm",
