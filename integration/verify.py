@@ -151,13 +151,13 @@ def test_filesystem_mailbox(device, data_dir):
         device.run_ssh('find {0}/box'.format(data_dir))
 
 
-def test_mail_receiving(app_domain):
+def test_mail_receiving(app_domain, device_user, device_password):
 
     message_count = 0
     retry = 0
     retries = 3
     while retry < retries:
-        message_count = retry_func(lambda: get_message_count(app_domain), message='get message count', retries=5)
+        message_count = retry_func(lambda: get_message_count(app_domain, device_user, device_password), message='get message count', retries=5)
         if message_count > 0:
             break
         retry += 1
