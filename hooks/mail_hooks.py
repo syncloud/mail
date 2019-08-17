@@ -7,11 +7,9 @@ import shutil
 import logging
 
 from subprocess import check_output
-from syncloud_app import logger
-
-from syncloudlib import fs, linux, gen
 
 from syncloudlib.application import paths, urls, storage, ports, service
+from syncloudlib import fs, linux, gen, logger
 
 from config import Config
 from config import UserConfig
@@ -28,11 +26,11 @@ DB_NAME = 'mail'
 DB_USER = 'mail'
 DB_PASS = 'mail'
 
-logger.init(logging.DEBUG, console=True, line_format='%(message)s')
-
 
 class MailInstaller:
     def __init__(self):
+        if not logger.factory_instance:
+            logger.init(logging.DEBUG, True)
         self.log = logger.get_logger('mail_installer')
         self.app_dir = paths.get_app_dir(APP_NAME)
         self.app_data_dir = paths.get_data_dir(APP_NAME)
