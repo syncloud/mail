@@ -65,10 +65,6 @@ def test_activate_device(device):
     assert response.status_code == 200, response.text
 
 
-def test_running_platform_web(app_domain):
-    print(check_output('nc -zv -w 1 {0} 80'.format(app_domain), shell=True))
-
-
 def test_platform_rest(device_host):
     session = requests.session()
     session.mount('https://{0}'.format(device_host), HTTPAdapter(max_retries=5))
@@ -98,7 +94,7 @@ def test_running_pop3(app_domain):
 
 
 def test_running_roundcube(app_domain):
-    print(check_output('nc -zv -w 1 {0} 80'.format(app_domain), shell=True))
+    print(check_output('nc -zv -w 1 {0} 443'.format(app_domain), shell=True))
 
 
 def test_postfix_status(app_domain, app_dir, data_dir):
