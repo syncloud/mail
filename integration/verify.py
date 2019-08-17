@@ -72,14 +72,13 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host):
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
+def test_install(app_archive_path, device_host, device_password):
+    local_install(device_host, device_password, app_archive_path)
 
 
-def test_access_change_event(app_domain):
-    run_ssh(app_domain,
-            '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py',
-             password=LOGS_SSH_PASSWORD)
+def test_access_change_event(device, app_domain):
+    device.run_ssh(
+            '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py')
 
 
 def test_running_smtp(app_domain):
@@ -97,25 +96,22 @@ def test_running_roundcube(app_domain):
     print(check_output('nc -zv -w 1 {0} 443'.format(app_domain), shell=True))
 
 
-def test_postfix_status(app_domain, app_dir, data_dir):
-    run_ssh(app_domain,
+def test_postfix_status(device, app_domain, app_dir, data_dir):
+    device.run_ssh(
             '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
-                app_dir, data_dir),
-            password=LOGS_SSH_PASSWORD, throw=False)
+                app_dir, data_dir), throw=False)
 
 
-def test_postfix_check(app_domain, app_dir, data_dir):
-    run_ssh(app_domain,
+def test_postfix_check(device, app_dir, data_dir):
+    device.run_ssh(app_domain,
             '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
-                app_dir, data_dir),
-            password=LOGS_SSH_PASSWORD, throw=False)
+                app_dir, data_dir), throw=False)
 
 
-def test_dovecot_auth(app_domain, app_dir, data_dir):
-    run_ssh(app_domain,
+def test_dovecot_auth(device, app_dir, data_dir):
+    device.run_ssh(
             '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3} > {1}/log/doveadm.auth.test.log 2>&1'
             .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), 
-            password=DEVICE_PASSWORD, 
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
@@ -129,20 +125,20 @@ def test_postfix_submission_shell(app_domain):
         DIR, app_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
 
 
-def test_postfix_auth(app_domain):
+def test_postfix_auth(app_domain, device_user, device_password):
     server = smtplib.SMTP(app_domain, timeout=10)
     server.set_debuglevel(1)
-    server.login(DEVICE_USER, DEVICE_PASSWORD)
+    server.login(device_user, device_password)
 
 
-def test_postfix_submission_lib(app_domain, device_domain):
+def test_postfix_submission_lib(app_domain, device_domain, device_user, device_password):
     server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
     #server.starttls()
-    server.login(DEVICE_USER, DEVICE_PASSWORD)
+    server.login(device_user, device_password)
     msg = MIMEText('test')
-    mail_from = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    mail_from = '{0}@{1}'.format(device_user, device_domain)
     mail_to = mail_from
     msg['Subject'] = 'test subject'
     msg['From'] = mail_from
@@ -151,8 +147,8 @@ def test_postfix_submission_lib(app_domain, device_domain):
     server.quit()
 
 
-def test_filesystem_mailbox(app_domain, data_dir):
-        device.run_ssh('find {0}/box'.format(data_dir), password=DEVICE_PASSWORD)
+def test_filesystem_mailbox(device, data_dir):
+        device.run_ssh('find {0}/box'.format(data_dir))
 
 
 def test_mail_receiving(app_domain):
@@ -170,20 +166,20 @@ def test_mail_receiving(app_domain):
     assert message_count == 1
 
 
-def get_message_count(app_domain):
+def get_message_count(app_domain, device_user, device_password):
     imaplib.Debug = 4
     server = imaplib.IMAP4_SSL(app_domain)
-    server.login(DEVICE_USER, DEVICE_PASSWORD)
+    server.login(device_user, device_password)
     selected = server.select('inbox')
     server.logout()
     # assert selected[0] == 'OK'
     return int(selected[1][0])
 
 
-def test_postfix_ldap_aliases(app_domain, app_dir, data_dir):
-    run_ssh(app_domain,
+def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir):
+    device.run_ssh(
             '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
-            .format(app_dir, DEVICE_USER, app_domain, data_dir), password=DEVICE_PASSWORD)
+            .format(app_dir, device_user, app_domain, data_dir))
 
 
 def test_imap_openssl_generated(device, platform_data_dir, service_prefix):
@@ -212,7 +208,13 @@ def imap_openssl(device, ca, name, server_name):
     assert 'Verify return code: 0 (ok)' in output
 
 
-def test_upgrade(device_host, app_archive_path, app_domain):
-    local_remove(device_host, DEVICE_PASSWORD, 'mail')
-    local_install(device_host, DEVICE_PASSWORD, app_archive_path)
+def test_remove(device_session, device_host):
+    response = device_session.get('https://{0}/rest/remove?app_id=mail'.format(device_host),
+                                  allow_redirects=False, verify=False)
+    assert response.status_code == 200, response.text
+    wait_for_installer(device_session, device_host)
+
+
+def test_reinstall(app_archive_path, app_domain, device_password):
+    local_install(app_domain, device_password, app_archive_path)
 
