@@ -103,26 +103,26 @@ def test_postfix_status(device, app_domain, app_dir, data_dir):
 
 
 def test_postfix_check(device, app_dir, data_dir):
-    device.run_ssh(app_domain,
+    device.run_ssh(
             '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
                 app_dir, data_dir), throw=False)
 
 
-def test_dovecot_auth(device, app_dir, data_dir):
+def test_dovecot_auth(device, app_dir, data_dir, device_user, device_password):
     device.run_ssh(
             '{0}/dovecot/bin/doveadm -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3} > {1}/log/doveadm.auth.test.log 2>&1'
-            .format(app_dir, data_dir, DEVICE_USER, DEVICE_PASSWORD), 
+            .format(app_dir, data_dir, device_user, device_password), 
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
-def test_postfix_smtp_shell(app_domain):
+def test_postfix_smtp_shell(app_domain, device_user, device_password, log_dir):
     print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
-        DIR, app_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+        DIR, app_domain, device_user, device_password, log_dir), shell=True))
 
 
-def test_postfix_submission_shell(app_domain):
+def test_postfix_submission_shell(app_domain, device_user, device_password, log_dir):
     print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
-        DIR, app_domain, DEVICE_USER, DEVICE_PASSWORD, LOG_DIR), shell=True))
+        DIR, app_domain, device_user, device_password, log_dir), shell=True))
 
 
 def test_postfix_auth(app_domain, device_user, device_password):
