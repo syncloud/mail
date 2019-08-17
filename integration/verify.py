@@ -176,7 +176,7 @@ def get_message_count(app_domain, device_user, device_password):
     return int(selected[1][0])
 
 
-def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir):
+def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user, device_password):
     device.run_ssh(
             '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, device_user, app_domain, data_dir))
