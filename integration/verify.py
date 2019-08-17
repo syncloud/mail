@@ -11,6 +11,7 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
+from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
