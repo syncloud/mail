@@ -44,7 +44,7 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir)
         device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
         device.scp_from_device('/var/log/messages*', mail_log_dir, throw=False)
         device.scp_from_device('/var/log/*syslog*', mail_log_dir, throw=False) 
-        config_dir = join(LOG_DIR, 'config')
+        config_dir = join(log_dir, 'config')
         os.mkdir(config_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
 
