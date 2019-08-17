@@ -182,28 +182,12 @@ def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user
             .format(app_dir, device_user, app_domain, data_dir))
 
 
-def test_imap_openssl_generated(device, platform_data_dir, service_prefix):
-    imap_openssl(app_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
-                 'generated', 'localhost')
-
-
-#def test_enable_real_cert(device, platform_data_dir, service_prefix):
-#    run_scp('{0}/build.syncloud.info/fullchain.pem root@{1}:{2}/syncloud.crt'.format(DIR, app_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    run_scp('{0}/build.syncloud.info/privkey.pem root@{1}:{2}/syncloud.key'.format(DIR, app_domain, platform_data_dir), password=LOGS_SSH_PASSWORD)
-#    device.run_ssh("systemctl restart {0}mail.dovecot".format(service_prefix))
-
-
-#def test_imap_openssl_real(app_domain, platform_data_dir):
-#    imap_openssl(app_domain, '-CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs'.format(platform_data_dir),
-#                 'real', 'build.syncloud.info')
-
-
-def imap_openssl(device, ca, name, server_name):
+def test_imap_openssl(device, platform_data_dir, log_dir):
     device.run_ssh("/openssl/bin/openssl version -a")
     output = device.run_ssh("echo \"A Logout\" | "
-                                  "/openssl/bin/openssl s_client {0} -connect localhost:143 "
-                                  "-servername {1} -verify 3 -starttls imap".format(ca, server_name))
-    with open('{0}/openssl.{1}.log'.format(LOG_DIR, name), 'w') as f:
+                                  "/openssl/bin/openssl s_client -CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
+                                  "-servername localhost -verify 3 -starttls imap".format(platform_data_dir))
+    with open('{0}/openssl.log'.format(log_dir), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output
 
