@@ -16,7 +16,7 @@ from syncloudlib.integration.installer import local_install, wait_for_rest, loca
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
 TMP_DIR = '/tmp/syncloud'
-
+DIR = dirname(__file__)
 
 @pytest.fixture(scope="session")
 def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir):
