@@ -81,15 +81,15 @@ def test_access_change_event(device, app_domain):
             '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py')
 
 
-def test_running_smtp(app_domain):
-    cmd = 'nc -zv -w 1 {0} 25'.format(app_domain)
+def test_running_smtp(device_host):
+    cmd = 'nc -zv -w 1 {0} 25'.format(device_host)
     func = lambda: check_output(cmd, shell=True)
     result=retry_func(func, message=cmd, retries=5, sleep=10)
     print(result)
 
 
-def test_running_pop3(app_domain):
-    cmd = 'nc -zv -w 1 {0} 110'.format(app_domain)
+def test_running_pop3(device_host):
+    cmd = 'nc -zv -w 1 {0} 110'.format(device_host)
     func = lambda: check_output(cmd, shell=True)
     result=retry_func(func, message=cmd, retries=5, sleep=10)
     print(result)
