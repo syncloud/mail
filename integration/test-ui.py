@@ -37,7 +37,7 @@ def test_start(module_setup, app, device_host):
     if not exists(screenshot_dir):
         os.mkdir(screenshot_dir)
 
-    add_host_alias(app, device_host)
+    add_host_alias(app, device_host, device_user, device_password)
 
 
 def test_web(driver, app_domain, device_domain, ui_mode):
@@ -48,9 +48,9 @@ def test_web(driver, app_domain, device_domain, ui_mode):
     screenshots(driver, screenshot_dir, 'login-' + ui_mode)
 
     user = driver.find_element_by_id("rcmloginuser")
-    user.send_keys(DEVICE_USER)
+    user.send_keys(device_user)
     password = driver.find_element_by_id("rcmloginpwd")
-    password.send_keys(DEVICE_PASSWORD)
+    password.send_keys(device_password)
    
     screenshots(driver, screenshot_dir, 'login-filled-' + ui_mode)
   
