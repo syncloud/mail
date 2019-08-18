@@ -84,14 +84,14 @@ def test_access_change_event(device, app_domain):
 def test_running_smtp(app_domain):
     cmd = 'nc -zv -w 1 {0} 25'.format(app_domain)
     func = lambda: check_output(cmd, shell=True)
-    result=retry_func(func, message=cmd, retries=5)
+    result=retry_func(func, message=cmd, retries=5, sleep=10)
     print(result)
 
 
 def test_running_pop3(app_domain):
     cmd = 'nc -zv -w 1 {0} 110'.format(app_domain)
     func = lambda: check_output(cmd, shell=True)
-    result=retry_func(func, message=cmd, retries=5)
+    result=retry_func(func, message=cmd, retries=5, sleep=10)
     print(result)
 
 
@@ -151,7 +151,7 @@ def test_postfix_submission_lib(app_domain, device_domain, device_user, device_p
 
 
 def test_filesystem_mailbox(device, data_dir):
-        device.run_ssh('find {0}/box'.format(data_dir))
+    device.run_ssh('find {0}/box'.format(data_dir))
 
 
 def test_mail_receiving(app_domain, device_user, device_password):
