@@ -33,14 +33,14 @@ def module_teardown(device, log_dir, ui_mode):
     device.scp_from_device('{0}/*'.format(TMP_DIR), join(log_dir, 'log'))
 
 
-def test_start(module_setup, app, device_host):
+def test_start(module_setup, app, device_host, device_user, device_password):
     if not exists(screenshot_dir):
         os.mkdir(screenshot_dir)
 
     add_host_alias(app, device_host, device_user, device_password)
 
 
-def test_web(driver, app_domain, device_domain, ui_mode):
+def test_web(driver, app_domain, device_domain, ui_mode, device_user, device_password):
 
     driver.get("https://{0}".format(app_domain))
     
