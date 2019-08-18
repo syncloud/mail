@@ -60,7 +60,7 @@ def test_web(driver, app_domain, device_domain, ui_mode, device_user, device_pas
     screenshots(driver, screenshot_dir, 'login_progress-' + ui_mode)
 
     wait_driver = WebDriverWait(driver, 60)
-    username = '{0}@{1}'.format(DEVICE_USER, device_domain)
+    username = '{0}@{1}'.format(device_user, device_domain)
     wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
     time.sleep(10)
     
