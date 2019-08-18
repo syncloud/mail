@@ -3,19 +3,18 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-if [[ -z "$2" ]]; then
-    echo "usage $0 version installer"
+if [[ -z "$1" ]]; then
+    echo "usage $0 version"
     exit 1
 fi
 
 export TMPDIR=/tmp
 export TMP=/tmp
 
-NAME=mail
+NAME=$1
 ROUNDCUBE_VERSION=1.3.6
 ARCH=$(uname -m)
-VERSION=$1
-INSTALLER=$2
+VERSION=$2
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
@@ -66,4 +65,6 @@ echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
 echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml
 echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
 
-mksquashfs ${SNAP_DIR} ${DIR}/${NAME}_${VERSION}_${ARCH}.snap -noappend -comp xz -no-xattrs -all-root
+PACKAGE=${NAME}_${VERSION}_${ARCH}.snap
+echo ${PACKAGE} > ${DIR}/package.name
+mksquashfs ${SNAP_DIR} ${DIR}/${PACKAGE} -noappend -comp xz -no-xattrs -all-root
