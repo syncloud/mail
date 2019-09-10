@@ -10,17 +10,11 @@ apps:
     before: [php-fpm]
   dovecot:
     command: bin/service.dovecot.sh start
-    pre-start-command: bin/service.dovecot.sh pre-start
     daemon: simple
     plugs:
     - network
     - network-bind
     restart-condition: always
-#    sockets:
-#      sock1:
-#        listen-stream: 143
-#      sock2:
-#        listen-stream: 993
     before: [php-fpm]
   postgresql:
     user: mail
