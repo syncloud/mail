@@ -10,10 +10,8 @@ fi
 export LD_LIBRARY_PATH=${DIR}/dovecot/lib/dovecot
 export DOVECOT_BINDIR=${DIR}/dovecot/bin
 case $1 in
-pre-start)
-    /bin/rm -rf ${SNAP_COMMON}/dovecot/master.pid
-    ;;
 start)
+    /bin/rm -rf ${SNAP_COMMON}/dovecot/master.pid
     exec $DIR/dovecot/sbin/dovecot -F -c ${SNAP_COMMON}/config/dovecot/dovecot.conf
     ;;
 *)
