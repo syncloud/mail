@@ -12,7 +12,7 @@ import requests
 from requests.adapters import HTTPAdapter
 
 from syncloudlib.integration.hosts import add_host_alias_by_ip
-from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove, wait_for_installer
+from syncloudlib.integration.installer import local_install, local_remove, wait_for_installer
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
 TMP_DIR = '/tmp/syncloud'
@@ -72,8 +72,9 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host, device_password):
+def test_install(app_archive_path, device_host, device_password, device_session):
     local_install(device_host, device_password, app_archive_path)
+    wait_for_installer(device_session, device_host)
 
 
 def test_access_change_event(device, app_domain):
