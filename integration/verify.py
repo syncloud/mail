@@ -11,7 +11,7 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from syncloudlib.integration.hosts import add_host_alias
+from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove, wait_for_installer
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
@@ -52,10 +52,10 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir)
     request.addfinalizer(module_teardown)
 
 
-def test_start(module_setup, device_host, log_dir, app, device):
+def test_start(module_setup, device_host, log_dir, app, domain, device):
     shutil.rmtree(log_dir, ignore_errors=True)
     os.mkdir(log_dir)
-    add_host_alias(app, device_host)
+    add_host_alias_by_ip(app, domain, device_host)
     print(check_output('date', shell=True))
     device.run_ssh('date', retries=20)
 
