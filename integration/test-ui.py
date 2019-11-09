@@ -16,31 +16,26 @@ from syncloudlib.integration.hosts import add_host_alias_by_ip
 from syncloudlib.integration.screenshots import screenshots
 
 DIR = dirname(__file__)
-screenshot_dir = join(DIR, 'screenshot')
 TMP_DIR = '/tmp/syncloud/ui'
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, log_dir, ui_mode):
-    request.addfinalizer(lambda: module_teardown(device, log_dir, ui_mode))
-
-
-def module_teardown(device, log_dir, ui_mode):
-    device.activated()
-    device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
-    device.run_ssh('journalctl > {0}/journalctl.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
-    device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
+def module_setup(request, device, artifact_dir, ui_mode):
+    def module_teardown():
+        device.activated()
+        device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl > {0}/journalctl.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
+        device.run_ssh('cp /var/log/syslog {0}/syslog.ui.{1}.log'.format(TMP_DIR, ui_mode), throw=False)
       
-    device.scp_from_device('{0}/*'.format(TMP_DIR), join(log_dir, 'log'))
+        device.scp_from_device('{0}/*'.format(TMP_DIR), join(artifact_dir, 'log'))
+
+    request.addfinalizer(module_teardown)
 
 
 def test_start(module_setup, app, device_host, domain):
-    if not exists(screenshot_dir):
-        os.mkdir(screenshot_dir)
-
     add_host_alias_by_ip(app, domain, device_host)
 
 
-def test_web(driver, app_domain, device_domain, ui_mode, device_user, device_password):
+def test_web(driver, app_domain, device_domain, ui_mode, device_user, device_password, screenshot_dir):
 
     driver.get("https://{0}".format(app_domain))
     

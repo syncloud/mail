@@ -84,6 +84,7 @@ local build(arch) = {
                 password: {
                     from_secret: "artifact_password"
                 },
+                timeout: "2m",
                 command_timeout: "2m",
                 target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-" + arch,
                 source: "artifact/*",
