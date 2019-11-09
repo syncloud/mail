@@ -74,21 +74,21 @@ local build(arch) = {
             ]
         },
         {
-            name: "ci-artifact",
-            image: "syncloud/build-deps-" + arch,
-            environment: {
-                ARTIFACT_SSH_KEY: {
-                    from_secret: "ARTIFACT_SSH_KEY"
-                }
+            name: "artifact",
+            image: "appleboy/drone-scp",
+            settings: {
+                host: {
+                    from_secret: "artifact_host"
+                },
+                username: "artifact",
+                password: {
+                    from_secret: "artifact_password"
+                },
+                command_timeout: "2m",
+                target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-" + arch,
+                source: "artifact/*",
+		             strip_components: 1
             },
-            commands: [
-                "NAME=$(cat name)",
-                "PACKAGE=$(cat package.name)",
-                "pip2 install -r dev_requirements.txt",
-                "syncloud-upload-artifact.sh $NAME integration/log $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)",
-                "syncloud-upload-artifact.sh $NAME integration/screenshot $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)",
-                "syncloud-upload-artifact.sh $NAME $PACKAGE $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)"
-            ],
             when: {
               status: [ "failure", "success" ]
             }

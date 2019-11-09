@@ -46,18 +46,18 @@ steps:
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
 
-- name: ci-artifact
-  image: syncloud/build-deps-arm
-  commands:
-  - NAME=$(cat name)
-  - PACKAGE=$(cat package.name)
-  - pip2 install -r dev_requirements.txt
-  - syncloud-upload-artifact.sh $NAME integration/log $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  - syncloud-upload-artifact.sh $NAME integration/screenshot $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  - syncloud-upload-artifact.sh $NAME $PACKAGE $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  environment:
-    ARTIFACT_SSH_KEY:
-      from_secret: ARTIFACT_SSH_KEY
+- name: artifact
+  image: appleboy/drone-scp
+  settings:
+    command_timeout: 2m
+    host:
+      from_secret: artifact_host
+    password:
+      from_secret: artifact_password
+    source: "artifact/*"
+    strip_components: 1
+    target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-arm"
+    username: artifact
   when:
     status:
     - failure
@@ -143,18 +143,18 @@ steps:
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
 
-- name: ci-artifact
-  image: syncloud/build-deps-amd64
-  commands:
-  - NAME=$(cat name)
-  - PACKAGE=$(cat package.name)
-  - pip2 install -r dev_requirements.txt
-  - syncloud-upload-artifact.sh $NAME integration/log $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  - syncloud-upload-artifact.sh $NAME integration/screenshot $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  - syncloud-upload-artifact.sh $NAME $PACKAGE $DRONE_BUILD_NUMBER-$(dpkg --print-architecture)
-  environment:
-    ARTIFACT_SSH_KEY:
-      from_secret: ARTIFACT_SSH_KEY
+- name: artifact
+  image: appleboy/drone-scp
+  settings:
+    command_timeout: 2m
+    host:
+      from_secret: artifact_host
+    password:
+      from_secret: artifact_password
+    source: "artifact/*"
+    strip_components: 1
+    target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-amd64"
+    username: artifact
   when:
     status:
     - failure
