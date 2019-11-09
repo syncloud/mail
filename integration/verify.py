@@ -17,6 +17,8 @@ from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
 TMP_DIR = '/tmp/syncloud'
 DIR = dirname(__file__)
+OPENSSL = join(DIR, "openssl", "bin", "openssl")
+
 
 @pytest.fixture(scope="session")
 def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir):
@@ -187,13 +189,11 @@ def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user
 
 
 def test_imap_openssl(device, platform_data_dir, log_dir):
-    device.run_ssh("wget http://artifact.syncloud.org/3rdparty/openssl-$(uname -m).tar.gz -O /openssl.tar.gz")
-    device.run_ssh("tar xf /openssl.tar.gz -C /")
-    device.run_ssh("ls -la /openssl/bin/openssl")
-    device.run_ssh("/openssl/bin/openssl version -a")
+    
+    device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
-                                  "/openssl/bin/openssl s_client -CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
-                                  "-servername localhost -verify 3 -starttls imap".format(platform_data_dir))
+                                  "{0} s_client -CAfile {1}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
+                                  "-servername localhost -verify 3 -starttls imap".format(OPENSSL, platform_data_dir))
     with open('{0}/openssl.log'.format(log_dir), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output

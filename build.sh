@@ -51,6 +51,10 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}
 
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/openssl-${ARCH}.tar.gz
+tar xf openssl-${ARCH}.tar.gz
+mv openssl integration/
+
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
 coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
