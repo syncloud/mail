@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-ROUNDCUBE_VERSION=1.3.6
+ROUNDCUBE_VERSION=1.4.0
 ARCH=$(uname -m)
 VERSION=$2
 
