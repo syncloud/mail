@@ -29,7 +29,7 @@ mv postfix ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot_snap-${ARCH}.tar.gz
 tar xf dovecot_snap-${ARCH}.tar.gz
-mv dovecot_snap ${BUILD_DIR}
+mv dovecot ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/rsyslog-${ARCH}.tar.gz
 tar xf rsyslog-${ARCH}.tar.gz
