@@ -7,7 +7,10 @@ DIR = dirname(__file__)
 
 @pytest.fixture(scope="session")
 def log_dir():
-    return join(DIR, 'log')
+    dir = join(DIR, 'log')
+    if not exists(dir):
+        os.mkdir(dir)
+    return dir
 
 
 @pytest.fixture(scope="session")
