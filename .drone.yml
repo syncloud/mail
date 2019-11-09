@@ -11,15 +11,13 @@ steps:
   image: syncloud/build-deps-arm
   commands:
   - "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version"
-  - "echo mail > name"
   - "echo arm$DRONE_BRANCH > domain"
 
 - name: build
   image: syncloud/build-deps-arm
   commands:
-  - NAME=$(cat name)
   - VERSION=$(cat version)
-  - ./build.sh $NAME $VERSION
+  - ./build.sh mail $VERSION
 
 - name: test-intergation
   image: syncloud/build-deps-arm
@@ -27,9 +25,8 @@ steps:
   - pip2 install -r dev_requirements.txt
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - DOMAIN=$(cat domain)
-  - NAME=$(cat name)
   - cd integration
-  - py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=$NAME
+  - py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=mail
 
 
 - name: upload
@@ -56,7 +53,8 @@ steps:
       from_secret: artifact_password
     source: "artifact/*"
     strip_components: 1
-    target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-arm"
+    target: "/home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-arm"
+    timeout: 2m
     username: artifact
   when:
     status:
@@ -96,15 +94,13 @@ steps:
   image: syncloud/build-deps-amd64
   commands:
   - "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version"
-  - "echo mail > name"
   - "echo amd64$DRONE_BRANCH > domain"
 
 - name: build
   image: syncloud/build-deps-amd64
   commands:
-  - NAME=$(cat name)
   - VERSION=$(cat version)
-  - ./build.sh $NAME $VERSION
+  - ./build.sh mail $VERSION
 
 - name: test-intergation
   image: syncloud/build-deps-amd64
@@ -112,19 +108,17 @@ steps:
   - pip2 install -r dev_requirements.txt
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - DOMAIN=$(cat domain)
-  - NAME=$(cat name)
   - cd integration
-  - py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=$NAME
+  - py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=mail
 
 - name: test-ui
   image: syncloud/build-deps-amd64
   commands:
   - pip2 install -r dev_requirements.txt
   - DOMAIN=$(cat domain)
-  - NAME=$(cat name)
   - cd integration
-  - "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=$NAME"
-  - "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=$NAME"
+  - "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=mail"
+  - "xvfb-run -l --server-args='-screen 0, 1024x4096x24' py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=mail"
   volumes:
   - name: shm
     path: /dev/shm
@@ -153,7 +147,8 @@ steps:
       from_secret: artifact_password
     source: "artifact/*"
     strip_components: 1
-    target: "/home/artifact/repo/users/${DRONE_BUILD_NUMBER}-amd64"
+    target: "/home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-amd64"
+    timeout: 2m
     username: artifact
   when:
     status:
