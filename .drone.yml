@@ -33,10 +33,9 @@ steps:
   image: syncloud/build-deps-arm
   commands:
   - VERSION=$(cat version)
-  - NAME=$(cat name)
   - PACKAGE=$(cat package.name)
   - pip2 install -r dev_requirements.txt
-  - syncloud-upload.sh $NAME $DRONE_BRANCH $VERSION $PACKAGE
+  - syncloud-upload.sh mail $DRONE_BRANCH $VERSION $PACKAGE
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: AWS_ACCESS_KEY_ID
@@ -127,10 +126,9 @@ steps:
   image: syncloud/build-deps-amd64
   commands:
   - VERSION=$(cat version)
-  - NAME=$(cat name)
   - PACKAGE=$(cat package.name)
   - pip2 install -r dev_requirements.txt
-  - syncloud-upload.sh $NAME $DRONE_BRANCH $VERSION $PACKAGE
+  - syncloud-upload.sh mail $DRONE_BRANCH $VERSION $PACKAGE
   environment:
     AWS_ACCESS_KEY_ID:
       from_secret: AWS_ACCESS_KEY_ID

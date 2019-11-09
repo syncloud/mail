@@ -65,10 +65,9 @@ local build(arch) = {
             },
             commands: [
               "VERSION=$(cat version)",
-              "NAME=$(cat name)",
               "PACKAGE=$(cat package.name)",
               "pip2 install -r dev_requirements.txt",
-              "syncloud-upload.sh $NAME $DRONE_BRANCH $VERSION $PACKAGE"
+              "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
             ]
         },
         {
