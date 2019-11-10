@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-ROUNDCUBE_VERSION=1.3.6
+ROUNDCUBE_VERSION=1.4.0
 ARCH=$(uname -m)
 VERSION=$2
 
@@ -23,16 +23,37 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-DOWNLOAD_URL=http://artifact.syncloud.org/3rdparty
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/postfix-${ARCH}.tar.gz
+tar xf postfix-${ARCH}.tar.gz
+mv postfix ${BUILD_DIR}
 
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postfix-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/dovecot_snap-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/rsyslog-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/php7-${ARCH}.tar.gz
-mv ${BUILD_DIR}/php7 ${BUILD_DIR}/php
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/nginx-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/postgresql-${ARCH}.tar.gz
-coin --to ${BUILD_DIR} raw ${DOWNLOAD_URL}/python-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot_snap-${ARCH}.tar.gz
+tar xf dovecot_snap-${ARCH}.tar.gz
+mv dovecot ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/rsyslog-${ARCH}.tar.gz
+tar xf rsyslog-${ARCH}.tar.gz
+mv rsyslog ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/php7-${ARCH}.tar.gz
+tar xf php7-${ARCH}.tar.gz
+mv php7 ${BUILD_DIR}/php
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/nginx-${ARCH}.tar.gz
+tar xf nginx-${ARCH}.tar.gz
+mv nginx ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/postgresql-${ARCH}.tar.gz
+tar xf postgresql-${ARCH}.tar.gz
+mv postgresql ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/python-${ARCH}.tar.gz
+tar xf python-${ARCH}.tar.gz
+mv python ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/openssl-${ARCH}.tar.gz
+tar xf openssl-${ARCH}.tar.gz
+mv openssl integration/
 
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 

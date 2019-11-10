@@ -11,20 +11,22 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 
-from syncloudlib.integration.hosts import add_host_alias
-from syncloudlib.integration.installer import local_install, wait_for_rest, local_remove, wait_for_installer
+from syncloudlib.integration.hosts import add_host_alias_by_ip
+from syncloudlib.integration.installer import local_install, local_remove, wait_for_installer
 from syncloudlib.integration.ssh import run_scp, run_ssh
 from integration.util.helper import retry_func
 TMP_DIR = '/tmp/syncloud'
 DIR = dirname(__file__)
+OPENSSL = join(DIR, "openssl", "bin", "openssl")
+
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir):
+def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir):
     def module_teardown(): 
-        platform_log_dir = join(log_dir, 'platform')
+        platform_log_dir = join(artifact_dir, 'platform')
         os.mkdir(platform_log_dir)
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
-        mail_log_dir = join(log_dir, 'mail_log')
+        mail_log_dir = join(artifact_dir, 'mail_log')
         os.mkdir(mail_log_dir)
         device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/ > {1}/ls.log'.format(data_dir, TMP_DIR), throw=False)
@@ -45,17 +47,15 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, log_dir)
         device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
         device.scp_from_device('/var/log/messages*', mail_log_dir, throw=False)
         device.scp_from_device('/var/log/*syslog*', mail_log_dir, throw=False) 
-        config_dir = join(log_dir, 'config')
+        config_dir = join(artifact_dir, 'config')
         os.mkdir(config_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
 
     request.addfinalizer(module_teardown)
 
 
-def test_start(module_setup, device_host, log_dir, app, device):
-    shutil.rmtree(log_dir, ignore_errors=True)
-    os.mkdir(log_dir)
-    add_host_alias(app, device_host)
+def test_start(module_setup, device_host, app, domain, device):
+    add_host_alias_by_ip(app, domain, device_host)
     print(check_output('date', shell=True))
     device.run_ssh('date', retries=20)
 
@@ -72,8 +72,9 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host, device_password):
+def test_install(app_archive_path, device_host, device_password, device_session):
     local_install(device_host, device_password, app_archive_path)
+    wait_for_installer(device_session, device_host)
 
 
 def test_access_change_event(device, app_domain):
@@ -118,14 +119,14 @@ def test_dovecot_auth(device, app_dir, data_dir, device_user, device_password):
             env_vars='LD_LIBRARY_PATH={0}/dovecot/lib/dovecot DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
 
 
-def test_postfix_smtp_shell(app_domain, device_user, device_password, log_dir):
+def test_postfix_smtp_shell(app_domain, device_user, device_password, artifact_dir):
     print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
-        DIR, app_domain, device_user, device_password, log_dir), shell=True))
+        DIR, app_domain, device_user, device_password, artifact_dir), shell=True))
 
 
-def test_postfix_submission_shell(app_domain, device_user, device_password, log_dir):
+def test_postfix_submission_shell(app_domain, device_user, device_password, artifact_dir):
     print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
-        DIR, app_domain, device_user, device_password, log_dir), shell=True))
+        DIR, app_domain, device_user, device_password, artifact_dir), shell=True))
 
 
 def test_postfix_auth(app_domain, device_user, device_password):
@@ -185,15 +186,13 @@ def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user
             .format(app_dir, device_user, app_domain, data_dir))
 
 
-def test_imap_openssl(device, platform_data_dir, log_dir):
-    device.run_ssh("wget http://artifact.syncloud.org/3rdparty/openssl-$(uname -m).tar.gz -O /openssl.tar.gz")
-    device.run_ssh("tar xf /openssl.tar.gz -C /")
-    device.run_ssh("ls -la /openssl/bin/openssl")
-    device.run_ssh("/openssl/bin/openssl version -a")
+def test_imap_openssl(device, platform_data_dir, artifact_dir):
+    
+    device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
-                                  "/openssl/bin/openssl s_client -CAfile {0}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
-                                  "-servername localhost -verify 3 -starttls imap".format(platform_data_dir))
-    with open('{0}/openssl.log'.format(log_dir), 'w') as f:
+                                  "{0} s_client -CAfile {1}/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
+                                  "-servername localhost -verify 3 -starttls imap".format(OPENSSL, platform_data_dir))
+    with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output
 

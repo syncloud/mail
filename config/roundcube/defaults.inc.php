@@ -363,7 +363,7 @@ $config['advanced_prefs'] = array();
 
 // provide an URL where a user can get support for this Roundcube installation
 // PLEASE DO NOT LINK TO THE ROUNDCUBE.NET WEBSITE HERE!
-$config['support_url'] = '';
+$config['support_url'] = 'https://syncloud.org';
 
 // replace Roundcube logo with this image
 // specify an URL relative to the document root of this Roundcube installation
@@ -538,10 +538,10 @@ $config['max_disclosed_recipients'] = 5;
 $config['max_group_members'] = 0;
 
 // Name your service. This is displayed on the login screen and in the window title
-$config['product_name'] = 'Roundcube Webmail';
+$config['product_name'] = 'Syncloud Mail';
 
 // Add this user-agent to message headers when sending
-$config['useragent'] = 'Roundcube Webmail/'.RCMAIL_VERSION;
+$config['useragent'] = 'Syncloud Mail/'.RCMAIL_VERSION;
 
 // try to load host-specific configuration
 // see https://github.com/roundcube/roundcubemail/wiki/Configuration:-Multi-Domain-Setup
@@ -1029,7 +1029,7 @@ $config['contact_search_name'] = '{name} <{email}>';
 $config['default_charset'] = 'ISO-8859-1';
 
 // skin name: folder from skins/
-$config['skin'] = 'larry';
+$config['skin'] = 'elastic';
 
 // Enables using standard browser windows (that can be handled as tabs)
 // instead of popup windows

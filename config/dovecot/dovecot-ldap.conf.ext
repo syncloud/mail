@@ -132,11 +132,11 @@ pass_attrs = uid=user,userPassword=password,\
   homeDirectory=userdb_home,uidNumber=userdb_uid,gidNumber=userdb_gid
 
 # Filter for password lookups
-#pass_filter = (&(objectClass=posixAccount)(uid=%u))
+pass_filter = (&(objectClass=inetOrgPerson)(uid=%u))
 
 # Attributes and filter to get a list of all users
 #iterate_attrs = uid=user
-#iterate_filter = (objectClass=posixAccount)
+iterate_filter = (objectClass=inetOrgPerson)
 
 # Default password scheme. "{scheme}" before password overrides this.
 # List of supported schemes is in: http://wiki2.dovecot.org/Authentication
