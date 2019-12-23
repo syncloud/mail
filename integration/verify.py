@@ -50,6 +50,7 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         config_dir = join(artifact_dir, 'config')
         os.mkdir(config_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
+        check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
 
