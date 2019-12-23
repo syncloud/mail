@@ -31,10 +31,6 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf dovecot-${ARCH}.tar.gz
 mv dovecot ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/rsyslog-${ARCH}.tar.gz
-tar xf rsyslog-${ARCH}.tar.gz
-mv rsyslog ${BUILD_DIR}
-
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
 mv php7 ${BUILD_DIR}/php
