@@ -27,7 +27,7 @@ DB_USER = 'mail'
 DB_PASS = 'mail'
 
 
-class MailInstaller:
+class Installer:
     def __init__(self):
         if not logger.factory_instance:
             logger.init(logging.DEBUG, True)
