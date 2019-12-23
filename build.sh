@@ -51,8 +51,8 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/opendkim-${ARCH}.tar.gz
-tar xf opendkim-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/opendkim-${ARCH}-2.10.3.tar.gz
+tar xf opendkim-${ARCH}-2.10.3.tar.gz
 mv opendkim ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/openssl-${ARCH}.tar.gz
