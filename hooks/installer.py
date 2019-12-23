@@ -92,7 +92,7 @@ class Installer:
         for data_dir in data_dirs:
             fs.makepath(data_dir)
 
-        chevk_output('{0}/opendkim/sbin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
+        check_output('{0}/opendkim/sbin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
