@@ -3,5 +3,5 @@
 import os, sys
 sys.path.append(os.path.join(os.environ['SNAP'], 'hooks'))
 
-from mail_hooks import MailInstaller
-MailInstaller().install()
+from installer import Installer
+Installer().install()

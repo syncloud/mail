@@ -1,0 +1,1 @@
+mail._domainkey.{{ device_domain_name }}:mail:{{ app_data_dir }}/config/opendkim/keys/{{ device_domain_name }}/mail.private
