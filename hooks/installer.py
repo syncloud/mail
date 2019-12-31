@@ -47,6 +47,7 @@ class Installer:
         self.opendkim_dir = join(self.app_data_dir, 'opendkim')
         self.opendkim_keys_dir = join(self.opendkim_dir, 'keys')
         self.opendkim_keys_domain_dir = join(self.opendkim_keys_dir, self.device_domain_name)
+
     def regenerate_configs(self):
         
         variables = {
@@ -116,7 +117,7 @@ class Installer:
         check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
         mail_txt_file = join(self.opendkim_keys_domain_dir, 'mail.txt')
         mail_txt = open(mail_txt_file, 'r').read().strip()
-        key = re.match(r'.*p="(.*?)".*$', mail_txt).group(1)
+        key = re.match(r'.*p=(.*?)".*', mail_txt, re.DOTALL|re.MULTILINE).group(1)
         return key
 
     def install(self):
