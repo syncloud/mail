@@ -5,11 +5,12 @@ import sys
 from os.path import isdir, join
 import shutil
 import logging
-
+import re
 from subprocess import check_output
 
 from syncloudlib.application import paths, urls, storage, ports, service
 from syncloudlib import fs, linux, gen, logger
+from syncloudlib.application.config import set_dkim_key
 
 from config import Config
 from config import UserConfig
@@ -92,7 +93,8 @@ class Installer:
         for data_dir in data_dirs:
             fs.makepath(data_dir)
 
-        check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
+        dkim_key = self.generate_dkim_key()
+        set_dkim_key(dkim_key)
 
         fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
@@ -109,7 +111,14 @@ class Installer:
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
         
         self.log.info("setup configs")
-            
+
+    def generate_dkim_key(self):
+        check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
+        mail_txt_file = join(self.opendkim_keys_domain_dir, self.device_domain_name, 'mail.txt')
+        mail_txt = open(from_filename, 'r').read().strip()
+        key = re.match(r'.*p="(.*?)".*$', mail_txt).group(1)
+        return key
+
     def install(self):
         self.init_config()
         self.database_init(self.database_path, USER_NAME)
