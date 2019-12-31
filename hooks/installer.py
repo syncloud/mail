@@ -114,7 +114,7 @@ class Installer:
 
     def generate_dkim_key(self):
         check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
-        mail_txt_file = join(self.opendkim_keys_domain_dir, self.device_domain_name, 'mail.txt')
+        mail_txt_file = join(self.opendkim_keys_domain_dir, 'mail.txt')
         mail_txt = open(mail_txt_file, 'r').read().strip()
         key = re.match(r'.*p="(.*?)".*$', mail_txt).group(1)
         return key
