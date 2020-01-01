@@ -12,7 +12,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 
 NAME=$1
-ROUNDCUBE_VERSION=1.4.0
+ROUNDCUBE_VERSION=1.4.1
 ARCH=$(uname -m)
 VERSION=$2
 
@@ -27,13 +27,9 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf postfix-${ARCH}.tar.gz
 mv postfix ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot_snap-${ARCH}.tar.gz
-tar xf dovecot_snap-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot-${ARCH}.tar.gz
+tar xf dovecot-${ARCH}.tar.gz
 mv dovecot ${BUILD_DIR}
-
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/rsyslog-${ARCH}.tar.gz
-tar xf rsyslog-${ARCH}.tar.gz
-mv rsyslog ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
@@ -50,6 +46,10 @@ mv postgresql ${BUILD_DIR}
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/python-${ARCH}.tar.gz
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}
+
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/opendkim-${ARCH}-2.10.3.tar.gz
+tar xf opendkim-${ARCH}-2.10.3.tar.gz
+mv opendkim ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/openssl-${ARCH}.tar.gz
 tar xf openssl-${ARCH}.tar.gz

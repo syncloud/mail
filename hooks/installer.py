@@ -5,11 +5,12 @@ import sys
 from os.path import isdir, join
 import shutil
 import logging
-
+import re
 from subprocess import check_output
 
 from syncloudlib.application import paths, urls, storage, ports, service
 from syncloudlib import fs, linux, gen, logger
+from syncloudlib.application.config import set_dkim_key
 
 from config import Config
 from config import UserConfig
@@ -27,7 +28,7 @@ DB_USER = 'mail'
 DB_PASS = 'mail'
 
 
-class MailInstaller:
+class Installer:
     def __init__(self):
         if not logger.factory_instance:
             logger.init(logging.DEBUG, True)
@@ -43,7 +44,9 @@ class MailInstaller:
         self.config_path = join(self.app_data_dir, 'config')
         self.config = Config(self.config_path)
         self.user_config = UserConfig(self.app_data_dir)
-
+        self.opendkim_dir = join(self.app_data_dir, 'opendkim')
+        self.opendkim_keys_dir = join(self.opendkim_dir, 'keys')
+        self.opendkim_keys_domain_dir = join(self.opendkim_keys_dir, self.device_domain_name)
 
     def regenerate_configs(self):
         
@@ -67,7 +70,7 @@ class MailInstaller:
         
         self.log.info(fs.chownpath(self.config_path, USER_NAME, recursive=True))
 
-    def install(self):
+    def init_config(self):
 
         linux.useradd('maildrop')
         linux.useradd('dovecot')
@@ -76,20 +79,25 @@ class MailInstaller:
         
         self.regenerate_configs()
         
-        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
-
         data_dirs = [
             join(self.app_data_dir, 'config'),
             join(self.app_data_dir, 'log'),
             join(self.app_data_dir, 'spool'),
             join(self.app_data_dir, 'dovecot'),
             join(self.app_data_dir, 'dovecot', 'private'),
-            join(self.app_data_dir, 'data')
+            join(self.app_data_dir, 'data'),
+            self.opendkim_dir,
+            self.opendkim_keys_dir,
+            self.opendkim_keys_domain_dir
         ]
 
         for data_dir in data_dirs:
             fs.makepath(data_dir)
-            fs.chownpath(data_dir, USER_NAME)
+
+        dkim_key = self.generate_dkim_key()
+        set_dkim_key(dkim_key)
+
+        fs.chownpath(self.app_data_dir, USER_NAME, recursive=True)
 
         box_data_dir = join(self.app_data_dir, 'box')
         fs.makepath(box_data_dir)
@@ -102,11 +110,22 @@ class MailInstaller:
         dovecot_lda_info_log = join(self.app_data_dir, 'log', 'dovecot-lda.info.log')
         fs.touchfile(dovecot_lda_info_log)
         fs.chownpath(dovecot_lda_info_log, 'dovecot')
-
+        
         self.log.info("setup configs")
 
-        if not self.user_config.is_activated():
-            self.database_init(self.database_path, USER_NAME)
+    def generate_dkim_key(self):
+        check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
+        mail_txt_file = join(self.opendkim_keys_domain_dir, 'mail.txt')
+        mail_txt = open(mail_txt_file, 'r').read().strip()
+        key = re.match(r'.*p=(.*?)".*', mail_txt, re.DOTALL|re.MULTILINE).group(1)
+        return key
+
+    def install(self):
+        self.init_config()
+        self.database_init(self.database_path, USER_NAME)
+
+    def post_refresh(self):
+        self.init_config()
 
     def configure(self):
     
@@ -114,14 +133,7 @@ class MailInstaller:
             self.initialize(self.config, self.user_config, DB_NAME, DB_USER, DB_PASS)
 
         self.prepare_storage()
-        try:
-            ports.add_port(25, 'TCP')
-            ports.add_port(110, 'TCP')
-            ports.add_port(143, 'TCP')
-            ports.add_port(587, 'TCP')
-        except Exception, e:
-            self.log.warn("failed to add ports: {0}".format(e.message))
-   
+           
     def database_init(self, database_path, user_name):
 
         self.log.info("initializing database")

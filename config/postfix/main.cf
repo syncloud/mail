@@ -680,3 +680,8 @@ smtpd_tls_security_level = may
 smtpd_tls_auth_only = no
 
 smtp_tls_security_level = may
+
+milter_protocol = 2
+milter_default_action = accept
+smtpd_milters = unix:{{ app_data_dir }}/opendkim.socket
+non_smtpd_milters = unix:{{ app_data_dir }}/opendkim.socket

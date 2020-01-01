@@ -36,7 +36,16 @@ apps:
     post-start-command: bin/service.php-fpm.sh post-start
     after: [postgresql]
     before: [nginx]
-  
+  opendkim:
+    user: mail
+    command: bin/service.opendkim.sh start
+    daemon: forking
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    after: [postgresql]
+    before: [nginx]
   nginx:
     command: bin/service.nginx.sh start
     user: mail

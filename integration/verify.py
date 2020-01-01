@@ -21,7 +21,7 @@ OPENSSL = join(DIR, "openssl", "bin", "openssl")
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir):
+def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir, device_domain):
     def module_teardown(): 
         platform_log_dir = join(artifact_dir, 'platform')
         os.mkdir(platform_log_dir)
@@ -38,18 +38,23 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         device.run_ssh('ls -la {0}/roundcubemail/ > {2}/roundcubemail.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/roundcubemail/config/ > {2}/roundcubemail.config.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/roundcubemail/logs/ > {2}/roundcubemail.logs.ls.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('journalctl > {1}/journalctl.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('netstat -nlp > {1}/netstat.log'.format(data_dir, TMP_DIR), throw=False)
         device.run_ssh('DATA_DIR={1} {0}/bin/php -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
     
         device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
         device.scp_from_device('/var/log/mail*', mail_log_dir, throw=False)
         device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
-        device.scp_from_device('/var/log/messages*', mail_log_dir, throw=False)
-        device.scp_from_device('/var/log/*syslog*', mail_log_dir, throw=False) 
+        device.run_ssh('netstat -nlp > {0}/netstat.log'.format(mail_log_dir), throw=False)
+        device.run_ssh('journalctl > {0}/journalctl.log'.format(mail_log_dir), throw=False)
+        device.run_ssh('cp /var/log/syslog {0}/syslog.log'.format(mail_log_dir), throw=False)
+        device.run_ssh('cp /var/log/messages {0}/messages.log'.format(mail_log_dir), throw=False)
+        device.run_ssh('ls -la {0}/opendkim/keys > {1}/opendkim.keys.log'.format(data_dir, mail_log_dir), throw=False)
+        device.run_ssh('ls -la {0}/opendkim/keys/{1} > {2}/opendkim.keys.domain.log'.format(data_dir, device_domain, mail_log_dir), throw=False)
+        device.run_ssh('cp {0}/opendkim/keys/{1}/mail.txt {2}/opendkim.keys.domain.mail.txt.log'.format(data_dir, device_domain, mail_log_dir), throw=False)
+        device.run_ssh('cp {0}/opendkim/keys/{1}/mail.private {2}/opendkim.keys.domain.mail.private.log'.format(data_dir, device_domain, mail_log_dir), throw=False)
         config_dir = join(artifact_dir, 'config')
         os.mkdir(config_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
+        check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
 
