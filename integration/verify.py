@@ -82,11 +82,6 @@ def test_install(app_archive_path, device_host, device_password, device_session)
     wait_for_installer(device_session, device_host)
 
 
-def test_access_change_event(device, app_domain):
-    device.run_ssh(
-            '/snap/platform/current/python/bin/python /snap/mail/current/hooks/access-change.py')
-
-
 def test_running_smtp(device_host):
     cmd = 'nc -zv -w 1 {0} 25'.format(device_host)
     func = lambda: check_output(cmd, shell=True)
