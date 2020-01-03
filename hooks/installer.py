@@ -1,22 +1,17 @@
-from os.path import dirname, join, abspath, isdir
-from os import listdir
-import sys
-
-from os.path import isdir, join
-import shutil
 import logging
 import re
+import shutil
+from os.path import join
 from subprocess import check_output
 
-from syncloudlib.application import paths, urls, storage, ports, service
 from syncloudlib import fs, linux, gen, logger
+from syncloudlib.application import paths, urls, storage, service
 from syncloudlib.application.config import set_dkim_key
-
-from config import Config
-from config import UserConfig
-import postgres
 from tzlocal import get_localzone
 
+import postgres
+from config import Config
+from config import UserConfig
 
 SYSTEMD_DOVECOT = 'mail.dovecot'
 
@@ -114,10 +109,11 @@ class Installer:
         self.log.info("setup configs")
 
     def generate_dkim_key(self):
-        check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name), cwd=self.opendkim_keys_domain_dir, shell=True)
+        check_output('{0}/bin/opendkim-genkey -s mail -d {1}'.format(self.app_dir, self.device_domain_name),
+                     cwd=self.opendkim_keys_domain_dir, shell=True)
         mail_txt_file = join(self.opendkim_keys_domain_dir, 'mail.txt')
         mail_txt = open(mail_txt_file, 'r').read().strip()
-        key = re.match(r'.*p=(.*?)".*', mail_txt, re.DOTALL|re.MULTILINE).group(1)
+        key = re.match(r'.*p=(.*?)".*', mail_txt, re.DOTALL | re.MULTILINE).group(1)
         return key
 
     def install(self):
@@ -145,7 +141,8 @@ class Installer:
 
     def initialize(self, config, user_config, db_name, db_user, db_pass):
         self.log.info("initialization")
-        postgres.execute_sql(config, "ALTER USER {0} WITH PASSWORD '{0}';".format(db_user, db_pass), database="postgres")
+        postgres.execute_sql(config, "ALTER USER {0} WITH PASSWORD '{0}';".format(db_user, db_pass),
+                             database="postgres")
         postgres.execute_sql(config, "create database {0};".format(db_name), database="postgres")
         postgres.execute_file(config, config.db_init_file(), database=db_name)
         user_config.set_activated(True)
@@ -157,8 +154,8 @@ class Installer:
         fs.chownpath(tmp_storage_path, USER_NAME)
 
     def update_domain(self):
-
         self.regenerate_configs()
         service.restart(SYSTEMD_DOVECOT)
         
     def storage_change(self):
+        pass
