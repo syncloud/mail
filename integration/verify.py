@@ -202,6 +202,14 @@ def test_imap_openssl(device, platform_data_dir, artifact_dir):
     assert 'Verify return code: 0 (ok)' in output
 
 
+def test_access_change(device):
+    device.run_ssh('snap run mail.access-change > {0}/access.change.hook.log'.format(TMP_DIR))
+
+
+def test_storage_change(device):
+    device.run_ssh('snap run mail.storage-change > {0}/storage.change.hook.log'.format(TMP_DIR))
+
+
 def test_remove(device_session, device_host):
     response = device_session.get('https://{0}/rest/remove?app_id=mail'.format(device_host),
                                   allow_redirects=False, verify=False)
