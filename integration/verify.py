@@ -28,7 +28,6 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
         mail_log_dir = join(artifact_dir, 'mail_log')
         os.mkdir(mail_log_dir)
-        device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/ > {1}/ls.log'.format(data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/dovecot/ > {1}/data.dovecot.ls.log'.format(data_dir, TMP_DIR), throw=False)
         device.run_ssh('{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {2}/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir, TMP_DIR), throw=False)
@@ -63,6 +62,7 @@ def test_start(module_setup, device_host, app, domain, device):
     add_host_alias_by_ip(app, domain, device_host)
     print(check_output('date', shell=True))
     device.run_ssh('date', retries=20)
+    device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
 
 
 def test_activate_device(device):
