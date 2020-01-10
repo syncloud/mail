@@ -83,7 +83,7 @@ auth_bind = yes
 # For example:
 #   auth_bind_userdn = cn=%u,ou=people,o=org
 #
-auth_bind_userdn = cn=%u,ou=users,dc=syncloud,dc=org
+auth_bind_userdn = uid=%u,ou=users,dc=syncloud,dc=org
 
 # LDAP protocol version to use. Likely 2 or 3.
 ldap_version = 3
