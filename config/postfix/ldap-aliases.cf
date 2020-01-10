@@ -1,7 +1,7 @@
 server_host = localhost
 search_base = ou=users, dc=syncloud, dc=org
-query_filter = (uid=%u)
-result_attribute = uid
+query_filter = (cn=%u)
+result_attribute = cn
 result_format = %u
 version = 3
 bind_dn = dc=syncloud, dc=org
