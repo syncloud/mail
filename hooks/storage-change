@@ -1,0 +1,4 @@
+#!/snap/mail/current/python/bin/python
+
+from installer import Installer
+Installer().storage_change()
