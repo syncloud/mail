@@ -23,9 +23,8 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/postfix-${ARCH}.tar.gz
-tar xf postfix-${ARCH}.tar.gz
-mv postfix ${BUILD_DIR}
+${DIR}/postfix/build.sh
+mv /snap/mail/current/postfix ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot-${ARCH}.tar.gz
 tar xf dovecot-${ARCH}.tar.gz
