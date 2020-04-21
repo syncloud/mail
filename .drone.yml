@@ -62,7 +62,7 @@ steps:
 
 services:
 - name: device
-  image: syncloud/platform-jessie-arm
+  image: syncloud/platform-buster-arm
   privileged: true
   volumes:
   - name: dbus
@@ -155,7 +155,7 @@ steps:
 
 services:
 - name: device
-  image: syncloud/platform-jessie-amd64
+  image: syncloud/platform-buster-amd64
   privileged: true
   volumes:
   - name: dbus
