@@ -49,7 +49,9 @@ make non-interactive-package install_root=${PREFIX}
 mv ${PREFIX}/usr/sbin/postfix ${PREFIX}/usr/sbin/postfix.bin
 mv ${PREFIX}/usr/sbin/postconf ${PREFIX}/usr/sbin/postconf.bin
 mv ${PREFIX}/usr/sbin/postlog ${PREFIX}/usr/sbin/postlog.bin
+mv ${PREFIX}/usr/libexec/postfix/master ${PREFIX}/usr/usr/libexec/postfix/master.bin
 cp ${DIR}/usr/sbin/* ${PREFIX}/usr/sbin
+cp ${DIR}/usr/libexec/postfix/* ${PREFIX}/usr/libexec/postfix
 
 echo "original libs"
 ldd ${PREFIX}/usr/sbin/postfix.bin
