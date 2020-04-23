@@ -23,9 +23,8 @@ rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
 mkdir -p ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/postfix-${ARCH}.tar.gz
-tar xf postfix-${ARCH}.tar.gz
-mv postfix ${BUILD_DIR}
+${DIR}/postfix/build.sh
+mv /snap/mail/current/postfix ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot-${ARCH}.tar.gz
 tar xf dovecot-${ARCH}.tar.gz
@@ -57,8 +56,9 @@ mv openssl integration/
 
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
-coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
-mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
+wget --progress=dot:giga https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
+tar xf roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
+mv roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
 cd ${BUILD_DIR}/roundcubemail
 patch -p0 < ${DIR}/patches/roundcubemail.patch
@@ -66,7 +66,7 @@ patch -p0 < ${DIR}/patches/roundcubemail.patch
 cd ${DIR}
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
-cp -r ${BUILD_DIR}/postfix/opt/data/mail/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
+cp -r ${BUILD_DIR}/postfix/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
 cp -r ${DIR}/lib ${BUILD_DIR}
 cp -r ${DIR}/hooks ${BUILD_DIR}
 
