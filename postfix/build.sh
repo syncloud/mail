@@ -49,7 +49,7 @@ make non-interactive-package install_root=${PREFIX}
 mv ${PREFIX}/usr/sbin/postfix ${PREFIX}/usr/sbin/postfix.bin
 mv ${PREFIX}/usr/sbin/postconf ${PREFIX}/usr/sbin/postconf.bin
 mv ${PREFIX}/usr/sbin/postlog ${PREFIX}/usr/sbin/postlog.bin
-mv ${PREFIX}/usr/libexec/postfix/master ${PREFIX}/usr/usr/libexec/postfix/master.bin
+mv ${PREFIX}/usr/libexec/postfix/master ${PREFIX}/usr/libexec/postfix/master.bin
 cp ${DIR}/usr/sbin/* ${PREFIX}/usr/sbin
 cp ${DIR}/usr/libexec/postfix/* ${PREFIX}/usr/libexec/postfix
 
@@ -89,6 +89,7 @@ export LD_LIBRARY_PATH=${PREFIX}/lib
 ldd ${PREFIX}/usr/sbin/postfix.bin
 ldd ${PREFIX}/usr/sbin/postconf.bin
 ldd ${PREFIX}/usr/sbin/postlog.bin
+ldd ${PREFIX}/usr/libexec/postfix/master.bin
 
 ${PREFIX}/usr/sbin/postconf -a
 ${PREFIX}/usr/sbin/postconf -A
