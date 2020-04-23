@@ -94,7 +94,7 @@ local build(arch) = {
     ],
     services: [{
         name: "device",
-        image: "syncloud/platform-buster-" + arch,
+        image: "syncloud/platform-jessie-" + arch,
         privileged: true,
         volumes: [
             {
