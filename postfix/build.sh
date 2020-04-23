@@ -23,50 +23,7 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
-ls -la ${PREFIX}/lib
-ls -la ${PREFIX}/include
-
 cd ${BUILD_DIR}
-wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
-tar xf ${NAME}-${VERSION}.tar.gz
-cd ${NAME}-${VERSION}
-export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
-	-DUSE_SASL_AUTH \
-	-DDEF_SERVER_SASL_TYPE=\"dovecot\" \
-  -I'${PREFIX}'/include -I/usr/include -DHAS_LDAP \
-  -DUSE_TLS \
- 	-DUSE_CYRUS_SASL -I/usr/include/sasl'
-
-export AUXLIBS="-L${PREFIX}/lib \
-  -L/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE) \
-  -lldap -L/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE) \
-  -llber -lssl -lcrypto -lsasl2"
-
-make makefiles
-make
-make non-interactive-package install_root=${PREFIX}
-
-mv ${PREFIX}/usr/sbin/postfix ${PREFIX}/usr/sbin/postfix.bin
-mv ${PREFIX}/usr/sbin/postconf ${PREFIX}/usr/sbin/postconf.bin
-mv ${PREFIX}/usr/sbin/postlog ${PREFIX}/usr/sbin/postlog.bin
-mv ${PREFIX}/usr/sbin/postsuper ${PREFIX}/usr/sbin/postsuper.bin
-mv ${PREFIX}/usr/sbin/postalias ${PREFIX}/usr/sbin/postalias.bin
-mv ${PREFIX}/usr/sbin/postcat ${PREFIX}/usr/sbin/postcat.bin
-mv ${PREFIX}/usr/sbin/postdrop ${PREFIX}/usr/sbin/postdrop.bin
-mv ${PREFIX}/usr/sbin/postkick ${PREFIX}/usr/sbin/postkick.bin
-mv ${PREFIX}/usr/sbin/postlock ${PREFIX}/usr/sbin/postlock.bin
-mv ${PREFIX}/usr/sbin/postmap ${PREFIX}/usr/sbin/postmap.bin
-mv ${PREFIX}/usr/sbin/postmulti ${PREFIX}/usr/sbin/postmulti.bin
-mv ${PREFIX}/usr/sbin/postqueue ${PREFIX}/usr/sbin/postqueue.bin
-mv ${PREFIX}/usr/sbin/sendmail ${PREFIX}/usr/sbin/sendmail.bin
-
-mv ${PREFIX}/usr/libexec/postfix/master ${PREFIX}/usr/libexec/postfix/master.bin
-
-cp ${DIR}/usr/sbin/* ${PREFIX}/usr/sbin
-cp ${DIR}/usr/libexec/postfix/* ${PREFIX}/usr/libexec/postfix
-
-echo "original libs"
-ldd ${PREFIX}/usr/sbin/postfix.bin
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdb-*.so ${PREFIX}/lib
@@ -89,19 +46,34 @@ cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicui18n.so* ${PREFIX}/l
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicuuc.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicudata.so* ${PREFIX}/lib
 cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libncurses.so* ${PREFIX}/lib
-cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpcre.so.* ${PREFIX}/lib 
+cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpcre.so.* ${PREFIX}/lib
 #cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libstdc++.so.* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libm.so.* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgcc_s.so.* ${PREFIX}/lib 
+#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgcc_s.so.* ${PREFIX}/lib
+
+wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
+tar xf ${NAME}-${VERSION}.tar.gz
+cd ${NAME}-${VERSION}
+export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
+	-DUSE_SASL_AUTH \
+	-DDEF_SERVER_SASL_TYPE=\"dovecot\" \
+  -I'${PREFIX}'/include -I/usr/include -DHAS_LDAP \
+  -DUSE_TLS \
+ 	-DUSE_CYRUS_SASL -I/usr/include/sasl'
+
+export AUXLIBS="-L${PREFIX}/lib \
+  -L${PREFIX}/lib \
+  -lldap -L${PREFIX}/lib \
+  -llber -lssl -lcrypto -lsasl2"
+
+make makefiles
+make
+make non-interactive-package install_root=${PREFIX}
+
+ldd ${PREFIX}/usr/sbin/postfix
 
 echo "embedded libs"
-#export LD_DEBUG=libs
 export LD_LIBRARY_PATH=${PREFIX}/lib
-#export LD_PRELOAD=${PREFIX}/lib
-ldd ${PREFIX}/usr/sbin/postfix.bin
-ldd ${PREFIX}/usr/sbin/postconf.bin
-ldd ${PREFIX}/usr/sbin/postlog.bin
-ldd ${PREFIX}/usr/libexec/postfix/master.bin
 
 ${PREFIX}/usr/sbin/postconf -a
 ${PREFIX}/usr/sbin/postconf -A
