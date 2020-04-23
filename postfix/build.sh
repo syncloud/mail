@@ -61,19 +61,13 @@ export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
   -DUSE_TLS \
  	-DUSE_CYRUS_SASL -I/usr/include/sasl'
 
-export AUXLIBS="-L${PREFIX}/lib \
-  -L${PREFIX}/lib \
-  -lldap -L${PREFIX}/lib \
-  -llber -lssl -lcrypto -lsasl2"
+export AUXLIBS="-L${PREFIX}/lib -R${PREFIX}/lib -lldap -llber -lssl -lcrypto -lsasl2"
 
+export LD_LIBRARY_PATH=${PREFIX}/lib
 make makefiles shared=no
 make
 make non-interactive-package install_root=${PREFIX}
 
 ldd ${PREFIX}/usr/sbin/postfix
-
-echo "embedded libs"
-export LD_LIBRARY_PATH=${PREFIX}/lib
-
 ${PREFIX}/usr/sbin/postconf -a
 ${PREFIX}/usr/sbin/postconf -A
