@@ -61,9 +61,8 @@ export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
   -DUSE_TLS \
  	-DUSE_CYRUS_SASL -I/usr/include/sasl'
 
-export AUXLIBS="-L${PREFIX}/lib -R${PREFIX}/lib -lldap -llber -lssl -lcrypto -lsasl2"
+export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
 
-export LD_LIBRARY_PATH=${PREFIX}/lib
 make makefiles shared=no
 make
 make non-interactive-package install_root=${PREFIX}
