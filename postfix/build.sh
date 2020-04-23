@@ -66,7 +66,7 @@ export AUXLIBS="-L${PREFIX}/lib \
   -lldap -L${PREFIX}/lib \
   -llber -lssl -lcrypto -lsasl2"
 
-make makefiles
+make makefiles shared=no
 make
 make non-interactive-package install_root=${PREFIX}
 
