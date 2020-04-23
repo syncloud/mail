@@ -49,7 +49,19 @@ make non-interactive-package install_root=${PREFIX}
 mv ${PREFIX}/usr/sbin/postfix ${PREFIX}/usr/sbin/postfix.bin
 mv ${PREFIX}/usr/sbin/postconf ${PREFIX}/usr/sbin/postconf.bin
 mv ${PREFIX}/usr/sbin/postlog ${PREFIX}/usr/sbin/postlog.bin
+mv ${PREFIX}/usr/sbin/postsuper ${PREFIX}/usr/usr/sbin/postsuper.bin
+mv ${PREFIX}/usr/sbin/postalias ${PREFIX}/usr/sbin/postalias.bin
+mv ${PREFIX}/usr/sbin/postcat ${PREFIX}/usr/sbin/postcat.bin
+mv ${PREFIX}/usr/sbin/postdrop ${PREFIX}/usr/sbin/postdrop.bin
+mv ${PREFIX}/usr/sbin/postkick ${PREFIX}/usr/sbin/postkick.bin
+mv ${PREFIX}/usr/sbin/postlock ${PREFIX}/usr/sbin/postlock.bin
+mv ${PREFIX}/usr/sbin/postmap ${PREFIX}/usr/sbin/postmap.bin
+mv ${PREFIX}/usr/sbin/postmulti ${PREFIX}/usr/sbin/postmulti.bin
+mv ${PREFIX}/usr/sbin/postqueue ${PREFIX}/usr/sbin/postqueue.bin
+mv ${PREFIX}/usr/sbin/sendmail ${PREFIX}/usr/sbin/sendmail.bin
+
 mv ${PREFIX}/usr/libexec/postfix/master ${PREFIX}/usr/libexec/postfix/master.bin
+
 cp ${DIR}/usr/sbin/* ${PREFIX}/usr/sbin
 cp ${DIR}/usr/libexec/postfix/* ${PREFIX}/usr/libexec/postfix
 
