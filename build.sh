@@ -56,8 +56,9 @@ mv openssl integration/
 
 ${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
-coin --to ${BUILD_DIR} raw https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
-mv ${BUILD_DIR}/roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
+wget --progress=dot:giga https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
+tar xf roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
+mv roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
 
 cd ${BUILD_DIR}/roundcubemail
 patch -p0 < ${DIR}/patches/roundcubemail.patch
