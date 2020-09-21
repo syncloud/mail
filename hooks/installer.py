@@ -98,14 +98,6 @@ class Installer:
         fs.makepath(box_data_dir)
         fs.chownpath(box_data_dir, 'dovecot', recursive=True)
 
-        dovecot_lda_error_log = join(self.app_data_dir, 'log', 'dovecot-lda.error.log')
-        fs.touchfile(dovecot_lda_error_log)
-        fs.chownpath(dovecot_lda_error_log, 'dovecot')
-
-        dovecot_lda_info_log = join(self.app_data_dir, 'log', 'dovecot-lda.info.log')
-        fs.touchfile(dovecot_lda_info_log)
-        fs.chownpath(dovecot_lda_info_log, 'dovecot')
-        
         self.log.info("setup configs")
 
     def generate_dkim_key(self):
