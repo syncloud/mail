@@ -23,7 +23,17 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
+apt install -y libsasl2-modules
+
 cd ${BUILD_DIR}
+
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/libanonymous.so* ${PREFIX}/lib
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/libcrammd5.so* ${PREFIX}/lib
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/libdigestmd5.so* ${PREFIX}/lib
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/liblogin.so* ${PREFIX}/lib
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/libntlm.so* ${PREFIX}/lib
+/usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2/libplain.so* ${PREFIX}/lib
+
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdb-*.so ${PREFIX}/lib
