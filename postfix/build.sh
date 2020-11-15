@@ -42,9 +42,9 @@ cd cyrus-sasl-${SASL_VERSION}
     --disable-macos-framework \
     --with-pam=/usr \
     --with-saslauthd=/var/snap/mail/common/saslauthd \
-    --with-configdir=/snap/mail/postfix/lib/sasl2 \
-    --with-plugindir=/snap/mail/postfix/lib/sasl2 \
-    --sysconfdir=/etc \
+    --with-configdir=/snap/mail/current/postfix/lib/sasl2 \
+    --with-plugindir=/snap/mail/current/postfix/lib/sasl2 \
+    --sysconfdir=/snap/mail/current/postfix/config/sasl2 \
     --with-devrandom=/dev/urandom \
     --with-sphinx-build 
 make
