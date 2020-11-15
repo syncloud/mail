@@ -9,6 +9,7 @@ fi
 
 case $1 in
 start)
+    export SASL_PATH=$DIR/postfix/lib/sasl2
     exec $DIR/postfix/usr/sbin/postfix -c ${SNAP_COMMON}/config/postfix start
     ;;
 stop)

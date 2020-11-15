@@ -23,7 +23,10 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
+apt install -y libsasl2-modules
+
 cd ${BUILD_DIR}
+
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdb-*.so ${PREFIX}/lib
