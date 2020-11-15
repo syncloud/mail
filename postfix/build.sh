@@ -8,12 +8,47 @@ export TMP=/tmp
 NAME=postfix
 VERSION=3.4.10
 OPENSSL_VERSION=1.0.2g
+SASL_VERSION=2.1.27
 BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
+
+cd ${BUILD_DIR}
+wget https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
+tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
+cd cyrus-sasl-${SASL_VERSION}
+./configure \
+    --prefix=${PREFIX} \
+    --enable-static \
+    --enable-shared \
+    --enable-alwaystrue \
+    --enable-checkapop \
+    --enable-cram \
+    --enable-digest \
+    --enable-otp \
+    --disable-srp \
+    --disable-srp-setpass \
+    --disable-krb4 \
+    --enable-gss_mutexes \
+    --enable-auth-sasldb \
+    --enable-plain \
+    --enable-anon \
+    --enable-login \
+    --enable-ntlm \
+    --disable-passdss \
+    --disable-macos-framework \
+    --with-pam=/usr \
+    --with-saslauthd=/var/snap/mail/common/saslauthd \
+    --with-configdir=/snap/mail/current/postfix/lib/sasl2 \
+    --with-plugindir=/snap/mail/current/postfix/lib/sasl2 \
+    --sysconfdir=/snap/mail/current/postfix/config/sasl2 \
+    --with-devrandom=/dev/urandom \
+    --with-sphinx-build 
+make
+make install
 
 cd ${BUILD_DIR}
 curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
@@ -23,10 +58,6 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
-apt install -y libsasl2-modules
-
-cd ${BUILD_DIR}
-
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdb-*.so ${PREFIX}/lib
@@ -34,8 +65,6 @@ cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libnsl.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libresolv.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdl.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libc.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libsasl2.so* ${PREFIX}/lib
-cp -r /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2 ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgnutls-deb0.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpthread.so.0 ${PREFIX}/lib
 cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libz.so* ${PREFIX}/lib
@@ -54,6 +83,7 @@ cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpcre.so.* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libm.so.* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgcc_s.so.* ${PREFIX}/lib
 
+cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
