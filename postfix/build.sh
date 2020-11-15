@@ -17,7 +17,7 @@ rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
 cd ${BUILD_DIR}
-curl -O https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
+wget https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
 tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
 cd cyrus-sasl-${SASL_VERSION}
 ./configure \
