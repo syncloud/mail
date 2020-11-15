@@ -8,6 +8,7 @@ export TMP=/tmp
 NAME=postfix
 VERSION=3.4.10
 OPENSSL_VERSION=1.0.2g
+SASL_VERSION=2.1.27
 BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
@@ -23,7 +24,38 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
-apt install -y libsasl2-modules
+cd ${BUILD_DIR}
+curl -O https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
+cd cyrus-sasl-${SASL_VERSION}
+./configure \
+    --prefix=${PREFIX \
+    --enable-static \
+    --enable-shared \
+    --enable-alwaystrue \
+    --enable-checkapop \
+    --enable-cram \
+    --enable-digest \
+    --enable-otp \
+    --disable-srp \
+    --disable-srp-setpass \
+    --disable-krb4 \
+    --enable-gss_mutexes \
+    --enable-auth-sasldb \
+    --enable-plain \
+    --enable-anon \
+    --enable-login \
+    --enable-ntlm \
+    --disable-passdss \
+    --disable-macos-framework \
+    --with-pam=/usr \
+    --with-saslauthd=/var/snap/mail/common/saslauthd \
+    --with-configdir=/snap/mail/postfix/lib/sasl2 \
+    --with-plugindir=/snap/mail/postfix/lib/sasl2 \
+    --sysconfdir=/etc \
+    --with-devrandom=/dev/urandom \
+    --with-sphinx-build 
+make
+make install
 
 cd ${BUILD_DIR}
 
@@ -34,8 +66,6 @@ cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libnsl.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libresolv.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdl.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libc.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libsasl2.so* ${PREFIX}/lib
-cp -r /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/sasl2 ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgnutls-deb0.so* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpthread.so.0 ${PREFIX}/lib
 cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libz.so* ${PREFIX}/lib
