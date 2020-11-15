@@ -21,7 +21,7 @@ wget https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL
 tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
 cd cyrus-sasl-${SASL_VERSION}
 ./configure \
-    --prefix=${PREFIX \
+    --prefix=${PREFIX} \
     --enable-static \
     --enable-shared \
     --enable-alwaystrue \
