@@ -17,15 +17,8 @@ rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
 cd ${BUILD_DIR}
-curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
-tar xf openssl-${OPENSSL_VERSION}.tar.gz
-cd openssl-${OPENSSL_VERSION}
-./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
-make
-make install
-
-cd ${BUILD_DIR}
 curl -O https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
+tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
 cd cyrus-sasl-${SASL_VERSION}
 ./configure \
     --prefix=${PREFIX \
@@ -58,6 +51,12 @@ make
 make install
 
 cd ${BUILD_DIR}
+curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+tar xf openssl-${OPENSSL_VERSION}.tar.gz
+cd openssl-${OPENSSL_VERSION}
+./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
+make
+make install
 
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
 cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
@@ -84,6 +83,7 @@ cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpcre.so.* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libm.so.* ${PREFIX}/lib
 #cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgcc_s.so.* ${PREFIX}/lib
 
+cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
