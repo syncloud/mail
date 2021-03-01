@@ -34,3 +34,8 @@ $config['imap_conn_options'] = array(
       'capath' => '/etc/ssl/certs',
   ),
 );
+$config['support_url'] = 'https://syncloud.org';
+$config['product_name'] = 'Syncloud Mail';
+$config['useragent'] = 'Syncloud Mail/'.RCMAIL_VERSION;
+$config['skin'] = 'elastic';
+$config['password_charset'] = 'UTF-8';
