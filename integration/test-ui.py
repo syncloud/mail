@@ -1,22 +1,12 @@
-import os
-import shutil
-from os.path import dirname, join, exists
-
-import time
+from os.path import dirname, join
 
 import pytest
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from syncloudlib.integration.hosts import add_host_alias_by_ip
-from syncloudlib.integration.screenshots import screenshots
 
 DIR = dirname(__file__)
 TMP_DIR = '/tmp/syncloud/ui'
+
 
 @pytest.fixture(scope="session")
 def module_setup(request, device, artifact_dir, ui_mode):
@@ -35,29 +25,15 @@ def test_start(module_setup, app, device_host, domain):
     add_host_alias_by_ip(app, domain, device_host)
 
 
-def test_web(driver, app_domain, device_domain, ui_mode, device_user, device_password, screenshot_dir):
+def test_web(selenium, device_user, device_password):
 
-    driver.get("https://{0}".format(app_domain))
-    
-    time.sleep(2)
-    screenshots(driver, screenshot_dir, 'login-' + ui_mode)
-
-    user = driver.find_element_by_id("rcmloginuser")
-    user.send_keys(device_user)
-    password = driver.find_element_by_id("rcmloginpwd")
+    selenium.open_app()
+    selenium.screenshot('login')
+    selenium.find_by_id("rcmloginuser").send_keys(device_user)
+    password = selenium.find_by_id("rcmloginpwd")
     password.send_keys(device_password)
-   
-    screenshots(driver, screenshot_dir, 'login-filled-' + ui_mode)
-  
+    selenium.screenshot('login-filled')
     password.send_keys(Keys.RETURN)
-
-    time.sleep(10)
-    screenshots(driver, screenshot_dir, 'login_progress-' + ui_mode)
-
-    #wait_driver = WebDriverWait(driver, 60)
-    #username = '{0}@{1}'.format(device_user, device_domain)
-    #wait_driver.until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '.username'), username))
-    time.sleep(10)
-    
-    screenshots(driver, screenshot_dir, 'main-' + ui_mode)
-    
+    selenium.screenshot('login_progress')
+    selenium.find_by_xpath("//ul[@id='mailboxlist']")
+    selenium.screenshot('main')
