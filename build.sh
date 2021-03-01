@@ -66,6 +66,7 @@ patch -p0 < ${DIR}/patches/roundcubemail.patch
 cd ${DIR}
 cp -r ${DIR}/bin ${BUILD_DIR}
 cp -r ${DIR}/config ${BUILD_DIR}/config.templates
+cp ${BUILD_DIR}/roundcubemail/config/defaults.inc.php ${BUILD_DIR}/config.templates/roundcube/
 cp -r ${BUILD_DIR}/postfix/config/postfix/postfix-files ${BUILD_DIR}/config.templates/postfix
 cp -r ${DIR}/lib ${BUILD_DIR}
 cp -r ${DIR}/hooks ${BUILD_DIR}
