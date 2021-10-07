@@ -1,6 +1,7 @@
 local name = "mail";
+local browser = "firefox";
 
-local build(arch) = {
+local build(arch, testUI) = {
     kind: "pipeline",
     name: arch,
 
@@ -11,7 +12,7 @@ local build(arch) = {
     steps: [
         {
             name: "version",
-            image: "syncloud/build-deps-" + arch,
+            image: "debian:buster-slim",
             commands: [
                 "echo $(date +%y%m%d)$DRONE_BUILD_NUMBER > version",
                 "echo " + arch + "$DRONE_BRANCH > domain"
@@ -19,7 +20,7 @@ local build(arch) = {
         },
         {
             name: "build",
-            image: "syncloud/build-deps-" + arch,
+            image: "debian:buster-slim",
             commands: [
                 "VERSION=$(cat version)",
                 "./build.sh " + name + " $VERSION"
@@ -27,7 +28,7 @@ local build(arch) = {
         },
         {
             name: "test-intergation",
-            image: "syncloud/build-deps-" + arch,
+            image: "python:3.8-slim-buster",
             commands: [
               "pip2 install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
@@ -35,11 +36,11 @@ local build(arch) = {
               "cd integration",
               "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=" + name
             ]
-        },
-        if arch == "arm" then {} else
-        {
+        }] +
+        (if arch == "arm" then [] else
+        [{
             name: "test-ui-desktop",
-            image: "syncloud/build-deps-" + arch,
+            image: "python:3.8-slim-buster",
             commands: [
               "pip2 install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
@@ -50,11 +51,11 @@ local build(arch) = {
                 name: "shm",
                 path: "/dev/shm"
             }]
-        },
-        if arch == "arm" then {} else
-        {
+        }]) +
+        (if arch == "arm" then [] else
+        [{
             name: "test-ui-mobile",
-            image: "syncloud/build-deps-" + arch,
+            image: "python:3.8-slim-buster",
             commands: [
               "pip2 install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
@@ -65,10 +66,10 @@ local build(arch) = {
                 name: "shm",
                 path: "/dev/shm"
             }]
-        },
+        }]) + [
         {
             name: "upload",
-            image: "syncloud/build-deps-" + arch,
+            image: "debian:buster-slim",
             environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
@@ -108,8 +109,8 @@ local build(arch) = {
     ],
     services: [
         {
-            name: "device",
-            image: "syncloud/platform-jessie-" + arch,
+            name: "mail.device.com",
+            image: "syncloud/" + platform_image,
             privileged: true,
             volumes: [
                 {
@@ -122,14 +123,15 @@ local build(arch) = {
                 }
             ]
         },
-        if arch == "arm" then {} else {
-            name: "selenium",
-            image: "selenium/standalone-firefox:4.0.0-beta-1-20210215",
-            volumes: [{
-                name: "shm",
-                path: "/dev/shm"
-            }]
-        }
+        ] + ( if testUI then [{
+                    name: "selenium",
+                    image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
+                    volumes: [{
+                        name: "shm",
+                        path: "/dev/shm"
+                    }]
+                }
+            ] else [] ),
     ],
     volumes: [
         {
@@ -152,6 +154,7 @@ local build(arch) = {
 };
 
 [
-    build("arm"),
-    build("amd64")
+    build("arm", false),
+    build("arm64", false),
+    build("amd64", true)
 ]

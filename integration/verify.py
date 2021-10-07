@@ -9,7 +9,7 @@ from subprocess import check_output
 import pytest
 import requests
 from requests.adapters import HTTPAdapter
-from syncloudlib.integration.hosts import add_host_alias_by_ip
+from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install, wait_for_installer
 
 from integration.util.helper import retry_func
@@ -65,14 +65,14 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
 
 
 def test_start(module_setup, device_host, app, domain, device):
-    add_host_alias_by_ip(app, domain, device_host)
+    add_host_alias(app, device_host, domain)
     print(check_output('date', shell=True))
     device.run_ssh('date', retries=20)
     device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
 
 
 def test_activate_device(device):
-    response = device.activate()
+    response = device.activate_custom()
     assert response.status_code == 200, response.text
 
 
@@ -83,9 +83,8 @@ def test_platform_rest(device_host):
     assert response.status_code == 200
 
 
-def test_install(app_archive_path, device_host, device_password, device_session):
-    local_install(device_host, device_password, app_archive_path)
-    wait_for_installer(device_session, device_host)
+def test_install(app_archive_path, domain, device_password):
+    local_install(domain, device_password, app_archive_path)
 
 
 def test_running_smtp(device_host):
