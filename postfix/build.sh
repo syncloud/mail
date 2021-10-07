@@ -13,6 +13,9 @@ BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
+apt update
+apt -y install libdb-dev
+
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
