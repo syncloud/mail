@@ -8,13 +8,13 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
-export TMPDIR=/tmp
-export TMP=/tmp
-
 NAME=$1
 ROUNDCUBE_VERSION=1.4.9
 ARCH=$(uname -m)
 VERSION=$2
+
+apt update
+apt -y install wget squashfs-tools dpkg-dev libltdl7
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
