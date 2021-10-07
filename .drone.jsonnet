@@ -107,7 +107,7 @@ local build(arch, testUI) = {
             }
         }
     ],
-    services: [
+    services: ([
         {
             name: "mail.device.com",
             image: "syncloud/" + platform_image,
@@ -122,8 +122,7 @@ local build(arch, testUI) = {
                     path: "/dev"
                 }
             ]
-        },
-        ] + ( if testUI then [{
+        }] + ( if testUI then [{
                     name: "selenium",
                     image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
                     volumes: [{
@@ -132,7 +131,6 @@ local build(arch, testUI) = {
                     }]
                 }
             ] else [] ),
-    ],
     volumes: [
         {
             name: "dbus",
