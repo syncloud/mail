@@ -32,7 +32,7 @@ mv dovecot ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
-mv php7 ${BUILD_DIR}/php
+mv php ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
