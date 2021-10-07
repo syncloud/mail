@@ -20,7 +20,7 @@ OPENSSL = join(DIR, "openssl", "bin", "openssl")
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir, device_domain):
+def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir, domain):
     def module_teardown(): 
         platform_log_dir = join(artifact_dir, 'platform')
         os.mkdir(platform_log_dir)
@@ -51,11 +51,11 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         device.run_ssh('cp /var/log/messages {0}/messages.log'.format(mail_log_dir), throw=False)
         device.run_ssh('ls -la {0}/opendkim/keys > {1}/opendkim.keys.log'.format(data_dir, mail_log_dir), throw=False)
         device.run_ssh('ls -la {0}/opendkim/keys/{1} > {2}/opendkim.keys.domain.log'
-                       .format(data_dir, device_domain, mail_log_dir), throw=False)
+                       .format(data_dir, domain, mail_log_dir), throw=False)
         device.run_ssh('cp {0}/opendkim/keys/{1}/mail.txt {2}/opendkim.keys.domain.mail.txt.log'
-                       .format(data_dir, device_domain, mail_log_dir), throw=False)
+                       .format(data_dir, domain, mail_log_dir), throw=False)
         device.run_ssh('cp {0}/opendkim/keys/{1}/mail.private {2}/opendkim.keys.domain.mail.private.log'
-                       .format(data_dir, device_domain, mail_log_dir), throw=False)
+                       .format(data_dir, domain, mail_log_dir), throw=False)
         config_dir = join(artifact_dir, 'config')
         os.mkdir(config_dir)
         device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
