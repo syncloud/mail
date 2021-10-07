@@ -7,7 +7,7 @@ def retry_func(func, message="something", retries=0, sleep=1):
         try:
             print("running: {0}".format(message))
             return func()
-        except Exception, e:
+        except Exception as e:
             if retry >= retries:
                 raise e
             retry += 1
