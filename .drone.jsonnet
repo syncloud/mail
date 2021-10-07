@@ -107,30 +107,28 @@ local build(arch, testUI) = {
             }
         }
     ],
-    services: ([
-        {
-            name: "mail.device.com",
-            image: "syncloud/" + platform_image,
-            privileged: true,
-            volumes: [
-                {
-                    name: "dbus",
-                    path: "/var/run/dbus"
-                },
-                {
-                    name: "dev",
-                    path: "/dev"
-                }
-            ]
-        }] + ( if testUI then [{
-                    name: "selenium",
-                    image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
-                    volumes: [{
-                        name: "shm",
-                        path: "/dev/shm"
-                    }]
-                }
-            ] else [] ),
+    services: [{
+       name: "mail.device.com",
+       image: "syncloud/" + platform_image,
+       privileged: true,
+       volumes: [
+           {
+               name: "dbus",
+               path: "/var/run/dbus"
+           },
+           {
+               name: "dev",
+               path: "/dev"
+           }
+       ]
+    }] + ( if testUI then [{
+           name: "selenium",
+           image: "selenium/standalone-" + browser + ":4.0.0-beta-3-prerelease-20210402",
+           volumes: [{
+               name: "shm",
+               path: "/dev/shm"
+           }]
+       }] else []),
     volumes: [
         {
             name: "dbus",
