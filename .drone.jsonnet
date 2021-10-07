@@ -30,47 +30,50 @@ local build(arch, testUI, platform_image) = {
             name: "test-intergation",
             image: "python:3.8-slim-buster",
             commands: [
-              "pip2 install -r dev_requirements.txt",
+              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc apache2-utils libffi-dev",
+              "pip install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=device --app=" + name
+              "py.test -x -s verify.py --domain=$DOMAIN --app-archive-path=$APP_ARCHIVE_PATH --device-host=mail.device.com --app=" + name
             ]
-        }] +
-        (if arch == "arm" then [] else
-        [{
+        }
+        ] + ( if testUI then [
+        {
             name: "test-ui-desktop",
             image: "python:3.8-slim-buster",
             commands: [
-              "pip2 install -r dev_requirements.txt",
+              "apt-get update && apt-get install -y sshpass openssh-client libffi-dev",
+              "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=device --app=" + name,
+              "py.test -x -s test-ui.py --ui-mode=desktop --domain=$DOMAIN --device-host=mail.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }]) +
-        (if arch == "arm" then [] else
-        [{
+        },
+        {
             name: "test-ui-mobile",
             image: "python:3.8-slim-buster",
             commands: [
-              "pip2 install -r dev_requirements.txt",
+              "apt-get update && apt-get install -y sshpass openssh-client libffi-dev",
+              "pip install -r dev_requirements.txt",
               "DOMAIN=$(cat domain)",
               "cd integration",
-              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=device --app=" + name,
+              "py.test -x -s test-ui.py --ui-mode=mobile --domain=$DOMAIN --device-host=mail.device.com --app=" + name + " --browser=" + browser,
             ],
             volumes: [{
                 name: "shm",
                 path: "/dev/shm"
             }]
-        }]) + [
+        }
+        ] else [] ) + [
         {
             name: "upload",
-            image: "debian:buster-slim",
-            environment: {
+                image: "python:3.8-slim-buster",
+                environment: {
                 AWS_ACCESS_KEY_ID: {
                     from_secret: "AWS_ACCESS_KEY_ID"
                 },
@@ -81,7 +84,7 @@ local build(arch, testUI, platform_image) = {
             commands: [
               "VERSION=$(cat version)",
               "PACKAGE=$(cat package.name)",
-              "pip2 install -r dev_requirements.txt",
+              "pip install syncloud-lib s3cmd",
               "syncloud-upload.sh " + name + " $DRONE_BRANCH $VERSION $PACKAGE"
             ]
         },
