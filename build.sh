@@ -14,7 +14,7 @@ ARCH=$(uname -m)
 VERSION=$2
 
 apt update
-apt -y install wget squashfs-tools dpkg-dev libltdl7
+apt -y install wget curl squashfs-tools dpkg-dev libltdl7
 
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
