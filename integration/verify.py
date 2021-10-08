@@ -137,14 +137,14 @@ def test_postfix_auth(app_domain, device_user, device_password):
     server.login(device_user, device_password)
 
 
-def test_postfix_submission_lib(app_domain, device_domain, device_user, device_password):
+def test_postfix_submission_lib(app_domain, domain, device_user, device_password):
     server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
     server.set_debuglevel(1)
     server.ehlo()
     # server.starttls()
     server.login(device_user, device_password)
     msg = MIMEText('test')
-    mail_from = '{0}@{1}'.format(device_user, device_domain)
+    mail_from = '{0}@{1}'.format(device_user, domain)
     mail_to = mail_from
     msg['Subject'] = 'test subject'
     msg['From'] = mail_from

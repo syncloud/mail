@@ -30,11 +30,11 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf dovecot-${ARCH}.tar.gz
 mv dovecot ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/php7-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/php7/php7-${ARCH}.tar.gz
 tar xf php7-${ARCH}.tar.gz
 mv php ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/nginx-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/nginx/nginx-${ARCH}.tar.gz
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}
 
