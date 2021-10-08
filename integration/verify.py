@@ -10,7 +10,7 @@ import pytest
 import requests
 from requests.adapters import HTTPAdapter
 from syncloudlib.integration.hosts import add_host_alias
-from syncloudlib.integration.installer import local_install, wait_for_installer
+from syncloudlib.integration.installer import local_install
 
 from integration.util.helper import retry_func
 
