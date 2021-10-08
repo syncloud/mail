@@ -30,7 +30,7 @@ local build(arch, testUI, platform_image) = {
             name: "test-intergation",
             image: "python:3.8-slim-buster",
             commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc apache2-utils libffi-dev expect",
+              "apt-get update && apt-get install -y sshpass openssh-client netcat rustc apache2-utils libffi-dev expect telnet",
               "pip install -r dev_requirements.txt",
               "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
               "DOMAIN=$(cat domain)",
