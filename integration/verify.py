@@ -193,7 +193,7 @@ def test_imap_openssl(device, platform_data_dir, artifact_dir):
     
     device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
-                            "{0} s_client -CAfile /var/snap/platform/common/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
+                            "{0} s_client -CAfile /var/snap/platform/current/syncloud.crt -CApath /etc/ssl/certs -connect localhost:143 "
                             "-servername localhost -verify 3 -starttls imap".format(OPENSSL))
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
         f.write(output)
@@ -215,4 +215,6 @@ def test_remove(device, app):
 
 def test_reinstall(app_archive_path, app_domain, device_password):
     local_install(app_domain, device_password, app_archive_path)
+
+
 
