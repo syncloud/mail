@@ -40,7 +40,7 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
                        .format(app_dir, data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/roundcubemail/logs/ > {2}/roundcubemail.logs.ls.log'
                        .format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('DATA_DIR={1} {0}/bin/php -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
+        device.run_ssh('DATA_DIR={1} {0}/bin/php.sh -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
     
         device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
         device.scp_from_device('/var/log/mail*', mail_log_dir, throw=False)
@@ -193,7 +193,7 @@ def test_imap_openssl(device, platform_data_dir, artifact_dir):
     
     device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
-                            "{0} s_client -CAfile /var/snap/platform/current/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
+                            "{0} s_client -CAfile /var/snap/platform/common/syncloud.ca.crt -CApath /etc/ssl/certs -connect localhost:143 "
                             "-servername localhost -verify 3 -starttls imap".format(OPENSSL))
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
         f.write(output)
@@ -215,3 +215,4 @@ def test_remove(device, app):
 
 def test_reinstall(app_archive_path, app_domain, device_password):
     local_install(app_domain, device_password, app_archive_path)
+
