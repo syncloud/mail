@@ -27,6 +27,13 @@ local build(arch, testUI, platform_image) = {
             ]
         },
         {
+            name: "build python",
+            image: "debian:buster-slim",
+            commands: [
+                "./build-python.sh"
+            ]
+        },
+        {
             name: "test-intergation",
             image: "python:3.8-slim-buster",
             commands: [

@@ -42,10 +42,6 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf postgresql-${ARCH}.tar.gz
 mv postgresql ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/python3/python-${ARCH}.tar.gz
-tar xf python-${ARCH}.tar.gz
-mv python ${BUILD_DIR}
-
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/opendkim-${ARCH}-2.10.3.tar.gz
 tar xf opendkim-${ARCH}-2.10.3.tar.gz
 mv opendkim ${BUILD_DIR}
@@ -53,8 +49,6 @@ mv opendkim ${BUILD_DIR}
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/openssl/openssl-${ARCH}.tar.gz
 tar xf openssl-${ARCH}.tar.gz
 mv openssl integration/
-
-${BUILD_DIR}/python/bin/pip install -r ${DIR}/requirements.txt
 
 wget --progress=dot:giga https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 tar xf roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
