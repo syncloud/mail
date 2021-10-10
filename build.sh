@@ -26,7 +26,7 @@ mkdir -p ${BUILD_DIR}
 ${DIR}/postfix/build.sh
 mv /snap/mail/current/postfix ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/dovecot-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/dovecot/dovecot-${ARCH}.tar.gz
 tar xf dovecot-${ARCH}.tar.gz
 mv dovecot ${BUILD_DIR}
 
@@ -42,7 +42,7 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf postgresql-${ARCH}.tar.gz
 mv postgresql ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/python-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/python3/python-${ARCH}.tar.gz
 tar xf python-${ARCH}.tar.gz
 mv python ${BUILD_DIR}
 
@@ -50,7 +50,7 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf opendkim-${ARCH}-2.10.3.tar.gz
 mv opendkim ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/openssl-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/openssl/openssl-${ARCH}.tar.gz
 tar xf openssl-${ARCH}.tar.gz
 mv openssl integration/
 
