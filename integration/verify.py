@@ -1,14 +1,11 @@
 import imaplib
 import os
+import pytest
 import smtplib
 import time
 from email.mime.text import MIMEText
 from os.path import dirname, join
 from subprocess import check_output
-
-import pytest
-import requests
-from requests.adapters import HTTPAdapter
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 
@@ -74,13 +71,6 @@ def test_start(module_setup, device_host, app, domain, device):
 def test_activate_device(device):
     response = device.activate_custom()
     assert response.status_code == 200, response.text
-
-
-def test_platform_rest(device_host):
-    session = requests.session()
-    session.mount('https://{0}'.format(device_host), HTTPAdapter(max_retries=5))
-    response = session.get('https://{0}'.format(device_host), timeout=60, verify=False)
-    assert response.status_code == 200
 
 
 def test_install(app_archive_path, domain, device_password):
@@ -189,12 +179,16 @@ def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user
             .format(app_dir, device_user, app_domain, data_dir))
 
 
-def test_imap_openssl(device, platform_data_dir, artifact_dir):
+def test_imap_openssl(device, artifact_dir):
     
     device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
-                            "{0} s_client -CAfile /var/snap/platform/current/syncloud.crt -CApath /etc/ssl/certs -connect localhost:143 "
-                            "-servername localhost -verify 3 -starttls imap".format(OPENSSL))
+                            "{0} s_client "
+                            "-CAfile /var/snap/platform/current/syncloud.crt "
+                            "-CApath /etc/ssl/certs -connect localhost:143 "
+                            "-servername localhost "
+                            "-verify 3 "
+                            "-starttls imap".format(OPENSSL))
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output
