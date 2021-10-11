@@ -38,7 +38,7 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf nginx-${ARCH}.tar.gz
 mv nginx ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/postgresql-${ARCH}.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/postgresql/postgresql-${ARCH}.tar.gz
 tar xf postgresql-${ARCH}.tar.gz
 mv postgresql ${BUILD_DIR}
 
