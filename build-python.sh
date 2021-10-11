@@ -19,4 +19,3 @@ rm -rf python.tar
 cp ${DIR}/bin/python ${BUILD_DIR}/bin/
 ls -la ${BUILD_DIR}/bin
 rm -rf ${BUILD_DIR}/usr/src
-r/src
