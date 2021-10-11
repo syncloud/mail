@@ -16,5 +16,7 @@ cd ${BUILD_DIR}
 docker export python -o python.tar
 tar xf python.tar
 rm -rf python.tar
-cp ${DIR}/bin/python ${BUILD_DIR}/python/bin
+cp ${DIR}/bin/python ${BUILD_DIR}/bin/
+ls -la ${BUILD_DIR}/bin
 rm -rf ${BUILD_DIR}/usr/src
+r/src
