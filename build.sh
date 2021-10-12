@@ -19,11 +19,8 @@ apt -y install wget curl squashfs-tools dpkg-dev libltdl7
 rm -rf ${DIR}/lib
 mkdir ${DIR}/lib
 
-rm -rf build
 BUILD_DIR=${DIR}/build/${NAME}
-mkdir -p ${BUILD_DIR}
 
-${DIR}/postfix/build.sh
 mv /snap/mail/current/postfix ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/dovecot/dovecot-${ARCH}.tar.gz
@@ -84,3 +81,5 @@ echo "- ${ARCH}" >> ${SNAP_DIR}/meta/snap.yaml
 PACKAGE=${NAME}_${VERSION}_${ARCH}.snap
 echo ${PACKAGE} > ${DIR}/package.name
 mksquashfs ${SNAP_DIR} ${DIR}/${PACKAGE} -noappend -comp xz -no-xattrs -all-root
+mkdir ${DIR}/artifact
+cp ${DIR}/${PACKAGE} ${DIR}/artifact

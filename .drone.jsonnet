@@ -19,14 +19,6 @@ local build(arch, testUI, platform_image) = {
             ]
         },
         {
-            name: "build",
-            image: "debian:buster-slim",
-            commands: [
-                "VERSION=$(cat version)",
-                "./build.sh " + name + " $VERSION"
-            ]
-        },
-        {
             name: "build python",
             image: "debian:buster-slim",
             commands: [
@@ -41,6 +33,21 @@ local build(arch, testUI, platform_image) = {
                     name: "docker.sock",
                     path: "/var/run/docker.sock"
                 }
+            ]
+        },
+        {
+            name: "build postfix",
+            image: "debian:buster-slim",
+            commands: [
+                "./postfix/build.sh"
+            ]
+        },
+        {
+            name: "build",
+            image: "debian:buster-slim",
+            commands: [
+                "VERSION=$(cat version)",
+                "./build.sh " + name + " $VERSION"
             ]
         },
         {
