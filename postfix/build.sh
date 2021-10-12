@@ -106,3 +106,6 @@ make non-interactive-package install_root=${PREFIX}
 ldd ${PREFIX}/usr/sbin/postfix
 ${PREFIX}/usr/sbin/postconf -a
 ${PREFIX}/usr/sbin/postconf -A
+
+
+mv $PREFIX ${DIR}/../build/mail

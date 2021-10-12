@@ -21,8 +21,6 @@ mkdir ${DIR}/lib
 
 BUILD_DIR=${DIR}/build/${NAME}
 
-mv /snap/mail/current/postfix ${BUILD_DIR}
-
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/dovecot/dovecot-${ARCH}.tar.gz
 tar xf dovecot-${ARCH}.tar.gz
 mv dovecot ${BUILD_DIR}
