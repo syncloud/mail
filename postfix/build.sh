@@ -14,7 +14,7 @@ PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 apt update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
