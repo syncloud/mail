@@ -30,7 +30,7 @@ $config['imap_conn_options'] = array(
       'allow_self_signed' => true,
       'verify_depth' => 3,
       'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-      'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt',
+      'cafile' => '{{ platform_data_dir }}/syncloud.crt',
       'capath' => '/etc/ssl/certs',
   ),
 );
