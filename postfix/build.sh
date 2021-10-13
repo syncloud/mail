@@ -70,7 +70,7 @@ cp /lib/*/libdl.so* ${PREFIX}/lib
 cp /lib/*/libc.so* ${PREFIX}/lib
 cp /usr/lib/*/libgnutls*.so* ${PREFIX}/lib
 cp /usr/lib/*/libsasl2.so* ${PREFIX}/lib
-cp /lib/*/libpthread.so.0 ${PREFIX}/lib
+cp /lib/*/libpthread.so* ${PREFIX}/lib
 cp /lib/*/libz.so* ${PREFIX}/lib
 cp /usr/lib/*/libp11-kit.so* ${PREFIX}/lib
 cp /usr/lib/*/libtasn1.so* ${PREFIX}/lib
