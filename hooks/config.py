@@ -95,5 +95,6 @@ class UserConfig:
         self.__save()
 
     def __save(self):
-        with open(self.filename, 'wb') as f:
+        with open(self.filename, 'w') as f:
             self.parser.write(f)
+
