@@ -10,10 +10,10 @@ fi
 case $1 in
 start)
     export SASL_PATH=$DIR/postfix/lib/sasl2
-    exec $DIR/postfix/usr/sbin/postfix -c ${SNAP_COMMON}/config/postfix start
+    exec $DIR/postfix/bin/postfix.sh -c ${SNAP_COMMON}/config/postfix start
     ;;
 stop)
-    exec $DIR/postfix/usr/sbin/postfix -c ${SNAP_COMMON}/config/postfix stop
+    exec $DIR/postfix/bin/postfix.sh -c ${SNAP_COMMON}/config/postfix stop
     ;;
 *)
     echo "not valid command"

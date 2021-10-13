@@ -26,7 +26,7 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         os.mkdir(mail_log_dir)
         device.run_ssh('ls -la {0}/ > {1}/ls.log'.format(data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/dovecot/ > {1}/data.dovecot.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > '
+        device.run_ssh('{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v status > '
                        '{2}/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/ > {1}/data.ls.log'.format(data_dir, TMP_DIR), throw=False)
         device.run_ssh('ls -la {0}/box/ > {1}/data.box.ls.log'.format(data_dir, TMP_DIR), throw=False)
@@ -93,13 +93,13 @@ def test_running_roundcube(app_domain):
 
 def test_postfix_status(device, app_dir, data_dir):
     device.run_ssh(
-            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
+            '{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
                 app_dir, data_dir), throw=False)
 
 
 def test_postfix_check(device, app_dir, data_dir):
     device.run_ssh(
-            '{0}/postfix/usr/sbin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
+            '{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
                 app_dir, data_dir), throw=False)
 
 
