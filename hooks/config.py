@@ -91,7 +91,7 @@ class UserConfig:
 
     def set_activated(self, activated):
         self.parser.read(self.filename)
-        self.parser.set('mail', 'activated', activated)
+        self.parser.set('mail', 'activated', 'true' if activated else 'false')
         self.__save()
 
     def __save(self):
