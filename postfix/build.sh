@@ -107,7 +107,7 @@ cp $DIR/postconf.sh ${PREFIX}/bin
 
 ldd ${PREFIX}/usr/sbin/postfix
 
-${PREFIX}/bin/postfix.sh --version
+${PREFIX}/bin/postfix.sh --help || true
 ${PREFIX}/bin/postconf.sh -a
 ${PREFIX}/bin/postconf.sh -A
 

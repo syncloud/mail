@@ -2,9 +2,11 @@ import imaplib
 import os
 import pytest
 import smtplib
+import ssl
 import time
 from email.mime.text import MIMEText
 from os.path import dirname, join
+from ssl import SSLContext
 from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
@@ -165,7 +167,7 @@ def test_mail_receiving(app_domain, device_user, device_password):
 
 def get_message_count(app_domain, device_user, device_password):
     imaplib.Debug = 4
-    server = imaplib.IMAP4_SSL(app_domain)
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLSv1)))
     server.login(device_user, device_password)
     selected = server.select('inbox')
     server.logout()
@@ -175,7 +177,7 @@ def get_message_count(app_domain, device_user, device_password):
 
 def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user):
     device.run_ssh(
-            '{0}/postfix/usr/sbin/postmap -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
+            '{0}/postfix/bin/postmap.sh -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
             .format(app_dir, device_user, app_domain, data_dir))
 
 
