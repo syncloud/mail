@@ -42,7 +42,11 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
         device.run_ssh('DATA_DIR={1} {0}/bin/php.sh -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
     
         device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
-        device.scp_from_device('/var/log/mail*', mail_log_dir, throw=False)
+        device.run_ssh('ls -la /var/log/ > {0}/var.log.ls.log'.format(TMP_DIR), throw=False)
+        device.scp_from_device('/var/log/mail.err', '{0}/var.log.mail.err.log'.format(mail_log_dir), throw=False)
+        device.scp_from_device('/var/log/mail.info', '{0}/var.log.mail.info.log'.format(mail_log_dir), throw=False)
+        device.scp_from_device('/var/log/mail.log', '{0}/var.log.mail.log.log'.format(mail_log_dir), throw=False)
+        device.scp_from_device('/var/log/mail.warn', '{0}/var.log.mail.warn.log'.format(mail_log_dir), throw=False)
         device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
         device.run_ssh('netstat -nlp > {0}/netstat.log'.format(mail_log_dir), throw=False)
         device.run_ssh('journalctl > {0}/journalctl.log'.format(mail_log_dir), throw=False)
