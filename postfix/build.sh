@@ -104,6 +104,7 @@ make non-interactive-package install_root=${PREFIX}
 mkdir -p ${PREFIX}/bin
 cp $DIR/postfix.sh ${PREFIX}/bin
 cp $DIR/postconf.sh ${PREFIX}/bin
+cp $DIR/postmap.sh ${PREFIX}/bin
 
 ldd ${PREFIX}/usr/sbin/postfix
 
