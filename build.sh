@@ -9,7 +9,7 @@ if [[ -z "$1" ]]; then
 fi
 
 NAME=$1
-ROUNDCUBE_VERSION=1.4.9
+ROUNDCUBE_VERSION=1.4.11
 ARCH=$(uname -m)
 VERSION=$2
 
@@ -48,9 +48,6 @@ mv openssl integration/
 wget --progress=dot:giga https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 tar xf roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 mv roundcubemail-${ROUNDCUBE_VERSION} ${BUILD_DIR}/roundcubemail
-
-cd ${BUILD_DIR}/roundcubemail
-patch -p0 < ${DIR}/patches/roundcubemail.patch
 
 cd ${DIR}
 cp -r ${DIR}/bin ${BUILD_DIR}

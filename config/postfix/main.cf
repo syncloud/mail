@@ -692,8 +692,8 @@ mydomain = {{ device_domain_name }}
 myhostname = {{ app_domain_name }}
 virtual_mailbox_domains = {{ device_domain_name }}
 
-smtpd_tls_cert_file = {{ platform_data_dir }}/syncloud.crt
-smtpd_tls_key_file = {{ platform_data_dir }}/syncloud.key
+smtpd_tls_cert_file = /var/snap/platform/current/syncloud.crt
+smtpd_tls_key_file = /var/snap/platform/current/syncloud.key
 smtpd_tls_received_header = yes
 smtpd_tls_security_level = may
 smtpd_tls_auth_only = no
