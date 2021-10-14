@@ -26,6 +26,7 @@ $config['mail_domain'] = '{{ device_domain_name }}';
 $config['imap_conn_options'] = array(
   'ssl' => array(
       'peer_name' => '{{ device_domain_name }}',
+      'verify_peer_name' => false,
       'verify_peer' => true,
       'allow_self_signed' => true,
       'verify_depth' => 3,
