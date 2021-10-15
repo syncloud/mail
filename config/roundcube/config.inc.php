@@ -4,7 +4,7 @@ $config = array();
 $config['imap_debug'] = true;
 $config['ldap_debug'] = true;
 $config['smtp_debug'] = true;
-$config['log_dir'] = '{{ app_data_dir }}/log/';
+$config['log_driver'] = 'syslog';
 
 $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
 
@@ -26,11 +26,12 @@ $config['mail_domain'] = '{{ device_domain_name }}';
 $config['imap_conn_options'] = array(
   'ssl' => array(
       'peer_name' => '{{ device_domain_name }}',
+      'verify_peer_name' => false,
       'verify_peer' => true,
       'allow_self_signed' => true,
       'verify_depth' => 3,
       'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-      'cafile' => '{{ platform_data_dir }}/syncloud.ca.crt',
+      'cafile' => '/var/snap/platform/current/syncloud.crt',
       'capath' => '/etc/ssl/certs',
   ),
 );

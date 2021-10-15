@@ -13,6 +13,9 @@ BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
+apt update
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl
+
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
@@ -58,30 +61,28 @@ cd openssl-${OPENSSL_VERSION}
 make
 make install
 
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libldap*.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/liblber*.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdb-*.so ${PREFIX}/lib
-cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libnsl.so* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libresolv.so* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libdl.so* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libc.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgnutls-deb0.so* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpthread.so.0 ${PREFIX}/lib
-cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libz.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libp11-kit.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libtasn1.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libnettle.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libhogweed.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgmp.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libffi.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicui18n.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicuuc.so* ${PREFIX}/lib
-cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libicudata.so* ${PREFIX}/lib
-cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libncurses.so* ${PREFIX}/lib
-cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libpcre.so.* ${PREFIX}/lib
-#cp /usr/lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libstdc++.so.* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libm.so.* ${PREFIX}/lib
-#cp /lib/$(dpkg-architecture -q DEB_HOST_GNU_TYPE)/libgcc_s.so.* ${PREFIX}/lib
+cp /usr/lib/*/libldap*.so* ${PREFIX}/lib
+cp /usr/lib/*/liblber*.so* ${PREFIX}/lib
+cp /usr/lib/*/libdb-*.so ${PREFIX}/lib
+cp /lib/*/libnsl.so* ${PREFIX}/lib
+cp /lib/*/libresolv.so* ${PREFIX}/lib
+cp /lib/*/libdl.so* ${PREFIX}/lib
+cp /lib/*/libc.so* ${PREFIX}/lib
+cp /usr/lib/*/libgnutls*.so* ${PREFIX}/lib
+cp /usr/lib/*/libsasl2.so* ${PREFIX}/lib
+cp /lib/*/libpthread.so* ${PREFIX}/lib
+cp /lib/*/libz.so* ${PREFIX}/lib
+cp /usr/lib/*/libp11-kit.so* ${PREFIX}/lib
+cp /usr/lib/*/libtasn1.so* ${PREFIX}/lib
+cp /usr/lib/*/libnettle.so* ${PREFIX}/lib
+cp /usr/lib/*/libhogweed.so* ${PREFIX}/lib
+cp /usr/lib/*/libgmp.so* ${PREFIX}/lib
+cp /usr/lib/*/libffi.so* ${PREFIX}/lib
+cp /usr/lib/*/libidn2.so* ${PREFIX}/lib
+cp /usr/lib/*/libunistring.so* ${PREFIX}/lib
+cp /lib/*/libpcre.so.* ${PREFIX}/lib
+cp /lib/*/libgcc_s.so.* ${PREFIX}/lib
+cp $(readlink -f /lib*/ld-linux-*.so*) ${PREFIX}/lib/ld.so
 
 cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
@@ -100,6 +101,15 @@ make makefiles shared=no
 make
 make non-interactive-package install_root=${PREFIX}
 
+mkdir -p ${PREFIX}/bin
+cp $DIR/postfix.sh ${PREFIX}/bin
+cp $DIR/postconf.sh ${PREFIX}/bin
+cp $DIR/postmap.sh ${PREFIX}/bin
+
 ldd ${PREFIX}/usr/sbin/postfix
-${PREFIX}/usr/sbin/postconf -a
-${PREFIX}/usr/sbin/postconf -A
+
+${PREFIX}/bin/postfix.sh --help || true
+${PREFIX}/bin/postconf.sh -a
+${PREFIX}/bin/postconf.sh -A
+
+mv $PREFIX ${DIR}/../build/mail

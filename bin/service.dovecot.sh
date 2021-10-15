@@ -7,12 +7,11 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
-export LD_LIBRARY_PATH=${DIR}/dovecot/lib/dovecot
 export DOVECOT_BINDIR=${DIR}/dovecot/bin
 case $1 in
 start)
     /bin/rm -rf ${SNAP_COMMON}/dovecot/master.pid
-    exec $DIR/dovecot/sbin/dovecot -F -c ${SNAP_COMMON}/config/dovecot/dovecot.conf
+    exec $DIR/dovecot/bin/dovecot.sh -F -c ${SNAP_COMMON}/config/dovecot/dovecot.conf
     ;;
 *)
     echo "not valid command"

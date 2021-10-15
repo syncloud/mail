@@ -1,4 +1,4 @@
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from os.path import isfile, join
 
 
@@ -91,9 +91,10 @@ class UserConfig:
 
     def set_activated(self, activated):
         self.parser.read(self.filename)
-        self.parser.set('mail', 'activated', activated)
+        self.parser.set('mail', 'activated', 'true' if activated else 'false')
         self.__save()
 
     def __save(self):
-        with open(self.filename, 'wb') as f:
+        with open(self.filename, 'w') as f:
             self.parser.write(f)
+
