@@ -96,8 +96,8 @@ class Installer:
 
         box_data_dir = join(self.app_data_dir, 'box')
         fs.makepath(box_data_dir)
-        fs.chownpath(box_data_dir, 'dovecot', recursive=True)
-
+        self.log.info(check_output('chown -R dovecot.dovecot {0}'.format(box_data_dir), shell=True))
+      
         self.log.info("setup configs")
 
     def generate_dkim_key(self):
