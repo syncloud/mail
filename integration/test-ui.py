@@ -37,3 +37,7 @@ def test_web(selenium, device_user, device_password):
     selenium.screenshot('login_progress')
     selenium.find_by_xpath("//ul[@id='mailboxlist']")
     selenium.screenshot('main')
+
+
+def test_teardown(driver):
+    driver.quit()
