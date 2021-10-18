@@ -7,11 +7,9 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
-export LD_LIBRARY_PATH=${DIR}/opendkim/lib
-
 case $1 in
 start)
-    exec $DIR/opendkim/sbin/opendkim -x ${SNAP_COMMON}/config/opendkim/opendkim.conf
+    exec $DIR/opendkim/bin/opendkim.sh -x ${SNAP_COMMON}/config/opendkim/opendkim.conf
     ;;
 *)
     echo "not valid command"
