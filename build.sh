@@ -37,8 +37,8 @@ wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/
 tar xf postgresql-${ARCH}.tar.gz
 mv postgresql ${BUILD_DIR}
 
-wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/1/opendkim-${ARCH}-2.10.3.tar.gz
-tar xf opendkim-${ARCH}-2.10.3.tar.gz
+wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/opendkim/opendkim-${ARCH}.tar.gz
+tar xf opendkim-${ARCH}.tar.gz
 mv opendkim ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/openssl/openssl-${ARCH}.tar.gz
