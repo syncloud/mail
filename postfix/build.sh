@@ -112,4 +112,4 @@ ${PREFIX}/bin/postfix.sh --help || true
 ${PREFIX}/bin/postconf.sh -a
 ${PREFIX}/bin/postconf.sh -A
 
-mv $PREFIX ${DIR}/../build/mail
+mv $PREFIX ${DIR}/../build/snap
