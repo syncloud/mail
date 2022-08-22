@@ -19,8 +19,8 @@ cp -r ${DIR}/bin ${SNAP_DIR}
 cp -r ${DIR}/config ${SNAP_DIR}
 cp -r ${DIR}/hooks ${SNAP_DIR}
 cp -r ${DIR}/meta ${SNAP_DIR}
-cp ${DIR}/roundcubemail/config/defaults.inc.php ${SNAP_DIR}/config/roundcube/
-cp -r ${DIR}/postfix/config/postfix/postfix-files ${SNAP_DIR}/config/postfix
+cp ${SNAP_DIR}/roundcubemail/config/defaults.inc.php ${SNAP_DIR}/config/roundcube/
+cp -r ${SNAP_DIR}/postfix/config/postfix/postfix-files ${SNAP_DIR}/config/postfix
 
 echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
 echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml

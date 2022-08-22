@@ -59,7 +59,7 @@ class Installer:
             'timezone': get_localzone()
         }
 
-        templates_path = join(self.app_dir, 'config.templates')
+        templates_path = join(self.app_dir, 'config')
         
         gen.generate_files(templates_path, self.config_path, variables)
         
