@@ -27,7 +27,7 @@ mv opendkim ${BUILD_DIR}
 
 wget --progress=dot:giga https://github.com/syncloud/3rdparty/releases/download/openssl/openssl-${ARCH}.tar.gz
 tar xf openssl-${ARCH}.tar.gz
-mv openssl integration/
+mv openssl $DIR/integration
 
 wget --progress=dot:giga https://github.com/roundcube/roundcubemail/releases/download/${ROUNDCUBE_VERSION}/roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
 tar xf roundcubemail-${ROUNDCUBE_VERSION}-complete.tar.gz
