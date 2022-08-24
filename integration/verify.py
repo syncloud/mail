@@ -190,7 +190,7 @@ def test_imap_openssl(device, artifact_dir):
     device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
                             "{0} s_client "
-                            "-CAfile /var/snap/platform/current/syncloud.crt "
+                            "-CAfile /var/snap/platform/current/syncloud.ca.crt "
                             "-CApath /etc/ssl/certs "
                             "-connect localhost:143 "
                             "-servername syncloud "
