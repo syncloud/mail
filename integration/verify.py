@@ -191,8 +191,9 @@ def test_imap_openssl(device, artifact_dir):
     output = device.run_ssh("echo \"A Logout\" | "
                             "{0} s_client "
                             "-CAfile /var/snap/platform/current/syncloud.crt "
-                            "-CApath /etc/ssl/certs -connect localhost:143 "
-                            "-servername localhost "
+                            "-CApath /etc/ssl/certs "
+                            "-connect localhost:143 "
+                            "-servername syncloud "
                             "-verify 3 "
                             "-starttls imap".format(OPENSSL))
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
