@@ -8,18 +8,16 @@ $config['log_driver'] = 'syslog';
 
 $config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
 
-$config['default_host'] = 'localhost';
-
 $config['support_url'] = '';
 $config['des_key'] = '46adfbf655e235b60f56f881';
 
-$config['smtp_server'] = 'localhost';
+$config['smtp_host'] = 'localhost';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
 $config['plugins'] = array();
 
-$config['default_host'] = 'tls://localhost';
+$config['imap_host'] = 'tls://localhost';
 
 $config['mail_domain'] = '{{ device_domain_name }}';
 
@@ -31,11 +29,11 @@ $config['imap_conn_options'] = array(
       'allow_self_signed' => true,
       'verify_depth' => 3,
       'ciphers' => 'TLSv1+HIGH:!aNull:@STRENGTH',
-      'cafile' => '/var/snap/platform/current/syncloud.crt',
+      'cafile' => '/var/snap/platform/current/syncloud.ca.crt',
       'capath' => '/etc/ssl/certs',
   ),
 );
-$config['support_url'] = 'https://syncloud.org';
+$config['support_url'] = 'https://syncloud.discourse.group';
 $config['product_name'] = 'Syncloud Mail';
 $config['useragent'] = 'Syncloud Mail/'.RCMAIL_VERSION;
 $config['skin'] = 'elastic';

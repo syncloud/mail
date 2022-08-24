@@ -1,5 +1,5 @@
 local name = "mail";
-local roundcube_version = "1.4.11";
+local roundcube_version = "1.6.0";
 local browser = "firefox";
 
 local build(arch, test_ui) = [{
@@ -310,4 +310,5 @@ local build(arch, test_ui) = [{
 build("amd64", true) +
 build("arm64", false) +
 build("arm", false)
+
 
