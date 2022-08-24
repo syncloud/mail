@@ -171,7 +171,7 @@ def test_mail_receiving(app_domain, device_user, device_password):
 
 def get_message_count(app_domain, device_user, device_password):
     imaplib.Debug = 4
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLSv1)))
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
     server.login(device_user, device_password)
     selected = server.select('inbox')
     server.logout()
@@ -216,6 +216,8 @@ def test_remove(device, app):
 
 def test_reinstall(app_archive_path, app_domain, device_password):
     local_install(app_domain, device_password, app_archive_path)
+
+
 
 
 
