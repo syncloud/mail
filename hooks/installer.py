@@ -59,7 +59,7 @@ class Installer:
             'timezone': get_localzone()
         }
 
-        templates_path = join(self.app_dir, 'config.templates')
+        templates_path = join(self.app_dir, 'config')
         
         gen.generate_files(templates_path, self.config_path, variables)
         
@@ -125,7 +125,7 @@ class Installer:
     def database_init(self, database_path, user_name):
 
         self.log.info("initializing database")
-        psql_initdb = join(self.app_dir, 'postgresql/bin/initdb')
+        psql_initdb = join(self.app_dir, 'postgresql/bin/initdb.sh')
         self.log.info(check_output(['sudo', '-H', '-u', user_name, psql_initdb, database_path]))
         postgresql_conf_to = join(database_path, 'postgresql.conf')
         postgresql_conf_from = join(self.app_data_dir, 'config', 'postgresql', 'postgresql.conf')

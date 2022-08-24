@@ -9,10 +9,10 @@ fi
 
 case $1 in
 start)
-    exec ${DIR}/postgresql/bin/pg_ctl -w -s -D ${SNAP_COMMON}/database start
+    exec ${DIR}/postgresql/bin/pg_ctl.sh -w -s -D ${SNAP_COMMON}/database start
     ;;
 stop)
-    exec ${DIR}/postgresql/bin/pg_ctl -s -D ${SNAP_COMMON}/database stop -m fast
+    exec ${DIR}/postgresql/bin/pg_ctl.sh -s -D ${SNAP_COMMON}/database stop -m fast
     ;;
 *)
     echo "not valid command"

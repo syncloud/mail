@@ -171,7 +171,7 @@ def test_mail_receiving(app_domain, device_user, device_password):
 
 def get_message_count(app_domain, device_user, device_password):
     imaplib.Debug = 4
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLSv1)))
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
     server.login(device_user, device_password)
     selected = server.select('inbox')
     server.logout()
@@ -190,9 +190,10 @@ def test_imap_openssl(device, artifact_dir):
     device.run_ssh("{0} version -a".format(OPENSSL))
     output = device.run_ssh("echo \"A Logout\" | "
                             "{0} s_client "
-                            "-CAfile /var/snap/platform/current/syncloud.crt "
-                            "-CApath /etc/ssl/certs -connect localhost:143 "
-                            "-servername localhost "
+                            "-CAfile /var/snap/platform/current/syncloud.ca.crt "
+                            "-CApath /etc/ssl/certs "
+                            "-connect localhost:143 "
+                            "-servername syncloud "
                             "-verify 3 "
                             "-starttls imap".format(OPENSSL))
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
@@ -215,6 +216,8 @@ def test_remove(device, app):
 
 def test_reinstall(app_archive_path, app_domain, device_password):
     local_install(app_domain, device_password, app_archive_path)
+
+
 
 
 
