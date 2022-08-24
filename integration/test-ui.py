@@ -4,6 +4,7 @@ import pytest
 from selenium.webdriver.common.keys import Keys
 from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
+from integration import lib
 
 DIR = dirname(__file__)
 TMP_DIR = '/tmp/syncloud/ui'
@@ -27,15 +28,7 @@ def test_start(module_setup, app, device_host, domain):
 
 def test_web(selenium, device_user, device_password):
 
-    selenium.open_app()
-    selenium.screenshot('login')
-    selenium.find_by_id("rcmloginuser").send_keys(device_user)
-    password = selenium.find_by_id("rcmloginpwd")
-    password.send_keys(device_password)
-    selenium.screenshot('login-filled')
-    password.send_keys(Keys.RETURN)
-    selenium.screenshot('login_progress')
-    selenium.find_by_xpath("//ul[@id='mailboxlist']")
+    lib.login(selenium, device_user, device_password)
     selenium.screenshot('main')
 
 
