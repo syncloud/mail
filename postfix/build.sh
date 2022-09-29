@@ -6,9 +6,9 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=postfix
-VERSION=3.4.10
-OPENSSL_VERSION=1.0.2g
-SASL_VERSION=2.1.27
+VERSION=3.7.2
+OPENSSL_VERSION=3.0.5
+SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
@@ -57,7 +57,7 @@ cd ${BUILD_DIR}
 curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
 tar xf openssl-${OPENSSL_VERSION}.tar.gz
 cd openssl-${OPENSSL_VERSION}
-./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
+./config --prefix=${PREFIX} --openssldir=${PREFIX} no-shared no-ssl2 no-ssl3 -fPIC
 make
 make install
 
