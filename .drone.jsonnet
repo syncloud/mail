@@ -2,7 +2,7 @@ local name = "mail";
 local roundcube_version = "1.6.0";
 local browser = "firefox";
 
-local build(arch, test_ui) = [{
+local build(arch, test_ui, dind) = [{
     kind: "pipeline",
     type: "docker",
     name: arch,
@@ -27,18 +27,14 @@ local build(arch, test_ui) = [{
         },
 {
             name: "package python",
-            image: "debian:buster-slim",
+            image: "docker:" + dind,
             commands: [
                 "./python/build.sh"
             ],
             volumes: [
                 {
-                    name: "docker",
-                    path: "/usr/bin/docker"
-                },
-                {
-                    name: "docker.sock",
-                    path: "/var/run/docker.sock"
+                    name: "dockersock",
+                    path: "/var/run"
                 }
             ]
         },
@@ -51,35 +47,27 @@ local build(arch, test_ui) = [{
         },
   {
             name: "build php",
-            image: "debian:buster-slim",
+            image: "docker:" + dind,
             commands: [
                 "./php/build.sh"
             ],
             volumes: [
                 {
-                    name: "docker",
-                    path: "/usr/bin/docker"
-                },
-                {
-                    name: "docker.sock",
-                    path: "/var/run/docker.sock"
+                    name: "dockersock",
+                    path: "/var/run"
                 }
             ]
         },
     {
             name: "package postgresql",
-            image: "debian:buster-slim",
+            image: "docker:" + dind,
             commands: [
                 "./postgresql/build.sh"
             ],
             volumes: [
                 {
-                    name: "docker",
-                    path: "/usr/bin/docker"
-                },
-                {
-                    name: "docker.sock",
-                    path: "/var/run/docker.sock"
+                    name: "dockersock",
+                    path: "/var/run"
                 }
             ]
         },	
@@ -208,6 +196,17 @@ local build(arch, test_ui) = [{
           ]
         },
         services: [
+{
+                name: "docker",
+                image: "docker:" + dind,
+                privileged: true,
+                volumes: [
+                    {
+                        name: "dockersock",
+                        path: "/var/run"
+                    }
+                ]
+            },
             {
                 name: name + ".buster.com",
                 image: "syncloud/platform-buster-" + arch + ":22.01",
@@ -258,17 +257,9 @@ local build(arch, test_ui) = [{
                 temp: {}
             },
             {
-                name: "docker",
-                host: {
-                    path: "/usr/bin/docker"
+                    name: "dockersock",
+                    path: "/var/run"
                 }
-            },
-            {
-                name: "docker.sock",
-                host: {
-                    path: "/var/run/docker.sock"
-                }
-            }
         ]
     },
     {
@@ -307,8 +298,6 @@ local build(arch, test_ui) = [{
      }
 ];
 
-build("amd64", true) +
-build("arm64", false) +
-build("arm", false)
-
-
+build("amd64", true, "20.10.21-dind") +
+build("arm64", false, "19.03.8-dind") +
+build("arm", false, "19.03.8-dind")
