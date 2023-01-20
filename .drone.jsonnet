@@ -256,10 +256,10 @@ local build(arch, test_ui, dind) = [{
                 name: "videos",
                 temp: {}
             },
-            {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
+           {
+                name: "dockersock",
+                temp: {}
+            },
         ]
     },
     {
