@@ -21,4 +21,3 @@ mv $PGBIN/postgres $PGBIN/postgres.bin
 mv $PGBIN/pg_dump $PGBIN/pg_dump.bin
 cp $DIR/bin/* bin
 cp $DIR/pgbin/* $PGBIN
-./bin/initdb.sh --help
