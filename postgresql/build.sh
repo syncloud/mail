@@ -1,18 +1,11 @@
-#!/bin/bash -ex
+#!/bin/sh -ex
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 MAJOR_VERSION=9.4-alpine
-
-apt update
-apt install -y libltdl7 libnss3
-
-
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
-docker ps -a -q --filter ancestor=postgres:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
-docker rmi postgres:syncloud || true
 docker build --build-arg MAJOR_VERSION=$MAJOR_VERSION -t postgres:syncloud .
 docker run postgres:syncloud postgres --help
 docker create --name=postgres postgres:syncloud
