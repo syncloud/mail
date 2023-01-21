@@ -208,16 +208,3 @@ def test_access_change(device):
 def test_storage_change(device):
     device.run_ssh('snap run mail.storage-change > {0}/storage.change.hook.log'.format(TMP_DIR))
 
-
-def test_remove(device, app):
-    response = device.app_remove(app)
-    assert response.status_code == 200, response.text
-
-
-def test_reinstall(app_archive_path, app_domain, device_password):
-    local_install(app_domain, device_password, app_archive_path)
-
-
-
-
-

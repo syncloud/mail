@@ -1,13 +1,11 @@
-#!/bin/bash -xe
+#!/bin/sh -xe
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 BUILD_DIR=${DIR}/../build/snap/php
 
 ARCH=$(uname -m)
-docker ps -a -q --filter ancestor=php:syncloud --format="{{.ID}}" | xargs docker stop | xargs docker rm || true
-docker rmi php:syncloud || true
 docker build -t php:syncloud .
 docker run php:syncloud php -i
 docker create --name=php php:syncloud

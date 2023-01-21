@@ -114,7 +114,7 @@ scope = subtree
 #   %u - username
 #   %n - user part in user@domain, same as %u if there's no domain
 #   %d - domain part in user@domain, empty if user there's no domain
-user_filter = (&(objectClass=inetOrgPerson)(uid=%u))
+user_filter = (&(objectClass=inetOrgPerson)(cn=%u))
 
 # Password checking attributes:
 #  user: Virtual user name (user@domain), if you wish to change the
@@ -128,11 +128,11 @@ user_filter = (&(objectClass=inetOrgPerson)(uid=%u))
 # userdb prefetch instead of userdb ldap in dovecot.conf. In that case you'll
 # also have to include user_attrs in pass_attrs field prefixed with "userdb_"
 # string. For example:
-pass_attrs = uid=user,userPassword=password,\
+pass_attrs = cn=user,userPassword=password,\
   homeDirectory=userdb_home,uidNumber=userdb_uid,gidNumber=userdb_gid
 
 # Filter for password lookups
-pass_filter = (&(objectClass=inetOrgPerson)(uid=%u))
+pass_filter = (&(objectClass=inetOrgPerson)(cn=%u))
 
 # Attributes and filter to get a list of all users
 #iterate_attrs = uid=user
