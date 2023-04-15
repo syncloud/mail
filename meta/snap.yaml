@@ -64,6 +64,9 @@ apps:
   access-change:
     command: hooks/access-change
 
+  certificate-change:
+    command: hooks/certificate-change
+
 confinement: strict
 description: Mail
 grade: stable
