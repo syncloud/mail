@@ -202,9 +202,12 @@ def test_imap_openssl(device, artifact_dir):
 
 
 def test_access_change(device):
-    device.run_ssh('snap run mail.access-change > {0}/access.change.hook.log'.format(TMP_DIR))
+    device.run_ssh('snap run mail.access-change > {0}/access-change.hook.log'.format(TMP_DIR))
 
 
 def test_storage_change(device):
-    device.run_ssh('snap run mail.storage-change > {0}/storage.change.hook.log'.format(TMP_DIR))
+    device.run_ssh('snap run mail.storage-change > {0}/storage-change.hook.log'.format(TMP_DIR))
 
+
+def test_certificate_change(device):
+    device.run_ssh('snap run mail.certificate-change > {0}/certificate-change.hook.log'.format(TMP_DIR))
