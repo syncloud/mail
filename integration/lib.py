@@ -14,4 +14,4 @@ def login(selenium, device_user, device_password):
     selenium.screenshot('login-filled')
     password.send_keys(Keys.RETURN)
     selenium.screenshot('login_progress')
-    selenium.find_by_xpath("//a[contains(.,'Inbox')]")
+    selenium.find_by_xpath("//span[contains(.,'Inbox')]")
