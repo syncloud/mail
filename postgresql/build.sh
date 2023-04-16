@@ -6,7 +6,10 @@ cd ${DIR}
 MAJOR_VERSION=9.4-alpine
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
-docker build --build-arg MAJOR_VERSION=$MAJOR_VERSION -t postgres:syncloud .
+while ! docker build --build-arg MAJOR_VERSION=$MAJOR_VERSION -t postgres:syncloud . ; do
+  echo "retry"
+  sleep 1
+done
 docker run postgres:syncloud postgres --help
 docker create --name=postgres postgres:syncloud
 mkdir -p ${BUILD_DIR}
