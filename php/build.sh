@@ -8,7 +8,10 @@ BUILD_DIR=${DIR}/../build/snap/php
 ARCH=$(uname -m)
 docker build -t php:syncloud .
 docker run php:syncloud php -i
-docker create --name=php php:syncloud
+while ! docker create --name=php php:syncloud ; do
+  echo "retrying"
+  sleep 1
+done
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
 docker export php -o php.tar

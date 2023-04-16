@@ -149,5 +149,8 @@ class Installer:
         self.regenerate_configs()
         service.restart(SYSTEMD_DOVECOT)
         
+    def certificate_change(self):
+        service.restart(SYSTEMD_DOVECOT)
+
     def storage_change(self):
         pass
