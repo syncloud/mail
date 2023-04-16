@@ -1,5 +1,5 @@
 local name = "mail";
-local roundcube_version = "1.6.0";
+local roundcube_version = "1.6.1";
 local browser = "firefox";
 
 local build(arch, test_ui, dind) = [{
