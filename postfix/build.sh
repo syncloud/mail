@@ -66,13 +66,15 @@ wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progr
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
 export CCARGS='-DDEF_CONFIG_DIR=\"/var/snap/mail/current/config/postfix\" \
-	-DUSE_SASL_AUTH \
-	-DDEF_SERVER_SASL_TYPE=\"dovecot\" \
-  -I/include -I/usr/include -DHAS_LDAP \
+  -DUSE_SASL_AUTH \
+  -DDEF_SERVER_SASL_TYPE=\"dovecot\" \
+  -I/include -I/usr/include \
+  -DHAS_LDAP \
   -DUSE_TLS \
- 	-DUSE_CYRUS_SASL -I/usr/include/sasl'
+  -DUSE_CYRUS_SASL -I/usr/include/sasl'
 
 #export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
+export AUXLIBS_LDAP="-L/usr/local/lib -lldap -L/usr/local/lib -llber"
 
 make makefiles shared=no
 make
