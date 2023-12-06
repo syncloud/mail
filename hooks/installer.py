@@ -42,6 +42,7 @@ class Installer:
         self.opendkim_dir = join(self.app_data_dir, 'opendkim')
         self.opendkim_keys_dir = join(self.opendkim_dir, 'keys')
         self.opendkim_keys_domain_dir = join(self.opendkim_keys_dir, self.device_domain_name)
+        self.log_dir = join(self.app_data_dir, 'log')
 
     def regenerate_configs(self):
         
@@ -76,7 +77,7 @@ class Installer:
         
         data_dirs = [
             join(self.app_data_dir, 'config'),
-            join(self.app_data_dir, 'log'),
+            self.log_dir,
             join(self.app_data_dir, 'spool'),
             join(self.app_data_dir, 'dovecot'),
             join(self.app_data_dir, 'dovecot', 'private'),
@@ -114,7 +115,8 @@ class Installer:
 
     def post_refresh(self):
         self.init_config()
-
+        check_output(f'rm -rf {self.log_dir}/*.log', shell=True)
+    
     def configure(self):
     
         if not self.user_config.is_activated():
