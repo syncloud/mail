@@ -6,8 +6,8 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=postfix
-VERSION=3.8.3
-OPENSSL_VERSION=3.0.12
+VERSION=3.5.22
+OPENSSL_VERSION=1.0.2g
 SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
