@@ -6,7 +6,7 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=postfix
-VERSION=3.5.22
+VERSION=3.4.28
 OPENSSL_VERSION=1.1.1w
 SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
