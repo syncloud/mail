@@ -86,11 +86,20 @@ make
 make non-interactive-package install_root=${PREFIX}
 #make non-interactive-package
 
-#mkdir ${PREFIX}
+# cleanup
+apt-get -y purge build-essential
+apt-get -y autoremove
+rm -rf \
+    /tmp/* \
+    /var/lib/apt/lists/* \
+    /var/tmp/* \
+    /root/.cache
 
-cp -r /* ${PREFIX}
+cp -r /bin ${PREFIX}
+cp -r /sbin ${PREFIX}
+cp -r /lib* ${PREFIX}
+cp -r /usr ${PREFIX}
 
-mkdir -p ${PREFIX}/bin
 cp $DIR/postfix.sh ${PREFIX}/bin
 cp $DIR/postconf.sh ${PREFIX}/bin
 cp $DIR/postmap.sh ${PREFIX}/bin
