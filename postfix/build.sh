@@ -98,7 +98,8 @@ rm -rf \
 cp -r /bin ${PREFIX}
 cp -r /sbin ${PREFIX}
 cp -r /lib* ${PREFIX}
-cp -r /usr ${PREFIX}
+cp -r /usr/lib ${PREFIX}
+cp -r /usr/local/lib ${PREFIX}
 
 cp $DIR/postfix.sh ${PREFIX}/bin
 cp $DIR/postconf.sh ${PREFIX}/bin
