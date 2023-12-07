@@ -25,7 +25,21 @@ local build(arch, test_ui, dind) = [{
                 "./download.sh " + roundcube_version
             ]
         },
-{
+	    {
+            name: "build postfix",
+            image: "debian:buster-slim",
+            commands: [
+                "./postfix/build.sh"
+            ]
+        },
+	    {
+            name: "test postfix",
+            image: "debian:buster-slim",
+            commands: [
+                "./postfix/test.sh"
+            ]
+        },
+        {
             name: "package python",
             image: "docker:" + dind,
             commands: [
@@ -38,14 +52,7 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         },
-	{
-            name: "build postfix",
-            image: "debian:buster-slim",
-            commands: [
-                "./postfix/build.sh"
-            ]
-        },
-  {
+        {
             name: "build php",
             image: "docker:" + dind,
             commands: [
@@ -58,7 +65,7 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         },
-    {
+        {
             name: "package postgresql",
             image: "docker:" + dind,
             commands: [

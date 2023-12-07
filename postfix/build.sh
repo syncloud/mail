@@ -6,110 +6,105 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=postfix
-VERSION=3.4.10
-OPENSSL_VERSION=1.0.2g
-SASL_VERSION=2.1.27
+VERSION=3.4.28
+#OPENSSL_VERSION=1.1.0l
+#SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 apt update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
-cd ${BUILD_DIR}
-wget https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
-tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
-cd cyrus-sasl-${SASL_VERSION}
-./configure \
-    --prefix=${PREFIX} \
-    --enable-static \
-    --enable-shared \
-    --enable-alwaystrue \
-    --enable-checkapop \
-    --enable-cram \
-    --enable-digest \
-    --enable-otp \
-    --disable-srp \
-    --disable-srp-setpass \
-    --disable-krb4 \
-    --enable-gss_mutexes \
-    --enable-auth-sasldb \
-    --enable-plain \
-    --enable-anon \
-    --enable-login \
-    --enable-ntlm \
-    --disable-passdss \
-    --disable-macos-framework \
-    --with-pam=/usr \
-    --with-saslauthd=/var/snap/mail/common/saslauthd \
-    --with-configdir=/snap/mail/current/postfix/lib/sasl2 \
-    --with-plugindir=/snap/mail/current/postfix/lib/sasl2 \
-    --sysconfdir=/snap/mail/current/postfix/config/sasl2 \
-    --with-devrandom=/dev/urandom \
-    --with-sphinx-build 
-make
-make install
+#cd ${BUILD_DIR}
+#wget https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-${SASL_VERSION}/cyrus-sasl-${SASL_VERSION}.tar.gz
+#tar xf cyrus-sasl-${SASL_VERSION}.tar.gz
+#cd cyrus-sasl-${SASL_VERSION}
+#./configure \
+#    --enable-static \
+#    --enable-shared \
+#    --enable-alwaystrue \
+#    --enable-checkapop \
+#    --enable-cram \
+#    --enable-digest \
+#    --enable-otp \
+#    --disable-srp \
+#    --disable-srp-setpass \
+#    --disable-krb4 \
+#    --enable-gss_mutexes \
+#    --enable-auth-sasldb \
+#    --enable-plain \
+#    --enable-anon \
+#    --enable-login \
+#    --enable-ntlm \
+#    --disable-passdss \
+#    --disable-macos-framework \
+#    --with-pam=/usr \
+#    --with-saslauthd=/var/snap/mail/common/saslauthd \
+#    --with-configdir=/snap/mail/current/postfix/lib/sasl2 \
+#    --with-plugindir=/snap/mail/current/postfix/lib/sasl2 \
+#    --sysconfdir=/snap/mail/current/postfix/config/sasl2 \
+#    --with-devrandom=/dev/urandom \
+#    --with-sphinx-build
+#make
+#make install
 
-cd ${BUILD_DIR}
-curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
-tar xf openssl-${OPENSSL_VERSION}.tar.gz
-cd openssl-${OPENSSL_VERSION}
-./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
-make
-make install
-
-cp /usr/lib/*/libldap*.so* ${PREFIX}/lib
-cp /usr/lib/*/liblber*.so* ${PREFIX}/lib
-cp /usr/lib/*/libdb-*.so ${PREFIX}/lib
-cp /lib/*/libnsl.so* ${PREFIX}/lib
-cp /lib/*/libresolv.so* ${PREFIX}/lib
-cp /lib/*/libdl.so* ${PREFIX}/lib
-cp /lib/*/libc.so* ${PREFIX}/lib
-cp /usr/lib/*/libgnutls*.so* ${PREFIX}/lib
-cp /usr/lib/*/libsasl2.so* ${PREFIX}/lib
-cp /lib/*/libpthread.so* ${PREFIX}/lib
-cp /lib/*/libz.so* ${PREFIX}/lib
-cp /usr/lib/*/libp11-kit.so* ${PREFIX}/lib
-cp /usr/lib/*/libtasn1.so* ${PREFIX}/lib
-cp /usr/lib/*/libnettle.so* ${PREFIX}/lib
-cp /usr/lib/*/libhogweed.so* ${PREFIX}/lib
-cp /usr/lib/*/libgmp.so* ${PREFIX}/lib
-cp /usr/lib/*/libffi.so* ${PREFIX}/lib
-cp /usr/lib/*/libidn2.so* ${PREFIX}/lib
-cp /usr/lib/*/libunistring.so* ${PREFIX}/lib
-cp /lib/*/libpcre.so.* ${PREFIX}/lib
-cp /lib/*/libgcc_s.so.* ${PREFIX}/lib
-cp $(readlink -f /lib*/ld-linux-*.so*) ${PREFIX}/lib/ld.so
+#cd ${BUILD_DIR}
+#curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+#tar xf openssl-${OPENSSL_VERSION}.tar.gz
+#cd openssl-${OPENSSL_VERSION}
+#./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
+#./config --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
+#make
+#make install
 
 cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
 export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
-	-DUSE_SASL_AUTH \
-	-DDEF_SERVER_SASL_TYPE=\"dovecot\" \
-  -I'${PREFIX}'/include -I/usr/include -DHAS_LDAP \
+  -DUSE_SASL_AUTH \
+  -DDEF_SERVER_SASL_TYPE=\"dovecot\" \
+  -I/include -I/usr/include \
+  -DHAS_LDAP \
   -DUSE_TLS \
- 	-DUSE_CYRUS_SASL -I/usr/include/sasl'
+  -DUSE_CYRUS_SASL -I/usr/include/sasl'
 
-export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
+LIBS=$(echo /lib/*-linux-gnu*)
+USR_LIBS=$(echo /usr/lib/*-linux-gnu*)
+
+#export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
+export AUXLIBS="-L${USR_LIBS}/sasl -lsasl2 -L${LIBS} -lssl -lcrypto"
+export AUXLIBS_LDAP="-L${LIBS} -lldap -llber"
 
 make makefiles shared=no
 make
 make non-interactive-package install_root=${PREFIX}
+#make non-interactive-package
 
-mkdir -p ${PREFIX}/bin
-cp $DIR/postfix.sh ${PREFIX}/bin
-cp $DIR/postconf.sh ${PREFIX}/bin
-cp $DIR/postmap.sh ${PREFIX}/bin
+# cleanup
+apt-get -y purge build-essential
+apt-get -y autoremove
+rm -rf \
+    /tmp/* \
+    /var/lib/apt/lists/* \
+    /var/tmp/* \
+    /root/.cache
 
-ldd ${PREFIX}/usr/sbin/postfix
+TARGET=${DIR}/../build/snap/postfix
+mkdir $TARGET
+cp -r /bin ${TARGET}
+cp -r /sbin ${TARGET}
+cp -r /lib* ${TARGET}
+cp -r /usr/lib ${TARGET}
+cp -r /usr/local/lib ${TARGET}
+cp -r $PREFIX/* ${TARGET}
 
-${PREFIX}/bin/postfix.sh --help || true
-${PREFIX}/bin/postconf.sh -a
-${PREFIX}/bin/postconf.sh -A
+cp $DIR/postfix.sh ${TARGET}/bin
+cp $DIR/postconf.sh ${TARGET}/bin
+cp $DIR/postmap.sh ${TARGET}/bin
 
-mv $PREFIX ${DIR}/../build/snap
+ldd ${TARGET}/usr/sbin/postfix
