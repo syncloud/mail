@@ -25,19 +25,6 @@ local build(arch, test_ui, dind) = [{
                 "./download.sh " + roundcube_version
             ]
         },
-{
-            name: "package python",
-            image: "docker:" + dind,
-            commands: [
-                "./python/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },
 	    {
             name: "build postfix",
             image: "debian:buster-slim",
@@ -53,6 +40,19 @@ local build(arch, test_ui, dind) = [{
             ]
         },
         {
+            name: "package python",
+            image: "docker:" + dind,
+            commands: [
+                "./python/build.sh"
+            ],
+            volumes: [
+                {
+                    name: "dockersock",
+                    path: "/var/run"
+                }
+            ]
+        },
+        {
             name: "build php",
             image: "docker:" + dind,
             commands: [
@@ -65,7 +65,7 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         },
-    {
+        {
             name: "package postgresql",
             image: "docker:" + dind,
             commands: [

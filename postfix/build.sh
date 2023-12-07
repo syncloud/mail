@@ -10,7 +10,7 @@ VERSION=3.4.28
 #OPENSSL_VERSION=1.1.0l
 #SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
-
+PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 apt update
@@ -65,7 +65,7 @@ cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
-export CCARGS='-DDEF_CONFIG_DIR=\"/var/snap/mail/current/config/postfix\" \
+export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
   -DUSE_SASL_AUTH \
   -DDEF_SERVER_SASL_TYPE=\"dovecot\" \
   -I/include -I/usr/include \
@@ -79,7 +79,6 @@ USR_LIBS=$(echo /usr/lib/*-linux-gnu*)
 #export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
 export AUXLIBS="-L${USR_LIBS}/sasl -lsasl2 -L${LIBS} -lssl -lcrypto"
 export AUXLIBS_LDAP="-L${LIBS} -lldap -llber"
-PREFIX=${DIR}/../build/snap/postfix
 
 make makefiles shared=no
 make
@@ -95,14 +94,16 @@ rm -rf \
     /var/tmp/* \
     /root/.cache
 
-cp -r /bin ${PREFIX}
-cp -r /sbin ${PREFIX}
-cp -r /lib* ${PREFIX}
-cp -r /usr/lib ${PREFIX}
-cp -r /usr/local/lib ${PREFIX}
+TARGET=${DIR}/../build/snap/postfix
+cp -r /bin ${TARGET}
+cp -r /sbin ${TARGET}
+cp -r /lib* ${TARGET}
+cp -r /usr/lib ${TARGET}
+cp -r /usr/local/lib ${TARGET}
+cp -r $PREFIX/* ${TARGET}
 
-cp $DIR/postfix.sh ${PREFIX}/bin
-cp $DIR/postconf.sh ${PREFIX}/bin
-cp $DIR/postmap.sh ${PREFIX}/bin
+cp $DIR/postfix.sh ${TARGET}/bin
+cp $DIR/postconf.sh ${TARGET}/bin
+cp $DIR/postmap.sh ${TARGET}/bin
 
-ldd ${PREFIX}/usr/sbin/postfix
+ldd ${TARGET}/usr/sbin/postfix
