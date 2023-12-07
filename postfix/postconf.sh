@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-
-exec ${DIR}/lib/ld.so --library-path ${DIR}/lib ${DIR}/usr/sbin/postconf "$@"
+LIBS=$(echo ${DIR}/lib/*-linux-gnu*)
+LIBS=$LIBS:$(echo ${DIR}/usr/lib/*-linux-gnu*)
+LIBS=$LIBS:$(echo ${DIR}/usr/lib/*-linux-gnu*/sasl)
+exec ${DIR}/lib/*-linux*/ld-*.so --library-path ${DIR}/lib ${DIR}/usr/sbin/postconf "$@"
