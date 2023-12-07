@@ -38,14 +38,21 @@ local build(arch, test_ui, dind) = [{
                 }
             ]
         },
-	{
+	    {
             name: "build postfix",
             image: "debian:buster-slim",
             commands: [
                 "./postfix/build.sh"
             ]
         },
-  {
+	    {
+            name: "test postfix",
+            image: "debian:buster-slim",
+            commands: [
+                "./postfix/test.sh"
+            ]
+        },
+        {
             name: "build php",
             image: "docker:" + dind,
             commands: [

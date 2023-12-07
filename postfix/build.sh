@@ -86,7 +86,8 @@ make
 make non-interactive-package install_root=${PREFIX}
 #make non-interactive-package
 
-mkdir ${PREFIX}
+#mkdir ${PREFIX}
+
 cp -r /* ${PREFIX}
 
 mkdir -p ${PREFIX}/bin
@@ -95,7 +96,3 @@ cp $DIR/postconf.sh ${PREFIX}/bin
 cp $DIR/postmap.sh ${PREFIX}/bin
 
 ldd ${PREFIX}/usr/sbin/postfix
-
-${PREFIX}/bin/postfix.sh --help || true
-${PREFIX}/bin/postconf.sh -a
-${PREFIX}/bin/postconf.sh -A
