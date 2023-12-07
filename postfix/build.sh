@@ -95,6 +95,7 @@ rm -rf \
     /root/.cache
 
 TARGET=${DIR}/../build/snap/postfix
+mkdir $TARGET
 cp -r /bin ${TARGET}
 cp -r /sbin ${TARGET}
 cp -r /lib* ${TARGET}
