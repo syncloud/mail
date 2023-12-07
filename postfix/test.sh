@@ -2,6 +2,9 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 PREFIX=${DIR}/../build/snap/postfix
+
+du -d10 -h $PREFIX | sort -h | tail -100
+
 ldd ${PREFIX}/usr/sbin/postfix
 
 ${PREFIX}/bin/postfix.sh --help || true
