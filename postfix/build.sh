@@ -74,7 +74,7 @@ export CCARGS='-DDEF_CONFIG_DIR=\"/var/snap/mail/current/config/postfix\" \
   -DUSE_CYRUS_SASL -I/usr/include/sasl'
 
 #export AUXLIBS="-L${PREFIX}/lib -Wl,-rpath,$PREFIX/lib -lldap -llber -lssl -lcrypto -lsasl2"
-export AUXLIBS="-L/usr/local/lib -lsasl2"
+export AUXLIBS="-L/usr/local/lib -lsasl2 -lssl -lcrypto"
 export AUXLIBS_LDAP="-L/usr/local/lib -lldap -L/usr/local/lib -llber"
 
 make makefiles shared=no
