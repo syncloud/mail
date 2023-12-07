@@ -14,7 +14,7 @@ BUILD_DIR=${DIR}/build
 echo "building ${NAME}"
 
 apt update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
@@ -52,14 +52,14 @@ cd cyrus-sasl-${SASL_VERSION}
 make
 make install
 
-cd ${BUILD_DIR}
-curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
-tar xf openssl-${OPENSSL_VERSION}.tar.gz
-cd openssl-${OPENSSL_VERSION}
+#cd ${BUILD_DIR}
+#curl -O https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+#tar xf openssl-${OPENSSL_VERSION}.tar.gz
+#cd openssl-${OPENSSL_VERSION}
 #./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
-./config --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
-make
-make install
+#./config --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 -fPIC
+#make
+#make install
 
 cd ${BUILD_DIR}
 wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
