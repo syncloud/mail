@@ -65,7 +65,7 @@ apps:
     command: hooks/certificate-change
 
 confinement: strict
-description: Mail
+description: Mail with Web interface and compatible with popular mail apps
 grade: stable
 name: mail
-summary: Mail
+summary: Mail server
