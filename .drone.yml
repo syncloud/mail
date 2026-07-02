@@ -1,0 +1,508 @@
+---
+kind: pipeline
+name: amd64
+platform:
+  arch: amd64
+  os: linux
+services:
+- image: docker:20.10.21-dind
+  name: docker
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+- image: syncloud/platform-buster-amd64:22.01
+  name: mail.buster.com
+  privileged: true
+  volumes:
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+- environment:
+    SE_NODE_SESSION_TIMEOUT: "999999"
+  image: selenium/standalone-firefox:4.1.2-20220208
+  name: selenium
+  volumes:
+  - name: shm
+    path: /dev/shm
+steps:
+- commands:
+  - echo $DRONE_BUILD_NUMBER > version
+  image: debian:buster-slim
+  name: version
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:buster-slim
+  name: download
+- commands:
+  - ./postfix/build.sh
+  image: debian:buster-slim
+  name: build postfix
+- commands:
+  - ./postfix/test.sh
+  image: debian:buster-slim
+  name: test postfix
+- commands:
+  - ./python/build.sh
+  image: docker:20.10.21-dind
+  name: package python
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./php/build.sh
+  image: docker:20.10.21-dind
+  name: build php
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./postgresql/build.sh
+  image: docker:20.10.21-dind
+  name: package postgresql
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - VERSION=$(cat version)
+  - './package.sh mail $VERSION '
+  image: debian:buster-slim
+  name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.buster.com --app=mail --arch=amd64
+  image: python:3.8-slim-buster
+  name: test-integration-buster
+- detach: true
+  environment:
+    DISPLAY_CONTAINER_NAME: selenium
+    PRESET: -preset ultrafast -movflags faststart
+  image: selenium/video:ffmpeg-4.3.1-20220208
+  name: selenium-video
+  volumes:
+  - name: shm
+    path: /dev/shm
+  - name: videos
+    path: /videos
+- commands:
+  - apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev
+    build-essential libz-dev curl
+  - cd integration
+  - pip install -r requirements.txt
+  - py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com
+    --device-host=mail.buster.com --app=mail --browser=firefox
+  image: python:3.8-slim-buster
+  name: test-ui-desktop
+- commands:
+  - apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev
+    build-essential libz-dev curl
+  - cd integration
+  - pip install -r requirements.txt
+  - py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com
+    --device-host=mail.buster.com --app=mail --browser=firefox
+  image: python:3.8-slim-buster
+  name: test-ui-mobile
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com
+    --app-archive-path=$APP_ARCHIVE_PATH --device-host=mail.buster.com --app=mail
+    --browser=firefox
+  image: python:3.8-slim-buster
+  name: test-upgrade
+  privileged: true
+  volumes:
+  - name: videos
+    path: /videos
+- commands:
+  - PACKAGE=$(cat package.name)
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-amd64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release publish -f $PACKAGE -b $DRONE_BRANCH
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: upload
+  when:
+    branch:
+    - stable
+    - master
+- image: appleboy/drone-scp:1.6.4
+  name: artifact
+  settings:
+    command_timeout: 2m
+    host:
+      from_secret: artifact_host
+    key:
+      from_secret: artifact_key
+    privileged: true
+    source:
+    - artifact/*
+    strip_components: 1
+    target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-amd64
+    timeout: 2m
+    username: artifact
+    volumes:
+    - name: videos
+      path: /drone/src/artifact/videos
+  when:
+    status:
+    - failure
+    - success
+trigger:
+  event:
+  - push
+type: docker
+volumes:
+- host:
+    path: /var/run/dbus
+  name: dbus
+- host:
+    path: /dev
+  name: dev
+- name: shm
+  temp: {}
+- name: videos
+  temp: {}
+- name: dockersock
+  temp: {}
+---
+kind: pipeline
+name: promote-amd64
+platform:
+  arch: amd64
+  os: linux
+steps:
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-amd64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: promote
+trigger:
+  event:
+  - promote
+type: docker
+---
+kind: pipeline
+name: arm64
+platform:
+  arch: arm64
+  os: linux
+services:
+- image: docker:19.03.8-dind
+  name: docker
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+- image: syncloud/platform-buster-arm64:22.01
+  name: mail.buster.com
+  privileged: true
+  volumes:
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+steps:
+- commands:
+  - echo $DRONE_BUILD_NUMBER > version
+  image: debian:buster-slim
+  name: version
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:buster-slim
+  name: download
+- commands:
+  - ./postfix/build.sh
+  image: debian:buster-slim
+  name: build postfix
+- commands:
+  - ./postfix/test.sh
+  image: debian:buster-slim
+  name: test postfix
+- commands:
+  - ./python/build.sh
+  image: docker:19.03.8-dind
+  name: package python
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./php/build.sh
+  image: docker:19.03.8-dind
+  name: build php
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./postgresql/build.sh
+  image: docker:19.03.8-dind
+  name: package postgresql
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - VERSION=$(cat version)
+  - './package.sh mail $VERSION '
+  image: debian:buster-slim
+  name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.buster.com --app=mail --arch=arm64
+  image: python:3.8-slim-buster
+  name: test-integration-buster
+- commands:
+  - PACKAGE=$(cat package.name)
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release publish -f $PACKAGE -b $DRONE_BRANCH
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: upload
+  when:
+    branch:
+    - stable
+    - master
+- image: appleboy/drone-scp:1.6.4
+  name: artifact
+  settings:
+    command_timeout: 2m
+    host:
+      from_secret: artifact_host
+    key:
+      from_secret: artifact_key
+    privileged: true
+    source:
+    - artifact/*
+    strip_components: 1
+    target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-arm64
+    timeout: 2m
+    username: artifact
+    volumes:
+    - name: videos
+      path: /drone/src/artifact/videos
+  when:
+    status:
+    - failure
+    - success
+trigger:
+  event:
+  - push
+type: docker
+volumes:
+- host:
+    path: /var/run/dbus
+  name: dbus
+- host:
+    path: /dev
+  name: dev
+- name: shm
+  temp: {}
+- name: videos
+  temp: {}
+- name: dockersock
+  temp: {}
+---
+kind: pipeline
+name: promote-arm64
+platform:
+  arch: arm64
+  os: linux
+steps:
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: promote
+trigger:
+  event:
+  - promote
+type: docker
+---
+kind: pipeline
+name: arm
+platform:
+  arch: arm
+  os: linux
+services:
+- image: docker:19.03.8-dind
+  name: docker
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+- image: syncloud/platform-buster-arm:22.01
+  name: mail.buster.com
+  privileged: true
+  volumes:
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+steps:
+- commands:
+  - echo $DRONE_BUILD_NUMBER > version
+  image: debian:buster-slim
+  name: version
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:buster-slim
+  name: download
+- commands:
+  - ./postfix/build.sh
+  image: debian:buster-slim
+  name: build postfix
+- commands:
+  - ./postfix/test.sh
+  image: debian:buster-slim
+  name: test postfix
+- commands:
+  - ./python/build.sh
+  image: docker:19.03.8-dind
+  name: package python
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./php/build.sh
+  image: docker:19.03.8-dind
+  name: build php
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - ./postgresql/build.sh
+  image: docker:19.03.8-dind
+  name: package postgresql
+  volumes:
+  - name: dockersock
+    path: /var/run
+- commands:
+  - VERSION=$(cat version)
+  - './package.sh mail $VERSION '
+  image: debian:buster-slim
+  name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.buster.com --app=mail --arch=arm
+  image: python:3.8-slim-buster
+  name: test-integration-buster
+- commands:
+  - PACKAGE=$(cat package.name)
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release publish -f $PACKAGE -b $DRONE_BRANCH
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: upload
+  when:
+    branch:
+    - stable
+    - master
+- image: appleboy/drone-scp:1.6.4
+  name: artifact
+  settings:
+    command_timeout: 2m
+    host:
+      from_secret: artifact_host
+    key:
+      from_secret: artifact_key
+    privileged: true
+    source:
+    - artifact/*
+    strip_components: 1
+    target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-arm
+    timeout: 2m
+    username: artifact
+    volumes:
+    - name: videos
+      path: /drone/src/artifact/videos
+  when:
+    status:
+    - failure
+    - success
+trigger:
+  event:
+  - push
+type: docker
+volumes:
+- host:
+    path: /var/run/dbus
+  name: dbus
+- host:
+    path: /dev
+  name: dev
+- name: shm
+  temp: {}
+- name: videos
+  temp: {}
+- name: dockersock
+  temp: {}
+---
+kind: pipeline
+name: promote-arm
+platform:
+  arch: arm
+  os: linux
+steps:
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+  image: debian:buster-slim
+  name: promote
+trigger:
+  event:
+  - promote
+type: docker
