@@ -5,13 +5,15 @@ platform:
   arch: amd64
   os: linux
 services:
-- image: docker:20.10.21-dind
-  name: docker
+- image: syncloud/platform-bookworm-amd64:26.04.10
+  name: mail.bookworm.com
   privileged: true
   volumes:
-  - name: dockersock
-    path: /var/run
-- image: syncloud/platform-buster-amd64:22.01
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+- image: syncloud/platform-buster-amd64:26.04.10
   name: mail.buster.com
   privileged: true
   volumes:
@@ -19,110 +21,148 @@ services:
     path: /var/run/dbus
   - name: dev
     path: /dev
-- environment:
-    SE_NODE_SESSION_TIMEOUT: "999999"
-  image: selenium/standalone-firefox:4.1.2-20220208
-  name: selenium
-  volumes:
-  - name: shm
-    path: /dev/shm
 steps:
 - commands:
   - echo $DRONE_BUILD_NUMBER > version
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: version
 - commands:
-  - ./download.sh 1.6.1
-  image: debian:buster-slim
-  name: download
+  - ./openssl/build.sh
+  image: debian:bookworm-slim
+  name: openssl
 - commands:
-  - ./postfix/build.sh
-  image: debian:buster-slim
-  name: build postfix
+  - ./openssl/test.sh
+  image: debian:bookworm-slim
+  name: openssl test
 - commands:
-  - ./postfix/test.sh
-  image: debian:buster-slim
-  name: test postfix
+  - ./nginx/build.sh
+  image: debian:bookworm-slim
+  name: nginx
 - commands:
-  - ./python/build.sh
-  image: docker:20.10.21-dind
-  name: package python
-  volumes:
-  - name: dockersock
-    path: /var/run
+  - ./nginx/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: nginx test bookworm
+- commands:
+  - ./nginx/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: nginx test buster
+- commands:
+  - ./dovecot/build.sh
+  image: debian:bookworm-slim
+  name: dovecot
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: dovecot test bookworm
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: dovecot test buster
+- commands:
+  - ./opendkim/build.sh
+  image: debian:bullseye-slim
+  name: opendkim
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: opendkim test bookworm
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: opendkim test buster
 - commands:
   - ./php/build.sh
-  image: docker:20.10.21-dind
-  name: build php
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: php:8.0.16-fpm-buster
+  name: php
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: php test bookworm
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: php test buster
 - commands:
   - ./postgresql/build.sh
-  image: docker:20.10.21-dind
-  name: package postgresql
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: postgres:9.4-alpine
+  name: postgresql
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: postgresql test bookworm
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: postgresql test buster
+- commands:
+  - ./postfix/build.sh
+  image: debian:bookworm-slim
+  name: postfix
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-bookworm-amd64:26.04.10
+  name: postfix test bookworm
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-buster-amd64:26.04.10
+  name: postfix test buster
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:bookworm-slim
+  name: download
+- commands:
+  - ./cli/build.sh
+  image: golang:1.24.0
+  name: cli
 - commands:
   - VERSION=$(cat version)
   - './package.sh mail $VERSION '
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=bookworm --domain=bookworm.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.bookworm.com --app=mail --arch=amd64
+  image: python:3.12-slim-bookworm
+  name: test bookworm
 - commands:
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - cd integration
   - ./deps.sh
   - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
     --device-host=mail.buster.com --app=mail --arch=amd64
-  image: python:3.8-slim-buster
-  name: test-integration-buster
-- detach: true
-  environment:
-    DISPLAY_CONTAINER_NAME: selenium
-    PRESET: -preset ultrafast -movflags faststart
-  image: selenium/video:ffmpeg-4.3.1-20220208
-  name: selenium-video
-  volumes:
-  - name: shm
-    path: /dev/shm
-  - name: videos
-    path: /videos
+  image: python:3.12-slim-bookworm
+  name: test buster
 - commands:
-  - apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev
-    build-essential libz-dev curl
-  - cd integration
-  - pip install -r requirements.txt
-  - py.test -x -s test-ui.py --distro=buster --ui-mode=desktop --domain=buster.com
-    --device-host=mail.buster.com --app=mail --browser=firefox
-  image: python:3.8-slim-buster
-  name: test-ui-desktop
+  - ./test/e2e/run.sh e2e specs/01-smoke.spec.ts desktop
+  image: mcr.microsoft.com/playwright:v1.48.2-jammy
+  name: e2e
 - commands:
-  - apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev
-    build-essential libz-dev curl
-  - cd integration
-  - pip install -r requirements.txt
-  - py.test -x -s test-ui.py --distro=buster --ui-mode=mobile --domain=buster.com
-    --device-host=mail.buster.com --app=mail --browser=firefox
-  image: python:3.8-slim-buster
-  name: test-ui-mobile
+  - ./test/e2e/run.sh e2e specs/01-smoke.spec.ts mobile
+  image: mcr.microsoft.com/playwright:v1.48.2-jammy
+  name: e2e-mobile
+- commands:
+  - ./test/e2e/run.sh e2e-before-upgrade specs/02-pre-upgrade.spec.ts desktop
+  image: mcr.microsoft.com/playwright:v1.48.2-jammy
+  name: e2e-before-upgrade
 - commands:
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - cd integration
   - ./deps.sh
-  - py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com
-    --app-archive-path=$APP_ARCHIVE_PATH --device-host=mail.buster.com --app=mail
-    --browser=firefox
-  image: python:3.8-slim-buster
+  - py.test -x -s test-upgrade.py --distro=bookworm --domain=bookworm.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.bookworm.com --app=mail --arch=amd64
+  image: python:3.12-slim-bookworm
   name: test-upgrade
-  privileged: true
-  volumes:
-  - name: videos
-    path: /videos
+- commands:
+  - ./test/e2e/run.sh e2e-after-upgrade specs/03-post-upgrade.spec.ts desktop
+  image: mcr.microsoft.com/playwright:v1.48.2-jammy
+  name: e2e-after-upgrade
 - commands:
   - PACKAGE=$(cat package.name)
   - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-amd64
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-amd64
     -O release --progress=dot:giga
   - chmod +x release
   - ./release publish -f $PACKAGE -b $DRONE_BRANCH
@@ -131,12 +171,36 @@ steps:
       from_secret: AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
   name: upload
   when:
     branch:
     - stable
     - master
+    event:
+    - push
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-amd64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
+  name: promote
+  when:
+    branch:
+    - stable
+    event:
+    - push
 - image: appleboy/drone-scp:1.6.4
   name: artifact
   settings:
@@ -145,16 +209,12 @@ steps:
       from_secret: artifact_host
     key:
       from_secret: artifact_key
-    privileged: true
     source:
     - artifact/*
     strip_components: 1
     target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-amd64
     timeout: 2m
     username: artifact
-    volumes:
-    - name: videos
-      path: /drone/src/artifact/videos
   when:
     status:
     - failure
@@ -170,36 +230,6 @@ volumes:
 - host:
     path: /dev
   name: dev
-- name: shm
-  temp: {}
-- name: videos
-  temp: {}
-- name: dockersock
-  temp: {}
----
-kind: pipeline
-name: promote-amd64
-platform:
-  arch: amd64
-  os: linux
-steps:
-- commands:
-  - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-amd64
-    -O release --progress=dot:giga
-  - chmod +x release
-  - ./release promote -n mail -a $(dpkg --print-architecture)
-  environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
-  name: promote
-trigger:
-  event:
-  - promote
-type: docker
 ---
 kind: pipeline
 name: arm64
@@ -207,13 +237,15 @@ platform:
   arch: arm64
   os: linux
 services:
-- image: docker:19.03.8-dind
-  name: docker
+- image: syncloud/platform-bookworm-arm64:26.04.10
+  name: mail.bookworm.com
   privileged: true
   volumes:
-  - name: dockersock
-    path: /var/run
-- image: syncloud/platform-buster-arm64:22.01
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+- image: syncloud/platform-buster-arm64:26.04.10
   name: mail.buster.com
   privileged: true
   volumes:
@@ -224,58 +256,121 @@ services:
 steps:
 - commands:
   - echo $DRONE_BUILD_NUMBER > version
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: version
 - commands:
-  - ./download.sh 1.6.1
-  image: debian:buster-slim
-  name: download
+  - ./openssl/build.sh
+  image: debian:bookworm-slim
+  name: openssl
 - commands:
-  - ./postfix/build.sh
-  image: debian:buster-slim
-  name: build postfix
+  - ./openssl/test.sh
+  image: debian:bookworm-slim
+  name: openssl test
 - commands:
-  - ./postfix/test.sh
-  image: debian:buster-slim
-  name: test postfix
+  - ./nginx/build.sh
+  image: debian:bookworm-slim
+  name: nginx
 - commands:
-  - ./python/build.sh
-  image: docker:19.03.8-dind
-  name: package python
-  volumes:
-  - name: dockersock
-    path: /var/run
+  - ./nginx/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: nginx test bookworm
+- commands:
+  - ./nginx/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: nginx test buster
+- commands:
+  - ./dovecot/build.sh
+  image: debian:bookworm-slim
+  name: dovecot
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: dovecot test bookworm
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: dovecot test buster
+- commands:
+  - ./opendkim/build.sh
+  image: debian:bullseye-slim
+  name: opendkim
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: opendkim test bookworm
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: opendkim test buster
 - commands:
   - ./php/build.sh
-  image: docker:19.03.8-dind
-  name: build php
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: php:8.0.16-fpm-buster
+  name: php
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: php test bookworm
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: php test buster
 - commands:
   - ./postgresql/build.sh
-  image: docker:19.03.8-dind
-  name: package postgresql
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: postgres:9.4-alpine
+  name: postgresql
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: postgresql test bookworm
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: postgresql test buster
+- commands:
+  - ./postfix/build.sh
+  image: debian:bookworm-slim
+  name: postfix
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-bookworm-arm64:26.04.10
+  name: postfix test bookworm
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-buster-arm64:26.04.10
+  name: postfix test buster
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:bookworm-slim
+  name: download
+- commands:
+  - ./cli/build.sh
+  image: golang:1.24.0
+  name: cli
 - commands:
   - VERSION=$(cat version)
   - './package.sh mail $VERSION '
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=bookworm --domain=bookworm.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.bookworm.com --app=mail --arch=arm64
+  image: python:3.12-slim-bookworm
+  name: test bookworm
 - commands:
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - cd integration
   - ./deps.sh
   - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
     --device-host=mail.buster.com --app=mail --arch=arm64
-  image: python:3.8-slim-buster
-  name: test-integration-buster
+  image: python:3.12-slim-bookworm
+  name: test buster
 - commands:
   - PACKAGE=$(cat package.name)
   - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm64
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-arm64
     -O release --progress=dot:giga
   - chmod +x release
   - ./release publish -f $PACKAGE -b $DRONE_BRANCH
@@ -284,12 +379,36 @@ steps:
       from_secret: AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
   name: upload
   when:
     branch:
     - stable
     - master
+    event:
+    - push
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-arm64
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
+  name: promote
+  when:
+    branch:
+    - stable
+    event:
+    - push
 - image: appleboy/drone-scp:1.6.4
   name: artifact
   settings:
@@ -298,16 +417,12 @@ steps:
       from_secret: artifact_host
     key:
       from_secret: artifact_key
-    privileged: true
     source:
     - artifact/*
     strip_components: 1
     target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-arm64
     timeout: 2m
     username: artifact
-    volumes:
-    - name: videos
-      path: /drone/src/artifact/videos
   when:
     status:
     - failure
@@ -323,36 +438,6 @@ volumes:
 - host:
     path: /dev
   name: dev
-- name: shm
-  temp: {}
-- name: videos
-  temp: {}
-- name: dockersock
-  temp: {}
----
-kind: pipeline
-name: promote-arm64
-platform:
-  arch: arm64
-  os: linux
-steps:
-- commands:
-  - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm64
-    -O release --progress=dot:giga
-  - chmod +x release
-  - ./release promote -n mail -a $(dpkg --print-architecture)
-  environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
-  name: promote
-trigger:
-  event:
-  - promote
-type: docker
 ---
 kind: pipeline
 name: arm
@@ -360,13 +445,15 @@ platform:
   arch: arm
   os: linux
 services:
-- image: docker:19.03.8-dind
-  name: docker
+- image: syncloud/platform-bookworm-arm:26.04.10
+  name: mail.bookworm.com
   privileged: true
   volumes:
-  - name: dockersock
-    path: /var/run
-- image: syncloud/platform-buster-arm:22.01
+  - name: dbus
+    path: /var/run/dbus
+  - name: dev
+    path: /dev
+- image: syncloud/platform-buster-arm:26.04.10
   name: mail.buster.com
   privileged: true
   volumes:
@@ -377,58 +464,121 @@ services:
 steps:
 - commands:
   - echo $DRONE_BUILD_NUMBER > version
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: version
 - commands:
-  - ./download.sh 1.6.1
-  image: debian:buster-slim
-  name: download
+  - ./openssl/build.sh
+  image: debian:bookworm-slim
+  name: openssl
 - commands:
-  - ./postfix/build.sh
-  image: debian:buster-slim
-  name: build postfix
+  - ./openssl/test.sh
+  image: debian:bookworm-slim
+  name: openssl test
 - commands:
-  - ./postfix/test.sh
-  image: debian:buster-slim
-  name: test postfix
+  - ./nginx/build.sh
+  image: debian:bookworm-slim
+  name: nginx
 - commands:
-  - ./python/build.sh
-  image: docker:19.03.8-dind
-  name: package python
-  volumes:
-  - name: dockersock
-    path: /var/run
+  - ./nginx/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: nginx test bookworm
+- commands:
+  - ./nginx/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: nginx test buster
+- commands:
+  - ./dovecot/build.sh
+  image: debian:bookworm-slim
+  name: dovecot
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: dovecot test bookworm
+- commands:
+  - ./dovecot/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: dovecot test buster
+- commands:
+  - ./opendkim/build.sh
+  image: debian:bullseye-slim
+  name: opendkim
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: opendkim test bookworm
+- commands:
+  - ./opendkim/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: opendkim test buster
 - commands:
   - ./php/build.sh
-  image: docker:19.03.8-dind
-  name: build php
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: php:8.0.16-fpm-buster
+  name: php
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: php test bookworm
+- commands:
+  - ./php/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: php test buster
 - commands:
   - ./postgresql/build.sh
-  image: docker:19.03.8-dind
-  name: package postgresql
-  volumes:
-  - name: dockersock
-    path: /var/run
+  image: postgres:9.4-alpine
+  name: postgresql
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: postgresql test bookworm
+- commands:
+  - ./postgresql/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: postgresql test buster
+- commands:
+  - ./postfix/build.sh
+  image: debian:bookworm-slim
+  name: postfix
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-bookworm-arm:26.04.10
+  name: postfix test bookworm
+- commands:
+  - ./postfix/test.sh
+  image: syncloud/platform-buster-arm:26.04.10
+  name: postfix test buster
+- commands:
+  - ./download.sh 1.6.1
+  image: debian:bookworm-slim
+  name: download
+- commands:
+  - ./cli/build.sh
+  image: golang:1.24.0
+  name: cli
 - commands:
   - VERSION=$(cat version)
   - './package.sh mail $VERSION '
-  image: debian:buster-slim
+  image: debian:bookworm-slim
   name: package
+- commands:
+  - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
+  - cd integration
+  - ./deps.sh
+  - py.test -x -s verify.py --distro=bookworm --domain=bookworm.com --app-archive-path=$APP_ARCHIVE_PATH
+    --device-host=mail.bookworm.com --app=mail --arch=arm
+  image: python:3.12-slim-bookworm
+  name: test bookworm
 - commands:
   - APP_ARCHIVE_PATH=$(realpath $(cat package.name))
   - cd integration
   - ./deps.sh
   - py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH
     --device-host=mail.buster.com --app=mail --arch=arm
-  image: python:3.8-slim-buster
-  name: test-integration-buster
+  image: python:3.12-slim-bookworm
+  name: test buster
 - commands:
   - PACKAGE=$(cat package.name)
   - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-arm
     -O release --progress=dot:giga
   - chmod +x release
   - ./release publish -f $PACKAGE -b $DRONE_BRANCH
@@ -437,12 +587,36 @@ steps:
       from_secret: AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY:
       from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
   name: upload
   when:
     branch:
     - stable
     - master
+    event:
+    - push
+- commands:
+  - apt update && apt install -y wget
+  - wget https://github.com/syncloud/store/releases/download/4/syncloud-release-arm
+    -O release --progress=dot:giga
+  - chmod +x release
+  - ./release promote -n mail -a $(dpkg --print-architecture)
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: AWS_SECRET_ACCESS_KEY
+    SYNCLOUD_TOKEN:
+      from_secret: SYNCLOUD_TOKEN
+  image: debian:bookworm-slim
+  name: promote
+  when:
+    branch:
+    - stable
+    event:
+    - push
 - image: appleboy/drone-scp:1.6.4
   name: artifact
   settings:
@@ -451,16 +625,12 @@ steps:
       from_secret: artifact_host
     key:
       from_secret: artifact_key
-    privileged: true
     source:
     - artifact/*
     strip_components: 1
     target: /home/artifact/repo/mail/${DRONE_BUILD_NUMBER}-arm
     timeout: 2m
     username: artifact
-    volumes:
-    - name: videos
-      path: /drone/src/artifact/videos
   when:
     status:
     - failure
@@ -476,33 +646,3 @@ volumes:
 - host:
     path: /dev
   name: dev
-- name: shm
-  temp: {}
-- name: videos
-  temp: {}
-- name: dockersock
-  temp: {}
----
-kind: pipeline
-name: promote-arm
-platform:
-  arch: arm
-  os: linux
-steps:
-- commands:
-  - apt update && apt install -y wget
-  - wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-arm
-    -O release --progress=dot:giga
-  - chmod +x release
-  - ./release promote -n mail -a $(dpkg --print-architecture)
-  environment:
-    AWS_ACCESS_KEY_ID:
-      from_secret: AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY:
-      from_secret: AWS_SECRET_ACCESS_KEY
-  image: debian:buster-slim
-  name: promote
-trigger:
-  event:
-  - promote
-type: docker

@@ -15,9 +15,9 @@ SNAP_DIR=${DIR}/build/snap
 apt update
 apt -y install squashfs-tools
 
-cp -r ${DIR}/bin ${SNAP_DIR}
+mkdir -p ${SNAP_DIR}/bin
+cp -r ${DIR}/bin/* ${SNAP_DIR}/bin
 cp -r ${DIR}/config ${SNAP_DIR}
-cp -r ${DIR}/hooks ${SNAP_DIR}
 cp -r ${DIR}/meta ${SNAP_DIR}
 cp ${SNAP_DIR}/roundcubemail/config/defaults.inc.php ${SNAP_DIR}/config/roundcube/
 cp -r ${SNAP_DIR}/postfix/config/postfix/postfix-files ${SNAP_DIR}/config/postfix

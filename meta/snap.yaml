@@ -56,13 +56,13 @@ apps:
     restart-condition: always
 
   storage-change:
-    command: hooks/storage-change
+    command: bin/cli storage-change
 
   access-change:
-    command: hooks/access-change
+    command: bin/cli access-change
 
   certificate-change:
-    command: hooks/certificate-change
+    command: bin/cli certificate-change
 
 confinement: strict
 description: Mail with Web interface and compatible with popular mail apps

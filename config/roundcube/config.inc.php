@@ -6,7 +6,7 @@ $config['ldap_debug'] = true;
 $config['smtp_debug'] = true;
 $config['log_driver'] = 'syslog';
 
-$config['db_dsnw'] = 'pgsql://mail:@unix({{ db_psql_path }}:{{ db_psql_port }})/{{ db_name }}';
+$config['db_dsnw'] = 'pgsql://mail:@unix({{ .DbPsqlPath }}:{{ .DbPsqlPort }})/{{ .DbName }}';
 
 $config['support_url'] = '';
 $config['des_key'] = '46adfbf655e235b60f56f881';
@@ -19,11 +19,11 @@ $config['plugins'] = array();
 
 $config['imap_host'] = 'tls://localhost';
 
-$config['mail_domain'] = '{{ device_domain_name }}';
+$config['mail_domain'] = '{{ .DeviceDomainName }}';
 
 $config['imap_conn_options'] = array(
   'ssl' => array(
-      'peer_name' => '{{ device_domain_name }}',
+      'peer_name' => '{{ .DeviceDomainName }}',
       'verify_peer_name' => false,
       'verify_peer' => false,
       'allow_self_signed' => true,
