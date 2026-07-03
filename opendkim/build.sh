@@ -18,13 +18,13 @@ apt-get -y install opendkim opendkim-tools
 
 cp $(readlink -f /lib*/ld-linux-*.so*) ${PREFIX}/lib/ld.so
 
-cp /usr/lib/libopendkim.so.11 ${PREFIX}/lib
+cp /usr/lib/*/libopendkim.so.11 ${PREFIX}/lib
 cp /usr/lib/*/libmilter.so.1.0.1 ${PREFIX}/lib
 cp /usr/lib/*/libssl.so.1.1 ${PREFIX}/lib
 cp /usr/lib/*/libcrypto.so.1.1 ${PREFIX}/lib
 cp /lib/*/libresolv.so.2 ${PREFIX}/lib
 cp /usr/lib/*/libdb-5.3.so ${PREFIX}/lib
-cp /usr/lib/libopendbx.so.1 ${PREFIX}/lib
+cp /usr/lib/*/libopendbx.so.1 ${PREFIX}/lib
 cp /lib/*/libdl.so.2 ${PREFIX}/lib
 cp /usr/lib/*/libmemcached.so.11 ${PREFIX}/lib
 cp /usr/lib/*/libmemcachedutil.so.2 ${PREFIX}/lib
@@ -32,8 +32,8 @@ cp /usr/lib/*/liblua5.1.so.0 ${PREFIX}/lib
 cp /usr/lib/*/libldap_r-2.4.so.2 ${PREFIX}/lib
 cp /usr/lib/*/liblber-2.4.so.2 ${PREFIX}/lib
 cp /usr/lib/*/libunbound.so.8 ${PREFIX}/lib
-cp /usr/lib/libvbr.so.2 ${PREFIX}/lib
-cp /usr/lib/librbl.so.1 ${PREFIX}/lib
+cp /usr/lib/*/libvbr.so.2 ${PREFIX}/lib
+cp /usr/lib/*/librbl.so.1 ${PREFIX}/lib
 cp /usr/lib/*/libbsd.so.0 ${PREFIX}/lib
 cp /lib/*/libpthread.so.0 ${PREFIX}/lib
 cp /lib/*/libc.so.6 ${PREFIX}/lib
