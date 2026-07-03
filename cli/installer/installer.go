@@ -56,7 +56,7 @@ type Installer struct {
 
 func New(logger *zap.Logger) *Installer {
 	appDir := fmt.Sprintf("/snap/%s/current", App)
-	dataDir := fmt.Sprintf("/var/snap/%s/current", App)
+	dataDir := fmt.Sprintf("/var/snap/%s/common", App)
 	return &Installer{
 		appDir:             appDir,
 		dataDir:            dataDir,
