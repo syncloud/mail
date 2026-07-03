@@ -37,7 +37,7 @@ done | sort -u | while read -r lib; do
 done
 
 cp /usr/sbin/opendkim $PREFIX/sbin
-cp /usr/bin/opendkim-* $PREFIX/bin
+find /usr/bin /usr/sbin -maxdepth 1 -name 'opendkim-*' -exec cp {} $PREFIX/bin \;
 
 cp ${DIR}/bin/* $PREFIX/bin
 
