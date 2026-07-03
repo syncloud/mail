@@ -27,10 +27,17 @@ tar xzf openssl-${OPENSSL_VERSION}.tar.gz
 wget https://downloads.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.gz --progress dot:giga
 tar xzf pcre-${PCRE_VERSION}.tar.gz
 
+CC_OPT="-static -static-libgcc"
+OPENSSL_OPT="no-asm"
+if [ "$(dpkg --print-architecture)" = "armhf" ]; then
+    CC_OPT="${CC_OPT} -mfpu=vfpv3-d16"
+    OPENSSL_OPT="${OPENSSL_OPT} -mfpu=vfpv3-d16"
+fi
+
 cd ${NAME}-${VERSION}
 ./configure --prefix=${PREFIX} \
     --with-cpu-opt=generic \
-    --with-cc-opt="-static -static-libgcc" \
+    --with-cc-opt="${CC_OPT}" \
     --with-ld-opt="-static" \
     --with-http_ssl_module \
     --with-http_gzip_static_module \
@@ -38,7 +45,7 @@ cd ${NAME}-${VERSION}
     --with-pcre=../pcre-${PCRE_VERSION} \
     --with-http_realip_module \
     --with-http_v2_module \
-    --with-openssl-opt=no-asm
+    --with-openssl-opt="${OPENSSL_OPT}"
 
 sed -i "/CFLAGS/s/ \-O //g" objs/Makefile
 

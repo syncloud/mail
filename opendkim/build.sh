@@ -37,15 +37,7 @@ done | sort -u | while read -r lib; do
 done
 
 cp /usr/sbin/opendkim $PREFIX/sbin
-cp /usr/bin/convert_keylist $PREFIX/bin
-cp /usr/bin/miltertest $PREFIX/bin
-cp /usr/bin/opendkim-atpszone $PREFIX/bin
-cp /usr/bin/opendkim-genkey $PREFIX/bin
-cp /usr/bin/opendkim-genzone $PREFIX/bin
-cp /usr/bin/opendkim-spam $PREFIX/bin
-cp /usr/bin/opendkim-stats $PREFIX/bin
-cp /usr/bin/opendkim-testkey $PREFIX/bin
-cp /usr/bin/opendkim-testmsg $PREFIX/bin
+cp /usr/bin/opendkim-* $PREFIX/bin
 
 cp ${DIR}/bin/* $PREFIX/bin
 
