@@ -40,8 +40,8 @@ cp --remove-destination /lib/*/libcrypt.so* ${PREFIX}/lib/dovecot
 cp --remove-destination /usr/lib/*/libcrypto.so* ${PREFIX}/lib/dovecot
 cp --remove-destination /lib/*/libdl.so* ${PREFIX}/lib
 cp --remove-destination /lib/*/libc.so* ${PREFIX}/lib
-cp --remove-destination /usr/lib/*/libldap_r*.so* ${PREFIX}/lib
-cp --remove-destination /usr/lib/*/liblber-2.4.so* ${PREFIX}/lib
+cp --remove-destination /usr/lib/*/libldap*.so* ${PREFIX}/lib
+cp --remove-destination /usr/lib/*/liblber*.so* ${PREFIX}/lib
 cp --remove-destination /lib/*/libresolv.so* ${PREFIX}/lib
 cp --remove-destination /usr/lib/*/libsasl2.so* ${PREFIX}/lib
 cp --remove-destination /usr/lib/*/libgnutls.so* ${PREFIX}/lib
