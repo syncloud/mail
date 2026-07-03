@@ -11,7 +11,7 @@ from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 
-from integration.util.helper import retry_func
+from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
 DIR = dirname(__file__)

@@ -8,5 +8,6 @@ mkdir -p "$OUT_HOOKS" "$OUT_BIN"
 
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/install"      ./cmd/install
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/configure"    ./cmd/configure
+CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/pre-refresh"  ./cmd/pre-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/post-refresh" ./cmd/post-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_BIN/cli"            ./cmd/cli

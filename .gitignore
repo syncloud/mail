@@ -12,3 +12,4 @@ log
 .cache
 lib
 src/version
+.drone.yml

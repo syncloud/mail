@@ -41,6 +41,30 @@ func main() {
 		},
 	})
 
+	cmd.AddCommand(&cobra.Command{
+		Use: "backup-pre-stop",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			logger.Info("backup-pre-stop")
+			return installer.New(logger).BackupPreStop()
+		},
+	})
+
+	cmd.AddCommand(&cobra.Command{
+		Use: "restore-pre-start",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			logger.Info("restore-pre-start")
+			return installer.New(logger).RestorePreStart()
+		},
+	})
+
+	cmd.AddCommand(&cobra.Command{
+		Use: "restore-post-start",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			logger.Info("restore-post-start")
+			return installer.New(logger).RestorePostStart()
+		},
+	})
+
 	err := cmd.Execute()
 	if err != nil {
 		fmt.Print(err)

@@ -4,7 +4,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
 NAME=openssl
-PREFIX=${DIR}/../integration/openssl
+PREFIX=${DIR}/../test/openssl
 OPENSSL_VERSION=1.1.1h
 
 apt-get update

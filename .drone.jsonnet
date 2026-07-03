@@ -8,7 +8,7 @@ local php_image = 'php:8.0.16-fpm-buster';
 local postgres_image = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
-local deployer = 'https://github.com/syncloud/store/releases/download/4/syncloud-release';
+local store_publisher = 'stable-303';
 local distro_default = 'bookworm';
 local distros = ['bookworm', 'buster'];
 
@@ -45,34 +45,108 @@ local build(arch, test_ui) = [{
         './openssl/test.sh',
       ],
     },
-  ] + std.flattenArrays([
-    [
-      {
-        name: comp.name,
-        image: comp.image,
-        commands: [
-          './' + comp.name + '/build.sh',
-        ],
-      },
-    ] + [
-      {
-        name: comp.name + ' test ' + distro,
-        image: platform_image(distro, arch),
-        commands: [
-          './' + comp.name + '/test.sh',
-        ],
-      }
-      for distro in distros
-    ]
-    for comp in [
-      { name: 'nginx', image: 'debian:' + debian },
-      { name: 'dovecot', image: 'debian:' + debian },
-      { name: 'opendkim', image: 'debian:' + bullseye },
-      { name: 'php', image: php_image },
-      { name: 'postgresql', image: postgres_image },
-      { name: 'postfix', image: 'debian:' + debian },
-    ]
-  ]) + [
+    {
+      name: 'nginx',
+      image: 'debian:' + debian,
+      commands: [
+        './nginx/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'nginx test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './nginx/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'dovecot',
+      image: 'debian:' + debian,
+      commands: [
+        './dovecot/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'dovecot test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './dovecot/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'opendkim',
+      image: 'debian:' + bullseye,
+      commands: [
+        './opendkim/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'opendkim test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './opendkim/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'php',
+      image: php_image,
+      commands: [
+        './php/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'php test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './php/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'postgresql',
+      image: postgres_image,
+      commands: [
+        './postgresql/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'postgresql test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './postgresql/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'postfix',
+      image: 'debian:' + debian,
+      commands: [
+        './postfix/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'postfix test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './postfix/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
     {
       name: 'download',
       image: 'debian:' + debian,
@@ -101,9 +175,9 @@ local build(arch, test_ui) = [{
       image: 'python:' + python,
       commands: [
         'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
-        'cd integration',
+        'cd test',
         './deps.sh',
-        'py.test -x -s verify.py --distro=' + distro + ' --domain=' + distro + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro + '.com --app=' + name + ' --arch=' + arch,
+        'py.test -x -s test.py --distro=' + distro + ' --domain=' + distro + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro + '.com --app=' + name + ' --arch=' + arch,
       ],
     }
     for distro in distros
@@ -134,9 +208,9 @@ local build(arch, test_ui) = [{
            image: 'python:' + python,
            commands: [
              'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
-             'cd integration',
+             'cd test',
              './deps.sh',
-             'py.test -x -s test-upgrade.py --distro=' + distro_default + ' --domain=' + distro_default + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro_default + '.com --app=' + name + ' --arch=' + arch,
+             'py.test -x -s upgrade.py --distro=' + distro_default + ' --domain=' + distro_default + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro_default + '.com --app=' + name + ' --arch=' + arch,
            ],
          },
          {
@@ -148,41 +222,14 @@ local build(arch, test_ui) = [{
          },
        ] else []) + [
     {
-      name: 'upload',
-      image: 'debian:' + debian,
+      name: 'publish',
+      image: 'syncloud/store-publisher:' + store_publisher,
       environment: {
-        AWS_ACCESS_KEY_ID: { from_secret: 'AWS_ACCESS_KEY_ID' },
-        AWS_SECRET_ACCESS_KEY: { from_secret: 'AWS_SECRET_ACCESS_KEY' },
         SYNCLOUD_TOKEN: { from_secret: 'SYNCLOUD_TOKEN' },
       },
-      commands: [
-        'PACKAGE=$(cat package.name)',
-        'apt update && apt install -y wget',
-        'wget ' + deployer + '-' + arch + ' -O release --progress=dot:giga',
-        'chmod +x release',
-        './release publish -f $PACKAGE -b $DRONE_BRANCH',
-      ],
+      command: ['snap', '-c', '${DRONE_BRANCH}'],
       when: {
-        branch: ['stable', 'master'],
-        event: ['push'],
-      },
-    },
-    {
-      name: 'promote',
-      image: 'debian:' + debian,
-      environment: {
-        AWS_ACCESS_KEY_ID: { from_secret: 'AWS_ACCESS_KEY_ID' },
-        AWS_SECRET_ACCESS_KEY: { from_secret: 'AWS_SECRET_ACCESS_KEY' },
-        SYNCLOUD_TOKEN: { from_secret: 'SYNCLOUD_TOKEN' },
-      },
-      commands: [
-        'apt update && apt install -y wget',
-        'wget ' + deployer + '-' + arch + ' -O release --progress=dot:giga',
-        'chmod +x release',
-        './release promote -n ' + name + ' -a $(dpkg --print-architecture)',
-      ],
-      when: {
-        branch: ['stable'],
+        branch: ['master', 'stable'],
         event: ['push'],
       },
     },
@@ -196,11 +243,12 @@ local build(arch, test_ui) = [{
         timeout: '2m',
         command_timeout: '2m',
         target: '/home/artifact/repo/' + name + '/${DRONE_BUILD_NUMBER}-' + arch,
-        source: ['artifact/*'],
+        source: 'artifact/*',
         strip_components: 1,
       },
       when: {
         status: ['failure', 'success'],
+        event: ['push'],
       },
     },
   ],

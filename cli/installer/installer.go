@@ -130,8 +130,11 @@ func (i *Installer) InitConfig() error {
 	if err := linux.CreateUser(UserName); err != nil {
 		return err
 	}
+	if _, err := i.executor.RunDir("", "/usr/sbin/groupadd", "-f", UserName); err != nil {
+		return err
+	}
 
-	if err := os.MkdirAll(path.Join(i.dataDir, "nginx"), 0755); err != nil {
+	if err := linux.CreateMissingDirs(path.Join(i.dataDir, "nginx")); err != nil {
 		return err
 	}
 
@@ -156,10 +159,8 @@ func (i *Installer) InitConfig() error {
 		i.opendkimKeysDir,
 		opendkimKeysDomainDir,
 	}
-	for _, dataDir := range dataDirs {
-		if err := os.MkdirAll(dataDir, 0755); err != nil {
-			return err
-		}
+	if err := linux.CreateMissingDirs(dataDirs...); err != nil {
+		return err
 	}
 
 	dkimKey, err := i.GenerateDkimKey(deviceDomainName, opendkimKeysDomainDir)
@@ -175,10 +176,10 @@ func (i *Installer) InitConfig() error {
 	}
 
 	boxDataDir := path.Join(i.dataDir, "box")
-	if err := os.MkdirAll(boxDataDir, 0755); err != nil {
+	if err := linux.CreateMissingDirs(boxDataDir); err != nil {
 		return err
 	}
-	if _, err := i.executor.Run("chown", "-R", "dovecot:dovecot", boxDataDir); err != nil {
+	if _, err := i.executor.RunDir("", "chown", "-R", "dovecot:dovecot", boxDataDir); err != nil {
 		return err
 	}
 
@@ -243,7 +244,7 @@ func (i *Installer) Configure() error {
 func (i *Installer) DatabaseInit() error {
 	i.logger.Info("initializing database")
 	psqlInitdb := path.Join(i.appDir, "postgresql", "bin", "initdb.sh")
-	if _, err := i.executor.Run("sudo", "-H", "-u", UserName, psqlInitdb, i.databasePath); err != nil {
+	if _, err := i.executor.RunDir("", "sudo", "-H", "-u", UserName, psqlInitdb, i.databasePath); err != nil {
 		return err
 	}
 	postgresqlConfFrom := path.Join(i.dataDir, "config", "postgresql", "postgresql.conf")
@@ -279,14 +280,14 @@ func (i *Installer) psql() string {
 
 func (i *Installer) executeSql(sql, database string) error {
 	i.logger.Info("executing", zap.String("sql", sql))
-	_, err := i.executor.Run(i.psql(),
+	_, err := i.executor.RunDir("", i.psql(),
 		"-U", DbUser, "-h", i.databasePath, "-d", database, "-c", sql)
 	return err
 }
 
 func (i *Installer) executeFile(file, database string) error {
 	i.logger.Info("executing", zap.String("file", file))
-	_, err := i.executor.Run(i.psql(),
+	_, err := i.executor.RunDir("", i.psql(),
 		"-U", DbUser, "-h", i.databasePath, "-d", database, "-f", file)
 	return err
 }
@@ -320,4 +321,20 @@ func (i *Installer) StorageChange() error {
 
 func (i *Installer) AccessChange() error {
 	return i.UpdateDomain()
+}
+
+func (i *Installer) PreRefresh() error {
+	return nil
+}
+
+func (i *Installer) BackupPreStop() error {
+	return nil
+}
+
+func (i *Installer) RestorePreStart() error {
+	return nil
+}
+
+func (i *Installer) RestorePostStart() error {
+	return nil
 }
