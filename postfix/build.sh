@@ -62,7 +62,7 @@ mkdir -p ${BUILD_DIR}
 #make install
 
 cd ${BUILD_DIR}
-wget https://ftp.porcupine.org/mirrors/postfix-release/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
+wget http://ftp.porcupine.org/mirrors/postfix-release/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
 export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
