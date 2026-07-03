@@ -22,7 +22,11 @@ wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz --progress
 tar xzf openssl-${OPENSSL_VERSION}.tar.gz
 cd openssl-${OPENSSL_VERSION}
 
-./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 no-asm -fPIC
+if [ "$(dpkg --print-architecture)" = "armhf" ]; then
+    ./Configure linux-generic32 --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 no-asm -fPIC
+else
+    ./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 no-asm -fPIC
+fi
 make
 make install
 
