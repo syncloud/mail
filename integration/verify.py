@@ -70,7 +70,8 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
 def test_start(module_setup, device_host, app, domain, device):
     add_host_alias(app, device_host, domain)
     print(check_output('date', shell=True))
-    device.run_ssh('date', retries=20)
+    device.run_ssh('date', retries=100)
+    device.run_ssh('snap watch --last=auto-refresh?', throw=False)
     device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
 
 
