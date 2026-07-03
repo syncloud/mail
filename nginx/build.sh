@@ -24,7 +24,7 @@ tar xzf ${NAME}-${VERSION}.tar.gz
 wget http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz --progress dot:giga
 tar xzf openssl-${OPENSSL_VERSION}.tar.gz
 
-wget https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.gz --progress dot:giga
+wget https://downloads.sourceforge.net/project/pcre/pcre/${PCRE_VERSION}/pcre-${PCRE_VERSION}.tar.gz --progress dot:giga
 tar xzf pcre-${PCRE_VERSION}.tar.gz
 
 cd ${NAME}-${VERSION}
@@ -36,7 +36,6 @@ cd ${NAME}-${VERSION}
     --with-http_gzip_static_module \
     --with-openssl=../openssl-${OPENSSL_VERSION} \
     --with-pcre=../pcre-${PCRE_VERSION} \
-    --with-ipv6 \
     --with-http_realip_module \
     --with-http_v2_module \
     --with-openssl-opt=no-asm
