@@ -96,11 +96,9 @@ rm -rf \
 
 TARGET=${DIR}/../build/snap/postfix
 mkdir $TARGET
-cp -r /bin ${TARGET}
-cp -r /sbin ${TARGET}
-cp -r /lib* ${TARGET}
-cp -r /usr/lib ${TARGET}
-cp -r /usr/local/lib ${TARGET}
+mkdir -p ${TARGET}/lib ${TARGET}/usr/lib
+cp -r /lib/*-linux-gnu* ${TARGET}/lib/
+cp -r /usr/lib/*-linux-gnu* ${TARGET}/usr/lib/
 cp -r $PREFIX/* ${TARGET}
 
 cp $DIR/postfix.sh ${TARGET}/bin
