@@ -71,6 +71,15 @@ cp ${DIR}/dovecot.sh ${PREFIX}/bin
 cp ${DIR}/doveadm.sh ${PREFIX}/bin
 cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 
+apt-get -o Acquire::Check-Valid-Until=false -y install patchelf
+INTERP=/snap/mail/current/dovecot/lib/ld.so
+RPATH=/snap/mail/current/dovecot/lib:/snap/mail/current/dovecot/lib/dovecot
+for elf in $(find ${PREFIX}/bin ${PREFIX}/sbin ${PREFIX}/libexec -type f); do
+    if patchelf --print-interpreter "$elf" >/dev/null 2>&1; then
+        patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath "$elf"
+    fi
+done
+
 rm -rf ${OUTPUT}
 mkdir -p ${DIR}/../build/snap
 cp -r ${PREFIX} ${OUTPUT}

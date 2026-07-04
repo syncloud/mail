@@ -110,4 +110,15 @@ cp $DIR/postfix.sh ${TARGET}/bin
 cp $DIR/postconf.sh ${TARGET}/bin
 cp $DIR/postmap.sh ${TARGET}/bin
 
+apt -o Acquire::Check-Valid-Until=false -y install patchelf
+TRIPLET=$(gcc -dumpmachine)
+LDSO=$(basename $(ls ${TARGET}/lib/${TRIPLET}/ld-*.so* | head -1))
+INTERP=/snap/mail/current/postfix/lib/${TRIPLET}/${LDSO}
+RPATH=/snap/mail/current/postfix/lib/${TRIPLET}:/snap/mail/current/postfix/usr/lib/${TRIPLET}
+for elf in $(find ${TARGET}/usr/sbin ${TARGET}/usr/libexec -type f); do
+    if patchelf --print-interpreter "$elf" >/dev/null 2>&1; then
+        patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath "$elf"
+    fi
+done
+
 ldd ${TARGET}/usr/sbin/postfix
