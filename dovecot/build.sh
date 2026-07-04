@@ -80,13 +80,6 @@ for lib in $(find ${PREFIX}/lib/dovecot -name '*.so*' -type f) $(ls ${PREFIX}/li
     patchelf --set-rpath "$RPATH" --force-rpath "$lib" || true
 done
 
-echo "=== DIAG ==="
-ls ${PREFIX}/lib | grep -iE "libdl|libc.so|libc-|^ld"
-echo "doveconf interp:"; patchelf --print-interpreter ${PREFIX}/bin/doveconf
-echo "doveconf rpath:"; patchelf --print-rpath ${PREFIX}/bin/doveconf
-echo "doveconf needed:"; patchelf --print-needed ${PREFIX}/bin/doveconf | tr '\n' ' '; echo
-echo "=== END DIAG ==="
-
 rm -rf ${OUTPUT}
 mkdir -p ${DIR}/../build/snap
 cp -r ${PREFIX} ${OUTPUT}
