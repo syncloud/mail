@@ -7,8 +7,7 @@ local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
-local buster = 'buster-slim';
-local php = 'php:8.0.16-fpm-buster';
+local php = 'php:8.0.30-fpm-bullseye';
 local postgres = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
@@ -27,20 +26,6 @@ local build(arch, test_ui) = [{
     arch: arch,
   },
   steps: [
-    {
-      name: 'openssl',
-      image: 'debian:' + buster,
-      commands: [
-        './openssl/build.sh',
-      ],
-    },
-    {
-      name: 'openssl test',
-      image: 'debian:' + debian,
-      commands: [
-        './openssl/test.sh',
-      ],
-    },
     {
       name: 'nginx',
       image: 'nginx:' + nginx,
