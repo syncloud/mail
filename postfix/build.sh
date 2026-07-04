@@ -110,7 +110,7 @@ cp $DIR/postfix.sh ${TARGET}/bin
 cp $DIR/postconf.sh ${TARGET}/bin
 cp $DIR/postmap.sh ${TARGET}/bin
 
-TRIPLET=$(gcc -dumpmachine)
+TRIPLET=$(basename $(ls -d ${TARGET}/lib/*-linux-gnu*))
 LDSO=$(basename $(ls ${TARGET}/lib/${TRIPLET}/ld-*.so* | head -1))
 INTERP=/snap/mail/current/postfix/lib/${TRIPLET}/${LDSO}
 RPATH=/snap/mail/current/postfix/lib/${TRIPLET}:/snap/mail/current/postfix/usr/lib/${TRIPLET}
