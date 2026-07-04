@@ -10,7 +10,12 @@ VERSION=2.3.16
 PREFIX=/snap/mail/current/${NAME}
 OUTPUT=${DIR}/../build/snap/${NAME}
 
-apt-get update
+sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
+       -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
+       -e 's|http://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
+       -e '/buster-updates/d' /etc/apt/sources.list
+
+apt-get -o Acquire::Check-Valid-Until=false update
 apt-get -y install build-essential libncurses5-dev libldap2-dev libsasl2-dev libssl-dev libldb-dev wget
 
 rm -rf ${PREFIX}

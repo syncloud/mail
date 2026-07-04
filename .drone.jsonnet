@@ -4,6 +4,7 @@ local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
+local buster = 'buster-slim';
 local php_image = 'php:8.0.16-fpm-buster';
 local postgres_image = 'postgres:9.4-alpine';
 local platform = '26.04.10';
@@ -64,7 +65,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'dovecot',
-      image: 'debian:' + debian,
+      image: 'debian:' + buster,
       commands: [
         './dovecot/build.sh',
       ],
@@ -132,7 +133,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postfix',
-      image: 'debian:' + debian,
+      image: 'debian:' + buster,
       commands: [
         './postfix/build.sh',
       ],
