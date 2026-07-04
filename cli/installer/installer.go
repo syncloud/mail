@@ -5,12 +5,14 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/syncloud/golib/config"
 	"github.com/syncloud/golib/linux"
 	"github.com/syncloud/golib/platform"
 	"go.uber.org/zap"
+	"gopkg.in/ini.v1"
 )
 
 const (
@@ -46,6 +48,7 @@ type Installer struct {
 	logDir          string
 	opendkimDir     string
 	opendkimKeysDir string
+	userConfigFile  string
 	platformClient  *platform.Client
 	database        *Database
 	executor        *Executor
@@ -64,6 +67,7 @@ func New(logger *zap.Logger) *Installer {
 		logDir:          path.Join(dataDir, "log"),
 		opendkimDir:     path.Join(dataDir, "opendkim"),
 		opendkimKeysDir: path.Join(dataDir, "opendkim", "keys"),
+		userConfigFile:  path.Join(dataDir, "user_mail.cfg"),
 		platformClient:  platform.New(),
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		executor:        executor,
@@ -224,6 +228,23 @@ func (i *Installer) Initialize() error {
 		return err
 	}
 	return i.setActivated(true)
+}
+
+func (i *Installer) isActivated() (bool, error) {
+	cfg, err := ini.LooseLoad(i.userConfigFile)
+	if err != nil {
+		return false, err
+	}
+	return cfg.Section("mail").Key("activated").MustBool(false), nil
+}
+
+func (i *Installer) setActivated(activated bool) error {
+	cfg, err := ini.LooseLoad(i.userConfigFile)
+	if err != nil {
+		return err
+	}
+	cfg.Section("mail").Key("activated").SetValue(strconv.FormatBool(activated))
+	return cfg.SaveTo(i.userConfigFile)
 }
 
 func (i *Installer) PrepareStorage() error {

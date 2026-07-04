@@ -4,6 +4,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/syncloud/golib v1.1.20
 	go.uber.org/zap v1.26.0
+	gopkg.in/ini.v1 v1.67.3
 )
 
 require (
