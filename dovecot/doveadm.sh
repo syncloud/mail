@@ -2,4 +2,6 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 
-exec ${DIR}/lib/ld.so --library-path ${DIR}/lib:${DIR}/lib/dovecot ${DIR}/bin/doveadm "$@"
+LD_LIBRARY_PATH=$(find ${DIR}/lib -type d | tr '\n' ':')
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH%:}
+exec ${DIR}/bin/doveadm "$@"

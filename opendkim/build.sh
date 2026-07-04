@@ -9,48 +9,63 @@ NAME=opendkim
 PREFIX=${DIR}/../build/snap/${NAME}
 
 rm -rf ${PREFIX}
-mkdir -p ${PREFIX}/bin
-mkdir -p ${PREFIX}/sbin
-mkdir -p ${PREFIX}/lib
+mkdir -p ${PREFIX}/bin ${PREFIX}/sbin ${PREFIX}/lib
 
 apt-get update
 apt-get -y install opendkim opendkim-tools
 
-copy_deps() {
-    ldd "$1" 2>/dev/null | awk '$2 == "=>" && $3 ~ /^\// {print $3} $1 ~ /^\// && $2 != "=>" {print $1}'
-}
-
 cp $(readlink -f /lib*/ld-linux-*.so*) ${PREFIX}/lib/ld.so
 
-for bin in /usr/sbin/opendkim \
-           /usr/bin/opendkim-atpszone \
-           /usr/bin/opendkim-genzone \
-           /usr/bin/opendkim-spam \
-           /usr/bin/opendkim-stats \
-           /usr/bin/opendkim-testkey \
-           /usr/bin/opendkim-testmsg \
-           /usr/bin/convert_keylist \
-           /usr/bin/miltertest; do
-    copy_deps "$bin"
-done | sort -u | while read -r lib; do
-    cp -L --remove-destination "$lib" ${PREFIX}/lib
+for lib in \
+    libc.so.6 \
+    libdl.so.2 \
+    libgcc_s.so.1 \
+    libm.so.6 \
+    libpthread.so.0 \
+    libresolv.so.2 \
+    libnss_files.so.2 \
+    libnss_compat.so.2 \
+    libnss_dns.so.2; do
+    cp -L --remove-destination /lib/*-linux-gnu*/${lib} ${PREFIX}/lib
 done
 
-for nss in libnss_files.so.2 libnss_compat.so.2 libnss_dns.so.2; do
-    found=$(find /usr/lib /lib -maxdepth 3 -name "$nss" -print -quit 2>/dev/null)
-    if [ -z "${found}" ]; then
-        echo "opendkim: nss module not found: $nss"
-        exit 1
-    fi
-    cp -L --remove-destination "${found}" ${PREFIX}/lib
+for lib in \
+    libbsd.so.0 \
+    libcrypto.so.1.1 \
+    libdb-5.3.so \
+    libevent-2.1.so.7 \
+    libffi.so.7 \
+    libgmp.so.10 \
+    libgnutls.so.30 \
+    libhogweed.so.6 \
+    libidn2.so.0 \
+    liblber-2.4.so.2 \
+    libldap_r-2.4.so.2 \
+    liblua5.1.so.0 \
+    libmd.so.0 \
+    libmemcached.so.11 \
+    libmilter.so.1.0.1 \
+    libnettle.so.8 \
+    libopendkim.so.11 \
+    libp11-kit.so.0 \
+    librbl.so.1 \
+    libsasl2.so.2 \
+    libssl.so.1.1 \
+    libstdc++.so.6 \
+    libtasn1.so.6 \
+    libunbound.so.8 \
+    libunistring.so.2 \
+    libvbr.so.2; do
+    cp -L --remove-destination /usr/lib/*-linux-gnu*/${lib} ${PREFIX}/lib
 done
 
-cp /usr/sbin/opendkim $PREFIX/sbin
-find /usr/bin /usr/sbin -maxdepth 1 -name 'opendkim-*' -exec cp {} $PREFIX/bin \;
+cp -L --remove-destination /usr/lib/libopendbx.so.1 ${PREFIX}/lib
 
-cp ${DIR}/bin/* $PREFIX/bin
+cp /usr/sbin/opendkim ${PREFIX}/sbin
+cp /usr/sbin/opendkim-genkey ${PREFIX}/bin
+cp ${DIR}/bin/* ${PREFIX}/bin
 
 export LD_LIBRARY_PATH=${PREFIX}/lib
-ldd $PREFIX/sbin/opendkim
-$PREFIX/sbin/opendkim -V
-$PREFIX/bin/opendkim-genkey --help
+ldd ${PREFIX}/sbin/opendkim
+${PREFIX}/bin/opendkim.sh -V
+${PREFIX}/bin/opendkim-genkey --help
