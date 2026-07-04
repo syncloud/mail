@@ -1,9 +1,7 @@
 local name = 'mail';
 local roundcube = '1.6.1';
 local dovecot_version = '2.3.16';
-local nginx_version = '1.20.1';
-local nginx_openssl_version = '1.1.1';
-local pcre_version = '8.40';
+local nginx_version = '1.24.0';
 local postfix_version = '3.4.28';
 local openssl_version = '1.1.1h';
 local python = '3.12-slim-bookworm';
@@ -46,9 +44,9 @@ local build(arch, test_ui) = [{
     },
     {
       name: 'nginx',
-      image: 'debian:' + debian,
+      image: 'nginx:' + nginx_version,
       commands: [
-        './nginx/build.sh ' + nginx_version + ' ' + nginx_openssl_version + ' ' + pcre_version,
+        './nginx/build.sh',
       ],
     },
   ] + [
