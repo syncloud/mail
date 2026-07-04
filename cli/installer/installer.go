@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -203,19 +202,7 @@ func (i *Installer) Install() error {
 }
 
 func (i *Installer) PostRefresh() error {
-	if err := i.InitConfig(); err != nil {
-		return err
-	}
-	logs, err := filepath.Glob(path.Join(i.logDir, "*.log"))
-	if err != nil {
-		return err
-	}
-	for _, logFile := range logs {
-		if err := os.Remove(logFile); err != nil {
-			return err
-		}
-	}
-	return nil
+	return i.InitConfig()
 }
 
 func (i *Installer) Configure() error {
@@ -245,7 +232,7 @@ func (i *Installer) PrepareStorage() error {
 		return err
 	}
 	tmpStoragePath := path.Join(appStorageDir, "tmp")
-	if err := os.MkdirAll(tmpStoragePath, 0755); err != nil {
+	if err := linux.CreateMissingDirs(tmpStoragePath); err != nil {
 		return err
 	}
 	return linux.Chown(tmpStoragePath, UserName)
