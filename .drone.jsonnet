@@ -25,13 +25,6 @@ local build(arch, test_ui) = [{
   },
   steps: [
     {
-      name: 'version',
-      image: 'debian:' + debian,
-      commands: [
-        'echo $DRONE_BUILD_NUMBER > version',
-      ],
-    },
-    {
       name: 'openssl',
       image: 'debian:' + buster,
       commands: [
@@ -165,8 +158,7 @@ local build(arch, test_ui) = [{
       name: 'package',
       image: 'debian:' + debian,
       commands: [
-        'VERSION=$(cat version)',
-        './package.sh ' + name + ' $VERSION ',
+        './package.sh ' + name + ' $DRONE_BUILD_NUMBER',
       ],
     },
   ] + [
@@ -174,10 +166,7 @@ local build(arch, test_ui) = [{
       name: 'test ' + distro,
       image: 'python:' + python,
       commands: [
-        'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
-        'cd test',
-        './deps.sh',
-        'py.test -x -s test.py --distro=' + distro + ' --domain=' + distro + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro + '.com --app=' + name + ' --arch=' + arch,
+        './test/ci-test.sh ' + distro + ' ' + arch,
       ],
     }
     for distro in distros
@@ -200,10 +189,7 @@ local build(arch, test_ui) = [{
            name: 'test-upgrade',
            image: 'python:' + python,
            commands: [
-             'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
-             'cd test',
-             './deps.sh',
-             'py.test -x -s upgrade.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.buster.com --app=' + name + ' --arch=' + arch,
+             './test/ci-upgrade.sh buster ' + arch,
            ],
          },
        ] else []) + [

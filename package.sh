@@ -12,6 +12,8 @@ VERSION=$2
 ARCH=$(dpkg --print-architecture)
 SNAP_DIR=${DIR}/build/snap
 
+echo $VERSION > ${DIR}/version
+
 apt update
 apt -y install squashfs-tools
 

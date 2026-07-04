@@ -44,11 +44,11 @@ type Installer struct {
 	appDir          string
 	dataDir         string
 	configPath      string
-	databasePath    string
 	logDir          string
 	opendkimDir     string
 	opendkimKeysDir string
 	platformClient  *platform.Client
+	database        *Database
 	executor        *Executor
 	logger          *zap.Logger
 }
@@ -56,16 +56,18 @@ type Installer struct {
 func New(logger *zap.Logger) *Installer {
 	appDir := fmt.Sprintf("/snap/%s/current", App)
 	dataDir := fmt.Sprintf("/var/snap/%s/common", App)
+	configPath := path.Join(dataDir, "config")
+	executor := NewExecutor(logger)
 	return &Installer{
 		appDir:          appDir,
 		dataDir:         dataDir,
-		configPath:      path.Join(dataDir, "config"),
-		databasePath:    path.Join(dataDir, "database"),
+		configPath:      configPath,
 		logDir:          path.Join(dataDir, "log"),
 		opendkimDir:     path.Join(dataDir, "opendkim"),
 		opendkimKeysDir: path.Join(dataDir, "opendkim", "keys"),
 		platformClient:  platform.New(),
-		executor:        NewExecutor(logger),
+		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
+		executor:        executor,
 		logger:          logger,
 	}
 }
@@ -99,8 +101,8 @@ func (i *Installer) RegenerateConfigs() error {
 	variables := Variables{
 		AppDir:           i.appDir,
 		AppDataDir:       i.dataDir,
-		DbPsqlPath:       i.databasePath,
-		DbPsqlPort:       PsqlPort,
+		DbPsqlPath:       i.database.Dir(),
+		DbPsqlPort:       i.database.Port(),
 		DbName:           DbName,
 		DbUser:           DbUser,
 		DbPassword:       DbPass,
@@ -129,32 +131,30 @@ func (i *Installer) InitConfig() error {
 		return err
 	}
 
-	if err := linux.CreateMissingDirs(path.Join(i.dataDir, "nginx")); err != nil {
-		return err
-	}
-
-	if err := i.RegenerateConfigs(); err != nil {
-		return err
-	}
-
 	deviceDomainName, err := i.platformClient.GetDeviceDomainName()
 	if err != nil {
 		return err
 	}
 	opendkimKeysDomainDir := path.Join(i.opendkimKeysDir, deviceDomainName)
+	boxDataDir := path.Join(i.dataDir, "box")
 
-	dataDirs := []string{
+	if err := linux.CreateMissingDirs(
+		path.Join(i.dataDir, "nginx"),
 		path.Join(i.dataDir, "config"),
 		i.logDir,
 		path.Join(i.dataDir, "spool"),
 		path.Join(i.dataDir, "dovecot"),
 		path.Join(i.dataDir, "dovecot", "private"),
 		path.Join(i.dataDir, "data"),
+		boxDataDir,
 		i.opendkimDir,
 		i.opendkimKeysDir,
 		opendkimKeysDomainDir,
+	); err != nil {
+		return err
 	}
-	if err := linux.CreateMissingDirs(dataDirs...); err != nil {
+
+	if err := i.RegenerateConfigs(); err != nil {
 		return err
 	}
 
@@ -167,11 +167,6 @@ func (i *Installer) InitConfig() error {
 	}
 
 	if err := linux.Chown(i.dataDir, UserName); err != nil {
-		return err
-	}
-
-	boxDataDir := path.Join(i.dataDir, "box")
-	if err := linux.CreateMissingDirs(boxDataDir); err != nil {
 		return err
 	}
 	if _, err := i.executor.RunDir("", "chown", "-R", "dovecot:dovecot", boxDataDir); err != nil {
@@ -204,7 +199,7 @@ func (i *Installer) Install() error {
 	if err := i.InitConfig(); err != nil {
 		return err
 	}
-	return i.DatabaseInit()
+	return i.database.Init()
 }
 
 func (i *Installer) PostRefresh() error {
@@ -236,55 +231,12 @@ func (i *Installer) Configure() error {
 	return i.PrepareStorage()
 }
 
-func (i *Installer) DatabaseInit() error {
-	i.logger.Info("initializing database")
-	psqlInitdb := path.Join(i.appDir, "postgresql", "bin", "initdb.sh")
-	if _, err := i.executor.RunDir("", "sudo", "-H", "-u", UserName, psqlInitdb, i.databasePath); err != nil {
-		return err
-	}
-	postgresqlConfFrom := path.Join(i.dataDir, "config", "postgresql", "postgresql.conf")
-	postgresqlConfTo := path.Join(i.databasePath, "postgresql.conf")
-	content, err := os.ReadFile(postgresqlConfFrom)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(postgresqlConfTo, content, 0644)
-}
-
 func (i *Installer) Initialize() error {
 	i.logger.Info("initialization")
-	if err := i.executeSql(
-		fmt.Sprintf("ALTER USER %s WITH PASSWORD '%s';", DbUser, DbUser),
-		"postgres",
-	); err != nil {
-		return err
-	}
-	if err := i.executeSql(fmt.Sprintf("create database %s;", DbName), "postgres"); err != nil {
-		return err
-	}
-	dbInitFile := path.Join(i.appDir, "roundcubemail", "SQL", "postgres.initial.sql")
-	if err := i.executeFile(dbInitFile, DbName); err != nil {
+	if err := i.database.Create(); err != nil {
 		return err
 	}
 	return i.setActivated(true)
-}
-
-func (i *Installer) psql() string {
-	return path.Join(i.appDir, "postgresql", "bin", "psql.sh")
-}
-
-func (i *Installer) executeSql(sql, database string) error {
-	i.logger.Info("executing", zap.String("sql", sql))
-	_, err := i.executor.RunDir("", i.psql(),
-		"-U", DbUser, "-h", i.databasePath, "-d", database, "-c", sql)
-	return err
-}
-
-func (i *Installer) executeFile(file, database string) error {
-	i.logger.Info("executing", zap.String("file", file))
-	_, err := i.executor.RunDir("", i.psql(),
-		"-U", DbUser, "-h", i.databasePath, "-d", database, "-f", file)
-	return err
 }
 
 func (i *Installer) PrepareStorage() error {
@@ -323,13 +275,13 @@ func (i *Installer) PreRefresh() error {
 }
 
 func (i *Installer) BackupPreStop() error {
-	return nil
+	return i.PreRefresh()
 }
 
 func (i *Installer) RestorePreStart() error {
-	return nil
+	return i.PostRefresh()
 }
 
 func (i *Installer) RestorePostStart() error {
-	return nil
+	return i.Configure()
 }
