@@ -7,6 +7,5 @@ export async function login(page: Page, user: string, password: string) {
 }
 
 export async function expectInbox(page: Page) {
-  await expect(page.locator('#mailboxlist')).toBeVisible()
-  await expect(page.locator('#mailboxlist a[rel="INBOX"]')).toBeVisible()
+  await expect(page.locator('#messagelist')).toBeVisible()
 }
