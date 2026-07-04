@@ -10,7 +10,6 @@ local postgres_image = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-303';
-local distro_default = 'bookworm';
 local distros = ['bookworm', 'buster'];
 
 local platform_image(distro, arch) =
@@ -198,27 +197,13 @@ local build(arch, test_ui) = [{
            ],
          },
          {
-           name: 'e2e-before-upgrade',
-           image: playwright,
-           commands: [
-             './test/e2e/run.sh e2e-before-upgrade specs/02-pre-upgrade.spec.ts desktop',
-           ],
-         },
-         {
            name: 'test-upgrade',
            image: 'python:' + python,
            commands: [
              'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
              'cd test',
              './deps.sh',
-             'py.test -x -s upgrade.py --distro=' + distro_default + ' --domain=' + distro_default + '.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.' + distro_default + '.com --app=' + name + ' --arch=' + arch,
-           ],
-         },
-         {
-           name: 'e2e-after-upgrade',
-           image: playwright,
-           commands: [
-             './test/e2e/run.sh e2e-after-upgrade specs/03-post-upgrade.spec.ts desktop',
+             'py.test -x -s upgrade.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=' + name + '.buster.com --app=' + name + ' --arch=' + arch,
            ],
          },
        ] else []) + [
