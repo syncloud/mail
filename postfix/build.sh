@@ -13,12 +13,7 @@ BUILD_DIR=${DIR}/build
 PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
-sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
-       -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
-       -e 's|http://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
-       -e '/buster-updates/d' /etc/apt/sources.list
-
-apt -o Acquire::Check-Valid-Until=false update
+apt update
 apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev patchelf
 
 rm -rf ${BUILD_DIR}

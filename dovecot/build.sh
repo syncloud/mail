@@ -10,12 +10,7 @@ VERSION=$1
 PREFIX=/snap/mail/current/${NAME}
 OUTPUT=${DIR}/../build/snap/${NAME}
 
-sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
-       -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
-       -e 's|http://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
-       -e '/buster-updates/d' /etc/apt/sources.list
-
-apt-get -o Acquire::Check-Valid-Until=false update
+apt-get update
 apt-get -y install build-essential libncurses5-dev libldap2-dev libsasl2-dev libssl-dev libldb-dev wget
 
 rm -rf ${PREFIX}
@@ -69,7 +64,7 @@ cp ${DIR}/lda.sh ${PREFIX}/bin
 cp ${DIR}/doveadm.sh ${PREFIX}/bin
 cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 
-apt-get -o Acquire::Check-Valid-Until=false -y install patchelf
+apt-get -y install patchelf
 INTERP=/snap/mail/current/dovecot/lib/ld.so
 RPATH=/snap/mail/current/dovecot/lib:/snap/mail/current/dovecot/lib/dovecot
 for elf in $(find ${PREFIX}/bin ${PREFIX}/sbin ${PREFIX}/libexec -type f); do

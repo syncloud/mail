@@ -1,41 +1,21 @@
-#!/bin/bash -xe
+#!/bin/bash -ex
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${DIR}
 
-NAME=openssl
 PREFIX=${DIR}/../test/openssl
-OPENSSL_VERSION=$1
+rm -rf ${PREFIX}
+mkdir -p ${PREFIX}/bin ${PREFIX}/lib
 
 sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
        -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
        -e 's|http://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
        -e '/buster-updates/d' /etc/apt/sources.list
-
 apt-get -o Acquire::Check-Valid-Until=false update
-apt-get -y install build-essential libffi-dev wget
+apt-get -y install openssl
 
-rm -rf ${PREFIX}
-mkdir -p ${PREFIX}
-
-rm -rf ${DIR}/work
-mkdir -p ${DIR}/work
-cd ${DIR}/work
-
-wget https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz --progress dot:giga
-
-tar xzf openssl-${OPENSSL_VERSION}.tar.gz
-cd openssl-${OPENSSL_VERSION}
-
-if [ "$(dpkg --print-architecture)" = "armhf" ]; then
-    ./Configure linux-generic32 --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 no-asm -fPIC
-else
-    ./config --prefix=${PREFIX} --openssldir=/usr/lib/ssl no-shared no-ssl2 no-ssl3 no-asm -fPIC
-fi
-make
-make install
-
-mv ${PREFIX}/bin/openssl ${PREFIX}/bin/openssl.bin
+cp /usr/bin/openssl ${PREFIX}/bin/openssl.bin
+cp -a /lib/*-linux-gnu*/. ${PREFIX}/lib/
+cp /usr/lib/*/libssl.so* ${PREFIX}/lib/
+cp /usr/lib/*/libcrypto.so* ${PREFIX}/lib/
 cp ${DIR}/openssl ${PREFIX}/bin/openssl
-
-${PREFIX}/bin/openssl version -a

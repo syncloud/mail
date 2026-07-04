@@ -1,16 +1,15 @@
 local name = 'mail';
 local roundcube = '1.6.1';
-local dovecot_version = '2.3.16';
-local nginx_version = '1.24.0';
-local postfix_version = '3.4.28';
-local openssl_version = '1.1.1h';
+local dovecot = '2.3.16';
+local nginx = '1.24.0';
+local postfix = '3.4.28';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
 local buster = 'buster-slim';
-local php_image = 'php:8.0.16-fpm-buster';
-local postgres_image = 'postgres:9.4-alpine';
+local php = 'php:8.0.16-fpm-buster';
+local postgres = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-303';
@@ -32,7 +31,7 @@ local build(arch, test_ui) = [{
       name: 'openssl',
       image: 'debian:' + buster,
       commands: [
-        './openssl/build.sh ' + openssl_version,
+        './openssl/build.sh',
       ],
     },
     {
@@ -44,7 +43,7 @@ local build(arch, test_ui) = [{
     },
     {
       name: 'nginx',
-      image: 'nginx:' + nginx_version,
+      image: 'nginx:' + nginx,
       commands: [
         './nginx/build.sh',
       ],
@@ -61,9 +60,9 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'dovecot',
-      image: 'debian:' + buster,
+      image: 'debian:' + debian,
       commands: [
-        './dovecot/build.sh ' + dovecot_version,
+        './dovecot/build.sh ' + dovecot,
       ],
     },
   ] + [
@@ -95,7 +94,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'php',
-      image: php_image,
+      image: php,
       commands: [
         './php/build.sh',
       ],
@@ -112,7 +111,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postgresql',
-      image: postgres_image,
+      image: postgres,
       commands: [
         './postgresql/build.sh',
       ],
@@ -129,9 +128,9 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postfix',
-      image: 'debian:' + buster,
+      image: 'debian:' + debian,
       commands: [
-        './postfix/build.sh ' + postfix_version,
+        './postfix/build.sh ' + postfix,
       ],
     },
   ] + [
