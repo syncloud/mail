@@ -34,7 +34,7 @@ local build(arch, test_ui) = [{
     },
     {
       name: 'openssl',
-      image: 'debian:' + debian,
+      image: 'debian:' + buster,
       commands: [
         './openssl/build.sh',
       ],

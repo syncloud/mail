@@ -7,7 +7,12 @@ NAME=openssl
 PREFIX=${DIR}/../test/openssl
 OPENSSL_VERSION=1.1.1h
 
-apt-get update
+sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
+       -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
+       -e 's|http://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g' \
+       -e '/buster-updates/d' /etc/apt/sources.list
+
+apt-get -o Acquire::Check-Valid-Until=false update
 apt-get -y install build-essential libffi-dev wget
 
 rm -rf ${PREFIX}
