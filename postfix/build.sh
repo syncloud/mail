@@ -19,7 +19,7 @@ sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
        -e '/buster-updates/d' /etc/apt/sources.list
 
 apt -o Acquire::Check-Valid-Until=false update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev patchelf
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
@@ -110,7 +110,6 @@ cp $DIR/postfix.sh ${TARGET}/bin
 cp $DIR/postconf.sh ${TARGET}/bin
 cp $DIR/postmap.sh ${TARGET}/bin
 
-apt -o Acquire::Check-Valid-Until=false -y install patchelf
 TRIPLET=$(gcc -dumpmachine)
 LDSO=$(basename $(ls ${TARGET}/lib/${TRIPLET}/ld-*.so* | head -1))
 INTERP=/snap/mail/current/postfix/lib/${TRIPLET}/${LDSO}
