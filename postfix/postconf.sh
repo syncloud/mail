@@ -3,4 +3,4 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
 LD_LIBRARY_PATH=$(find ${DIR}/lib ${DIR}/usr/lib -type d | tr '\n' ':')
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH%:}
-exec ${DIR}/usr/sbin/postconf "$@"
+exec ${DIR}/lib/*-linux*/ld-linux-*.so* --library-path ${LD_LIBRARY_PATH} ${DIR}/usr/sbin/postconf "$@"
