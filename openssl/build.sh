@@ -5,7 +5,7 @@ cd ${DIR}
 
 NAME=openssl
 PREFIX=${DIR}/../test/openssl
-OPENSSL_VERSION=1.1.1h
+OPENSSL_VERSION=$1
 
 sed -i -e 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' \
        -e 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' \

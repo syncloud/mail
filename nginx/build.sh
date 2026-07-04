@@ -6,9 +6,9 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=nginx
-VERSION=1.20.1
-OPENSSL_VERSION=1.1.1
-PCRE_VERSION=8.40
+VERSION=$1
+OPENSSL_VERSION=$2
+PCRE_VERSION=$3
 PREFIX=${DIR}/../build/snap/nginx
 
 apt-get update

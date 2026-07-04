@@ -6,7 +6,7 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=dovecot
-VERSION=2.3.16
+VERSION=$1
 PREFIX=/snap/mail/current/${NAME}
 OUTPUT=${DIR}/../build/snap/${NAME}
 

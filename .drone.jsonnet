@@ -1,5 +1,11 @@
 local name = 'mail';
 local roundcube = '1.6.1';
+local dovecot_version = '2.3.16';
+local nginx_version = '1.20.1';
+local nginx_openssl_version = '1.1.1';
+local pcre_version = '8.40';
+local postfix_version = '3.4.28';
+local openssl_version = '1.1.1h';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
@@ -28,7 +34,7 @@ local build(arch, test_ui) = [{
       name: 'openssl',
       image: 'debian:' + buster,
       commands: [
-        './openssl/build.sh',
+        './openssl/build.sh ' + openssl_version,
       ],
     },
     {
@@ -42,7 +48,7 @@ local build(arch, test_ui) = [{
       name: 'nginx',
       image: 'debian:' + debian,
       commands: [
-        './nginx/build.sh',
+        './nginx/build.sh ' + nginx_version + ' ' + nginx_openssl_version + ' ' + pcre_version,
       ],
     },
   ] + [
@@ -59,7 +65,7 @@ local build(arch, test_ui) = [{
       name: 'dovecot',
       image: 'debian:' + buster,
       commands: [
-        './dovecot/build.sh',
+        './dovecot/build.sh ' + dovecot_version,
       ],
     },
   ] + [
@@ -127,7 +133,7 @@ local build(arch, test_ui) = [{
       name: 'postfix',
       image: 'debian:' + buster,
       commands: [
-        './postfix/build.sh',
+        './postfix/build.sh ' + postfix_version,
       ],
     },
   ] + [
