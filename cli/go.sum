@@ -14,6 +14,8 @@ github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKs
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/syncloud/golib v1.1.15 h1:NuWw/BOJ+0maoU775HxrlpvXdAWrFvRnn5X2gPhRBxA=
 github.com/syncloud/golib v1.1.15/go.mod h1:XmmoqNuegLnl27FbmzLj60dTR/tN7c1X7Qp3uUPRC88=
+github.com/syncloud/golib v1.1.20 h1:dNekQRY+X0YwRtn9JtlvtKMbxcxQldSydTJdClvVOl0=
+github.com/syncloud/golib v1.1.20/go.mod h1:XmmoqNuegLnl27FbmzLj60dTR/tN7c1X7Qp3uUPRC88=
 go.uber.org/goleak v1.2.0 h1:xqgm/S+aQvhWFTtR0XK3Jvg7z8kGV8P4X14IzwN3Eqk=
 go.uber.org/goleak v1.2.0/go.mod h1:XJYK+MuIchqpmGmUSAzotztawfKvYLUIgg7guXrwVUo=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=

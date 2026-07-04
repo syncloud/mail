@@ -41,34 +41,32 @@ type Variables struct {
 }
 
 type Installer struct {
-	appDir             string
-	dataDir            string
-	configPath         string
-	databasePath       string
-	logDir             string
-	opendkimDir        string
-	opendkimKeysDir    string
-	platformClient     *platform.Client
-	mailPlatformClient *PlatformClient
-	executor           *Executor
-	logger             *zap.Logger
+	appDir          string
+	dataDir         string
+	configPath      string
+	databasePath    string
+	logDir          string
+	opendkimDir     string
+	opendkimKeysDir string
+	platformClient  *platform.Client
+	executor        *Executor
+	logger          *zap.Logger
 }
 
 func New(logger *zap.Logger) *Installer {
 	appDir := fmt.Sprintf("/snap/%s/current", App)
 	dataDir := fmt.Sprintf("/var/snap/%s/common", App)
 	return &Installer{
-		appDir:             appDir,
-		dataDir:            dataDir,
-		configPath:         path.Join(dataDir, "config"),
-		databasePath:       path.Join(dataDir, "database"),
-		logDir:             path.Join(dataDir, "log"),
-		opendkimDir:        path.Join(dataDir, "opendkim"),
-		opendkimKeysDir:    path.Join(dataDir, "opendkim", "keys"),
-		platformClient:     platform.New(),
-		mailPlatformClient: NewPlatformClient(logger),
-		executor:           NewExecutor(logger),
-		logger:             logger,
+		appDir:          appDir,
+		dataDir:         dataDir,
+		configPath:      path.Join(dataDir, "config"),
+		databasePath:    path.Join(dataDir, "database"),
+		logDir:          path.Join(dataDir, "log"),
+		opendkimDir:     path.Join(dataDir, "opendkim"),
+		opendkimKeysDir: path.Join(dataDir, "opendkim", "keys"),
+		platformClient:  platform.New(),
+		executor:        NewExecutor(logger),
+		logger:          logger,
 	}
 }
 
@@ -85,7 +83,7 @@ func timezone() (string, error) {
 }
 
 func (i *Installer) RegenerateConfigs() error {
-	deviceDomainName, err := i.mailPlatformClient.GetDeviceDomainName()
+	deviceDomainName, err := i.platformClient.GetDeviceDomainName()
 	if err != nil {
 		return err
 	}
@@ -142,7 +140,7 @@ func (i *Installer) InitConfig() error {
 		return err
 	}
 
-	deviceDomainName, err := i.mailPlatformClient.GetDeviceDomainName()
+	deviceDomainName, err := i.platformClient.GetDeviceDomainName()
 	if err != nil {
 		return err
 	}
@@ -167,7 +165,7 @@ func (i *Installer) InitConfig() error {
 	if err != nil {
 		return err
 	}
-	if err := i.mailPlatformClient.SetDkimKey(dkimKey); err != nil {
+	if err := i.platformClient.SetDkimKey(dkimKey); err != nil {
 		return err
 	}
 
