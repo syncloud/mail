@@ -16,49 +16,41 @@ apt-get -y install opendkim opendkim-tools
 
 cp $(readlink -f /lib*/ld-linux-*.so*) ${PREFIX}/lib/ld.so
 
-for lib in \
-    libc.so.6 \
-    libdl.so.2 \
-    libgcc_s.so.1 \
-    libm.so.6 \
-    libpthread.so.0 \
-    libresolv.so.2 \
-    libnss_files.so.2 \
-    libnss_compat.so.2 \
-    libnss_dns.so.2; do
-    cp -L --remove-destination /lib/*-linux-gnu*/${lib} ${PREFIX}/lib
-done
-
-for lib in \
-    libbsd.so.0 \
-    libcrypto.so.1.1 \
-    libdb-5.3.so \
-    libevent-2.1.so.7 \
-    libffi.so.7 \
-    libgmp.so.10 \
-    libgnutls.so.30 \
-    libhogweed.so.6 \
-    libidn2.so.0 \
-    liblber-2.4.so.2 \
-    libldap_r-2.4.so.2 \
-    liblua5.1.so.0 \
-    libmd.so.0 \
-    libmemcached.so.11 \
-    libmilter.so.1.0.1 \
-    libnettle.so.8 \
-    libopendkim.so.11 \
-    libp11-kit.so.0 \
-    librbl.so.1 \
-    libsasl2.so.2 \
-    libssl.so.1.1 \
-    libstdc++.so.6 \
-    libtasn1.so.6 \
-    libunbound.so.8 \
-    libunistring.so.2 \
-    libvbr.so.2; do
-    cp -L --remove-destination /usr/lib/*-linux-gnu*/${lib} ${PREFIX}/lib
-done
-
+cp -L --remove-destination /lib/*-linux-gnu*/libc.so.6 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libdl.so.2 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libgcc_s.so.1 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libm.so.6 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libpthread.so.0 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libresolv.so.2 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libnss_files.so.2 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libnss_compat.so.2 ${PREFIX}/lib
+cp -L --remove-destination /lib/*-linux-gnu*/libnss_dns.so.2 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libbsd.so.0 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libcrypto.so.1.1 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libdb-5.3.so ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libevent-2.1.so.7 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libffi.so.7 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libgmp.so.10 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libgnutls.so.30 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libhogweed.so.6 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libidn2.so.0 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/liblber-2.4.so.2 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libldap_r-2.4.so.2 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/liblua5.1.so.0 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libmd.so.0 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libmemcached.so.11 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libmilter.so.1.0.1 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libnettle.so.8 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libopendkim.so.11 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libp11-kit.so.0 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/librbl.so.1 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libsasl2.so.2 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libssl.so.1.1 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libstdc++.so.6 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libtasn1.so.6 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libunbound.so.8 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libunistring.so.2 ${PREFIX}/lib
+cp -L --remove-destination /usr/lib/*-linux-gnu*/libvbr.so.2 ${PREFIX}/lib
 cp -L --remove-destination /usr/lib/libopendbx.so.1 ${PREFIX}/lib
 
 cp /usr/sbin/opendkim ${PREFIX}/sbin

@@ -67,14 +67,44 @@ cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 apt-get -y install patchelf
 INTERP=/snap/mail/current/dovecot/lib/ld.so
 RPATH=/snap/mail/current/dovecot/lib:/snap/mail/current/dovecot/lib/dovecot
-for elf in $(find ${PREFIX}/bin ${PREFIX}/sbin ${PREFIX}/libexec -type f); do
-    if patchelf --print-interpreter "$elf" >/dev/null 2>&1; then
-        patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath "$elf"
-    fi
-done
-for lib in $(find ${PREFIX}/lib/dovecot -name '*.so*' -type f) $(ls ${PREFIX}/lib/libdovecot*.so* 2>/dev/null); do
-    patchelf --set-rpath "$RPATH" --force-rpath "$lib" || true
-done
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/sbin/dovecot
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/bin/doveadm
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/bin/doveconf
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/aggregator
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/anvil
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/auth
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/checkpassword-reply
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/config
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/dict
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/director
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/dns-client
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/doveadm-server
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/dovecot-lda
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/gdbhelper
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap-hibernate
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap-login
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap-urlauth
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap-urlauth-login
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/imap-urlauth-worker
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/indexer
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/indexer-worker
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/ipc
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/lmtp
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/log
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/maildirlock
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/old-stats
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/pop3
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/pop3-login
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/quota-status
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/rawlog
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/replicator
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/script
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/script-login
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/stats
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/submission
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/submission-login
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/xml2text
 
 rm -rf ${OUTPUT}
 mkdir -p ${DIR}/../build/snap

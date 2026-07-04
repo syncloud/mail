@@ -109,10 +109,47 @@ TRIPLET=$(basename $(ls -d ${TARGET}/lib/*-linux-gnu*))
 LDSO=$(basename $(ls ${TARGET}/lib/${TRIPLET}/ld-*.so* | head -1))
 INTERP=/snap/mail/current/postfix/lib/${TRIPLET}/${LDSO}
 RPATH=/snap/mail/current/postfix/lib/${TRIPLET}:/snap/mail/current/postfix/usr/lib/${TRIPLET}
-for elf in $(find ${TARGET}/usr/sbin ${TARGET}/usr/libexec -type f); do
-    if patchelf --print-interpreter "$elf" >/dev/null 2>&1; then
-        patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath "$elf"
-    fi
-done
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postalias
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postcat
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postconf
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postdrop
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postfix
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postkick
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postlock
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postlog
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postmap
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postmulti
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postqueue
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postsuper
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/sendmail
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/anvil
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/bounce
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/cleanup
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/discard
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/dnsblog
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/error
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/flush
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/lmtp
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/local
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/master
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/nqmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/oqmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/pickup
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/pipe
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/postlogd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/postscreen
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/proxymap
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/qmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/qmqpd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/scache
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/showq
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/smtp
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/smtpd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/spawn
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/tlsmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/tlsproxy
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/trivial-rewrite
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/verify
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/virtual
 
 ldd ${TARGET}/usr/sbin/postfix
