@@ -128,9 +128,6 @@ func (i *Installer) InitConfig() error {
 	if err := linux.CreateUser(UserName); err != nil {
 		return err
 	}
-	if _, err := i.executor.RunDir("", "/usr/sbin/groupadd", "-f", UserName); err != nil {
-		return err
-	}
 
 	if err := linux.CreateMissingDirs(path.Join(i.dataDir, "nginx")); err != nil {
 		return err

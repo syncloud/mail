@@ -36,6 +36,15 @@ done | sort -u | while read -r lib; do
     cp -L --remove-destination "$lib" ${PREFIX}/lib
 done
 
+for nss in libnss_files.so.2 libnss_compat.so.2 libnss_dns.so.2; do
+    found=$(find /usr/lib /lib -maxdepth 3 -name "$nss" -print -quit 2>/dev/null)
+    if [ -z "${found}" ]; then
+        echo "opendkim: nss module not found: $nss"
+        exit 1
+    fi
+    cp -L --remove-destination "${found}" ${PREFIX}/lib
+done
+
 cp /usr/sbin/opendkim $PREFIX/sbin
 find /usr/bin /usr/sbin -maxdepth 1 -name 'opendkim-*' -exec cp {} $PREFIX/bin \;
 
