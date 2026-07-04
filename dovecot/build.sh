@@ -45,6 +45,13 @@ cp --remove-destination /lib/*/libcrypt.so* ${PREFIX}/lib/dovecot
 cp --remove-destination /usr/lib/*/libcrypto.so* ${PREFIX}/lib/dovecot
 cp --remove-destination /lib/*/libdl.so* ${PREFIX}/lib
 cp --remove-destination /lib/*/libc.so* ${PREFIX}/lib
+cp --remove-destination /lib/*/libm.so* ${PREFIX}/lib
+cp --remove-destination /lib/*/librt.so* ${PREFIX}/lib
+cp --remove-destination /lib/*/libutil.so* ${PREFIX}/lib
+cp --remove-destination /usr/lib/*/libnsl.so* /lib/*/libnsl.so* ${PREFIX}/lib 2>/dev/null || true
+cp --remove-destination /lib/*/libnss_files.so* ${PREFIX}/lib
+cp --remove-destination /lib/*/libnss_dns.so* ${PREFIX}/lib
+cp --remove-destination /lib/*/libnss_compat.so* ${PREFIX}/lib
 cp --remove-destination /usr/lib/*/libldap*.so* ${PREFIX}/lib
 cp --remove-destination /usr/lib/*/liblber*.so* ${PREFIX}/lib
 cp --remove-destination /lib/*/libresolv.so* ${PREFIX}/lib
