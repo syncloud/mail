@@ -15,7 +15,7 @@ from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
 DIR = dirname(__file__)
-OPENSSL = join(DIR, "openssl", "bin", "openssl")
+OPENSSL = "openssl"
 
 
 @pytest.fixture(scope="session")
