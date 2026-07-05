@@ -6,7 +6,7 @@ cd ${DIR}
 export TMPDIR=/tmp
 export TMP=/tmp
 NAME=postfix
-VERSION=3.4.28
+VERSION=$1
 #OPENSSL_VERSION=1.1.0l
 #SASL_VERSION=2.1.28
 BUILD_DIR=${DIR}/build
@@ -14,7 +14,7 @@ PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 apt update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev
+apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev patchelf
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
@@ -62,7 +62,7 @@ mkdir -p ${BUILD_DIR}
 #make install
 
 cd ${BUILD_DIR}
-wget https://de.postfix.org/ftpmirror/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
+wget http://ftp.porcupine.org/mirrors/postfix-release/official/${NAME}-${VERSION}.tar.gz --progress dot:giga
 tar xf ${NAME}-${VERSION}.tar.gz
 cd ${NAME}-${VERSION}
 export CCARGS='-DDEF_CONFIG_DIR=\"/config/postfix\" \
@@ -96,15 +96,60 @@ rm -rf \
 
 TARGET=${DIR}/../build/snap/postfix
 mkdir $TARGET
-cp -r /bin ${TARGET}
-cp -r /sbin ${TARGET}
-cp -r /lib* ${TARGET}
-cp -r /usr/lib ${TARGET}
-cp -r /usr/local/lib ${TARGET}
+mkdir -p ${TARGET}/lib ${TARGET}/usr/lib ${TARGET}/bin
+cp -r /lib/*-linux-gnu* ${TARGET}/lib/
+cp -r /usr/lib/*-linux-gnu* ${TARGET}/usr/lib/
 cp -r $PREFIX/* ${TARGET}
 
 cp $DIR/postfix.sh ${TARGET}/bin
 cp $DIR/postconf.sh ${TARGET}/bin
 cp $DIR/postmap.sh ${TARGET}/bin
+
+TRIPLET=$(basename $(ls -d ${TARGET}/lib/*-linux-gnu*))
+LDSO=$(basename $(ls ${TARGET}/lib/${TRIPLET}/ld-*.so* | head -1))
+INTERP=/snap/mail/current/postfix/lib/${TRIPLET}/${LDSO}
+RPATH=/snap/mail/current/postfix/lib/${TRIPLET}:/snap/mail/current/postfix/usr/lib/${TRIPLET}
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postalias
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postcat
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postconf
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postdrop
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postfix
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postkick
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postlock
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postlog
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postmap
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postmulti
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postqueue
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/postsuper
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/sbin/sendmail
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/anvil
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/bounce
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/cleanup
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/discard
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/dnsblog
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/error
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/flush
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/lmtp
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/local
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/master
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/nqmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/oqmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/pickup
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/pipe
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/postlogd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/postscreen
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/proxymap
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/qmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/qmqpd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/scache
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/showq
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/smtp
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/smtpd
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/spawn
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/tlsmgr
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/tlsproxy
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/trivial-rewrite
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/verify
+patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${TARGET}/usr/libexec/postfix/virtual
 
 ldd ${TARGET}/usr/sbin/postfix

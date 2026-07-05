@@ -6,18 +6,17 @@ cd ${DIR}
 MAJOR_VERSION=9.4-alpine
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
-while ! docker build --build-arg MAJOR_VERSION=$MAJOR_VERSION -t postgres:syncloud . ; do
-  echo "retry"
-  sleep 1
-done
-docker run postgres:syncloud postgres --help
-docker create --name=postgres postgres:syncloud
+postgres --help
+
+rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
-cd ${BUILD_DIR}
 echo "${MAJOR_VERSION}" > ${BUILD_DIR}/../db.major.version
-docker export postgres -o postgres.tar
-tar xf postgres.tar
-rm -rf postgres.tar
+cp -r /etc ${BUILD_DIR}
+cp -r /usr ${BUILD_DIR}
+cp -r /bin ${BUILD_DIR}
+cp -r /lib ${BUILD_DIR}
+
+cd ${BUILD_DIR}
 PGBIN=$(echo usr/local/bin)
 ldd $PGBIN/initdb
 mv $PGBIN/postgres $PGBIN/postgres.bin
