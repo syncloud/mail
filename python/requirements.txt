@@ -1,3 +1,0 @@
-syncloud-lib==270
-tzlocal==1.2.2
-pytz==2016.1

@@ -1,310 +1,238 @@
-local name = "mail";
-local roundcube_version = "1.6.1";
-local browser = "firefox";
+local name = 'mail';
+local roundcube = '1.6.1';
+local dovecot = '2.3.16';
+local nginx = '1.24.0';
+local postfix = '3.4.28';
+local python = '3.12-slim-bookworm';
+local golang = '1.24.0';
+local debian = 'bookworm-slim';
+local bullseye = 'bullseye-slim';
+local php = 'php:8.0.30-fpm-bullseye';
+local postgres = 'postgres:9.4-alpine';
+local platform = '26.04.10';
+local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
+local store_publisher = 'stable-303';
+local distros = ['bookworm', 'buster'];
 
-local build(arch, test_ui, dind) = [{
-    kind: "pipeline",
-    type: "docker",
-    name: arch,
-    platform: {
-        os: "linux",
-        arch: arch
+local platform_image(distro, arch) =
+  'syncloud/platform-' + distro + '-' + arch + ':' + platform;
+
+local build(arch, test_ui) = [{
+  kind: 'pipeline',
+  type: 'docker',
+  name: arch,
+  platform: {
+    os: 'linux',
+    arch: arch,
+  },
+  steps: [
+    {
+      name: 'nginx',
+      image: 'nginx:' + nginx,
+      commands: [
+        './nginx/build.sh',
+      ],
     },
-    steps: [
-        {
-            name: "version",
-            image: "debian:buster-slim",
-            commands: [
-                "echo $DRONE_BUILD_NUMBER > version"
-            ]
-        },
-        {
-            name: "download",
-            image: "debian:buster-slim",
-            commands: [
-                "./download.sh " + roundcube_version
-            ]
-        },
-	    {
-            name: "build postfix",
-            image: "debian:buster-slim",
-            commands: [
-                "./postfix/build.sh"
-            ]
-        },
-	    {
-            name: "test postfix",
-            image: "debian:buster-slim",
-            commands: [
-                "./postfix/test.sh"
-            ]
-        },
-        {
-            name: "package python",
-            image: "docker:" + dind,
-            commands: [
-                "./python/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },
-        {
-            name: "build php",
-            image: "docker:" + dind,
-            commands: [
-                "./php/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },
-        {
-            name: "package postgresql",
-            image: "docker:" + dind,
-            commands: [
-                "./postgresql/build.sh"
-            ],
-            volumes: [
-                {
-                    name: "dockersock",
-                    path: "/var/run"
-                }
-            ]
-        },	
-        {
-            name: "package",
-            image: "debian:buster-slim",
-            commands: [
-                "VERSION=$(cat version)",
-                "./package.sh " + name + " $VERSION "
-            ]
-        },
-      {
-            name: "test-integration-buster",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s verify.py --distro=buster --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --arch=" + arch
-            ]
-        }] +
-        ( if test_ui then ([
-        {
-            name: "selenium-video",
-            image: "selenium/video:ffmpeg-4.3.1-20220208",
-            detach: true,
-            environment: {
-                "DISPLAY_CONTAINER_NAME": "selenium",
-                "PRESET": "-preset ultrafast -movflags faststart"
-            },
-            volumes: [
-                {
-                    name: "shm",
-                    path: "/dev/shm"
-                },
-               {
-                    name: "videos",
-                    path: "/videos"
-                }
-            ]
-        }] +
-        [{
-            name: "test-ui-" + mode,
-            image: "python:3.8-slim-buster",
-            commands: [
-              "apt-get update && apt-get install -y sshpass openssh-client libxml2-dev libxslt-dev build-essential libz-dev curl",
-              "cd integration",
-              "pip install -r requirements.txt",
-              "py.test -x -s test-ui.py --distro=buster --ui-mode=" + mode + " --domain=buster.com --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-            ]
-        } for mode in ["desktop", "mobile"] ])
-       else [] ) +
-       ( if arch == "amd64" then [
-        {
-            name: "test-upgrade",
-            image: "python:3.8-slim-buster",
-            commands: [
-              "APP_ARCHIVE_PATH=$(realpath $(cat package.name))",
-              "cd integration",
-              "./deps.sh",
-              "py.test -x -s test-upgrade.py --distro=buster --ui-mode=desktop --domain=buster.com --app-archive-path=$APP_ARCHIVE_PATH --device-host=" + name + ".buster.com --app=" + name + " --browser=" + browser,
-            ],
-            privileged: true,
-            volumes: [{
-                name: "videos",
-                path: "/videos"
-            }]
-        } ] else [] ) + [
-        {
-            name: "upload",
-            image: "debian:buster-slim",
-            environment: {
-                AWS_ACCESS_KEY_ID: {
-                    from_secret: "AWS_ACCESS_KEY_ID"
-                },
-                AWS_SECRET_ACCESS_KEY: {
-                    from_secret: "AWS_SECRET_ACCESS_KEY"
-                }
-            },
-            commands: [
-                "PACKAGE=$(cat package.name)",
-                "apt update && apt install -y wget",
-                "wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-" + arch + " -O release --progress=dot:giga",
-                "chmod +x release",
-                "./release publish -f $PACKAGE -b $DRONE_BRANCH"
-            ],
-            when: {
-                branch: ["stable", "master"]
-            }
-        },
-        {
-            name: "artifact",
-            image: "appleboy/drone-scp:1.6.4",
-            settings: {
-                host: {
-                    from_secret: "artifact_host"
-                },
-                username: "artifact",
-                key: {
-                    from_secret: "artifact_key"
-                },
-                timeout: "2m",
-                command_timeout: "2m",
-                target: "/home/artifact/repo/" + name + "/${DRONE_BUILD_NUMBER}-" + arch,
-                source: [
-                    "artifact/*"
-                ],
-                privileged: true,
-                strip_components: 1,
-                volumes: [
-                   {
-                        name: "videos",
-                        path: "/drone/src/artifact/videos"
-                    }
-                ]
-            },
-            when: {
-              status: [ "failure", "success" ]
-            }
-        }
-        ],
-        trigger: {
-          event: [
-            "push",
-            "pull_request"
-          ]
-        },
-        services: [
-{
-                name: "docker",
-                image: "docker:" + dind,
-                privileged: true,
-                volumes: [
-                    {
-                        name: "dockersock",
-                        path: "/var/run"
-                    }
-                ]
-            },
-            {
-                name: name + ".buster.com",
-                image: "syncloud/platform-buster-" + arch + ":22.01",
-                privileged: true,
-                volumes: [
-                    {
-                        name: "dbus",
-                        path: "/var/run/dbus"
-                    },
-                    {
-                        name: "dev",
-                        path: "/dev"
-                    }
-                ]
-            }
-        ] + ( if test_ui then [
-            {
-                name: "selenium",
-                image: "selenium/standalone-" + browser + ":4.1.2-20220208",
-                environment: {
-                    SE_NODE_SESSION_TIMEOUT: "999999"
-                },
-                volumes: [{
-                    name: "shm",
-                    path: "/dev/shm"
-                }]
-            }
-        ] else [] ),
-        volumes: [
-            {
-                name: "dbus",
-                host: {
-                    path: "/var/run/dbus"
-                }
-            },
-            {
-                name: "dev",
-                host: {
-                    path: "/dev"
-                }
-            },
-            {
-                name: "shm",
-                temp: {}
-            },
-            {
-                name: "videos",
-                temp: {}
-            },
-           {
-                name: "dockersock",
-                temp: {}
-            },
-        ]
+  ] + [
+    {
+      name: 'nginx test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './nginx/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'dovecot',
+      image: 'debian:' + debian,
+      commands: [
+        './dovecot/build.sh ' + dovecot,
+      ],
+    },
+  ] + [
+    {
+      name: 'dovecot test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './dovecot/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'opendkim',
+      image: 'debian:' + bullseye,
+      commands: [
+        './opendkim/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'opendkim test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './opendkim/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'php',
+      image: php,
+      commands: [
+        './php/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'php test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './php/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'postgresql',
+      image: postgres,
+      commands: [
+        './postgresql/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'postgresql test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './postgresql/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'postfix',
+      image: 'debian:' + debian,
+      commands: [
+        './postfix/build.sh ' + postfix,
+      ],
+    },
+  ] + [
+    {
+      name: 'postfix test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './postfix/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'download',
+      image: 'debian:' + debian,
+      commands: [
+        './download.sh ' + roundcube,
+      ],
     },
     {
-         kind: "pipeline",
-         type: "docker",
-         name: "promote-" + arch,
-         platform: {
-             os: "linux",
-             arch: arch
-         },
-         steps: [
+      name: 'cli',
+      image: 'golang:' + golang,
+      commands: [
+        './cli/build.sh',
+      ],
+    },
+    {
+      name: 'package',
+      image: 'debian:' + debian,
+      commands: [
+        './package.sh ' + name + ' $DRONE_BUILD_NUMBER',
+      ],
+    },
+  ] + [
+    {
+      name: 'test ' + distro,
+      image: 'python:' + python,
+      commands: [
+        './test/ci-test.sh ' + distro + ' ' + arch,
+      ],
+    }
+    for distro in distros
+  ] + (if test_ui then [
          {
-                 name: "promote",
-                 image: "debian:buster-slim",
-                 environment: {
-                     AWS_ACCESS_KEY_ID: {
-                         from_secret: "AWS_ACCESS_KEY_ID"
-                     },
-                     AWS_SECRET_ACCESS_KEY: {
-                         from_secret: "AWS_SECRET_ACCESS_KEY"
-                     }
-                 },
-                 commands: [
-                   "apt update && apt install -y wget",
-                   "wget https://github.com/syncloud/snapd/releases/download/1/syncloud-release-" + arch + " -O release --progress=dot:giga",
-                   "chmod +x release",
-                   "./release promote -n " + name + " -a $(dpkg --print-architecture)"
-                 ]
-           }
-          ],
-          trigger: {
-           event: [
-             "promote"
-           ]
-         }
-     }
-];
+           name: 'e2e',
+           image: playwright,
+           commands: [
+             './test/e2e/run.sh e2e specs desktop',
+           ],
+         },
+         {
+           name: 'e2e-mobile',
+           image: playwright,
+           commands: [
+             './test/e2e/run.sh e2e specs/01-smoke.spec.ts mobile',
+           ],
+         },
+         {
+           name: 'test-upgrade',
+           image: 'python:' + python,
+           commands: [
+             './test/ci-upgrade.sh buster ' + arch,
+           ],
+         },
+       ] else []) + [
+    {
+      name: 'publish',
+      image: 'syncloud/store-publisher:' + store_publisher,
+      environment: {
+        SYNCLOUD_TOKEN: { from_secret: 'SYNCLOUD_TOKEN' },
+      },
+      command: ['snap', '-c', '${DRONE_BRANCH}'],
+      when: {
+        branch: ['master', 'stable'],
+        event: ['push'],
+      },
+    },
+    {
+      name: 'artifact',
+      image: 'appleboy/drone-scp:1.6.4',
+      settings: {
+        host: { from_secret: 'artifact_host' },
+        username: 'artifact',
+        key: { from_secret: 'artifact_key' },
+        timeout: '2m',
+        command_timeout: '2m',
+        target: '/home/artifact/repo/' + name + '/${DRONE_BUILD_NUMBER}-' + arch,
+        source: 'artifact/*',
+        strip_components: 1,
+      },
+      when: {
+        status: ['failure', 'success'],
+        event: ['push'],
+      },
+    },
+  ],
+  trigger: {
+    event: ['push'],
+  },
+  services: [
+    {
+      name: name + '.' + distro + '.com',
+      image: platform_image(distro, arch),
+      privileged: true,
+      volumes: [
+        { name: 'dbus', path: '/var/run/dbus' },
+        { name: 'dev', path: '/dev' },
+      ],
+    }
+    for distro in distros
+  ],
+  volumes: [
+    { name: 'dbus', host: { path: '/var/run/dbus' } },
+    { name: 'dev', host: { path: '/dev' } },
+  ],
+}];
 
-build("amd64", true, "20.10.21-dind") +
-build("arm64", false, "19.03.8-dind") +
-build("arm", false, "19.03.8-dind")
+build('amd64', true) +
+build('arm64', false) +
+build('arm', false)
