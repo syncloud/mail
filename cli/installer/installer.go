@@ -23,6 +23,7 @@ const (
 	DbUser         = "mail"
 	DbPass         = "mail"
 	SystemdDovecot = "mail.dovecot"
+	SystemdPostfix = "mail.postfix"
 )
 
 var dkimKeyPattern = regexp.MustCompile(`(?s).*p=(.*?)".*`)
@@ -39,6 +40,9 @@ type Variables struct {
 	DeviceDomainName string
 	AppDomainName    string
 	Timezone         string
+	Relay            bool
+	RelayHost        string
+	RelayPort        int
 }
 
 type Installer struct {
@@ -100,6 +104,10 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
+	relay, err := i.GetRelay()
+	if err != nil {
+		return err
+	}
 
 	variables := Variables{
 		AppDir:           i.appDir,
@@ -113,10 +121,17 @@ func (i *Installer) RegenerateConfigs() error {
 		DeviceDomainName: deviceDomainName,
 		AppDomainName:    appDomainName,
 		Timezone:         tz,
+		Relay:            relay.Enabled,
+		RelayHost:        relay.Host,
+		RelayPort:        relay.Port,
 	}
 
 	templatesPath := path.Join(i.appDir, "config")
 	if err := config.Generate(templatesPath, i.configPath, variables); err != nil {
+		return err
+	}
+
+	if err := i.applySasl(relay); err != nil {
 		return err
 	}
 

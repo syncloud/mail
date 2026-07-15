@@ -1,10 +1,11 @@
 local name = 'mail';
-local roundcube = '1.6.1';
+local roundcube = '1.6.15';
 local dovecot = '2.3.16';
 local nginx = '1.24.0';
 local postfix = '3.4.28';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
+local node = '20';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
 local php = 'php:8.0.30-fpm-bullseye';
@@ -140,6 +141,13 @@ local build(arch, test_ui) = [{
       image: 'golang:' + golang,
       commands: [
         './cli/build.sh',
+      ],
+    },
+    {
+      name: 'www',
+      image: 'node:' + node,
+      commands: [
+        './www/build.sh',
       ],
     },
     {

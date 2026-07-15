@@ -46,6 +46,16 @@ apps:
     restart-condition: always
     after: [postgresql]
     before: [nginx]
+  webui:
+    user: mail
+    command: bin/service.webui.sh
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    after: [postgresql]
+    before: [nginx]
   nginx:
     command: bin/service.nginx.sh
     user: mail
