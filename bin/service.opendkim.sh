@@ -9,7 +9,7 @@ fi
 
 case $1 in
 start)
-    exec $DIR/opendkim/bin/opendkim.sh -x ${SNAP_COMMON}/config/opendkim/opendkim.conf
+    exec $DIR/opendkim/bin/opendkim.sh -x ${SNAP_DATA}/config/opendkim/opendkim.conf
     ;;
 *)
     echo "not valid command"

@@ -10,8 +10,8 @@ fi
 export DOVECOT_BINDIR=${DIR}/dovecot/bin
 case $1 in
 start)
-    /bin/rm -rf ${SNAP_COMMON}/dovecot/master.pid
-    exec $DIR/dovecot/bin/dovecot.sh -F -c ${SNAP_COMMON}/config/dovecot/dovecot.conf
+    /bin/rm -rf ${SNAP_DATA}/dovecot/master.pid
+    exec $DIR/dovecot/bin/dovecot.sh -F -c ${SNAP_DATA}/config/dovecot/dovecot.conf
     ;;
 *)
     echo "not valid command"

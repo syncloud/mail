@@ -9,10 +9,10 @@ fi
 
 case $1 in
 start)
-    exec $DIR/php/bin/php-fpm.sh -y ${SNAP_COMMON}/config/php/php-fpm.conf -c ${SNAP_COMMON}/config/php/php.ini
+    exec $DIR/php/bin/php-fpm.sh -y ${SNAP_DATA}/config/php/php-fpm.conf -c ${SNAP_DATA}/config/php/php.ini
     ;;
 post-start)
-    timeout 5 /bin/bash -c 'until [ -S '${SNAP_COMMON}'/log/php5-fpm.sock ]; do echo "waiting for ${SNAP_COMMON}/log/php5-fpm.sock"; sleep 1; done'
+    timeout 5 /bin/bash -c 'until [ -S '${SNAP_DATA}'/log/php5-fpm.sock ]; do echo "waiting for ${SNAP_DATA}/log/php5-fpm.sock"; sleep 1; done'
     ;;
 *)
     echo "not valid command"
