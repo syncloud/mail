@@ -8,10 +8,10 @@ test.describe('mail admin relay', () => {
     await shoot(page, testInfo, 'admin')
 
     await page.getByTestId('relay-enabled').click()
-    await page.getByTestId('relay-host').locator('input').fill('smtp.gmail.com')
-    await page.getByTestId('relay-port').locator('input').fill('587')
-    await page.getByTestId('relay-user').locator('input').fill('user@gmail.com')
-    await page.getByTestId('relay-password').locator('input').fill('app-password')
+    await page.getByTestId('relay-host').fill('smtp.gmail.com')
+    await page.getByTestId('relay-port').fill('587')
+    await page.getByTestId('relay-user').fill('user@gmail.com')
+    await page.getByTestId('relay-password').fill('app-password')
     await shoot(page, testInfo, 'relay-filled')
 
     await page.getByTestId('relay-save').click()
