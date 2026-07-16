@@ -217,6 +217,10 @@ func (i *Installer) InitConfig() error {
 		return err
 	}
 
+	if err := i.database.UpdateConfig(); err != nil {
+		return err
+	}
+
 	dkimKey, err := i.GenerateDkimKey(deviceDomainName, opendkimKeysDomainDir)
 	if err != nil {
 		return err

@@ -54,6 +54,13 @@ func (d *Database) Init() error {
 	if _, err := d.executor.RunDir("", "sudo", "-H", "-u", d.user, initdb, d.databaseDir); err != nil {
 		return err
 	}
+	return d.UpdateConfig()
+}
+
+func (d *Database) UpdateConfig() error {
+	if _, err := os.Stat(d.databaseDir); os.IsNotExist(err) {
+		return nil
+	}
 	src := path.Join(d.configDir, "postgresql", "postgresql.conf")
 	dst := path.Join(d.databaseDir, "postgresql.conf")
 	content, err := os.ReadFile(src)
