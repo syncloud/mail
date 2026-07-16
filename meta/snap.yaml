@@ -47,6 +47,7 @@ apps:
     after: [postgresql]
     before: [nginx]
   webui:
+    user: mail
     command: bin/service.webui.sh
     daemon: simple
     plugs:

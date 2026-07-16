@@ -12,6 +12,7 @@ local php = 'php:8.0.30-fpm-bullseye';
 local postgres = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
+local mailpit = 'axllent/mailpit:latest';
 local store_publisher = 'stable-303';
 local distros = ['bookworm', 'buster'];
 
@@ -234,7 +235,16 @@ local build(arch, test_ui) = [{
       ],
     }
     for distro in distros
-  ],
+  ] + (if test_ui then [
+    {
+      name: 'mailpit',
+      image: mailpit,
+      environment: {
+        MP_SMTP_AUTH_ACCEPT_ANY: '1',
+        MP_SMTP_AUTH_ALLOW_INSECURE: '1',
+      },
+    },
+  ] else []),
   volumes: [
     { name: 'dbus', host: { path: '/var/run/dbus' } },
     { name: 'dev', host: { path: '/dev' } },

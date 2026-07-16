@@ -330,15 +330,12 @@ mynetworks_style = host
 #
 # If you're connected via UUCP, see also the default_transport parameter.
 #
-{{ if .Relay }}
-relayhost = [{{ .RelayHost }}]:{{ .RelayPort }}
+relayhost =
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:{{ .AppDataDir }}/config/postfix/sasl_passwd
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-{{ else }}
-relayhost =
-{{ end }}
+sender_dependent_relayhost_maps = hash:{{ .AppDataDir }}/config/postfix/relayhost
 #relayhost = [gateway.my.domain]
 #relayhost = [mailserver.isp.tld]
 #relayhost = uucphost

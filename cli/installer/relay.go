@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 
 	"gopkg.in/ini.v1"
 )
@@ -49,25 +50,53 @@ func (i *Installer) SetRelay(relay RelayConfig) error {
 }
 
 func (i *Installer) ApplyRelay() error {
-	if err := i.RegenerateConfigs(); err != nil {
+	relay, err := i.GetRelay()
+	if err != nil {
 		return err
 	}
-	return i.platformClient.RestartService(SystemdPostfix)
+	domain, err := i.mydomain()
+	if err != nil {
+		return err
+	}
+	return i.writeRelayMaps(relay, domain)
 }
 
-func (i *Installer) applySasl(relay RelayConfig) error {
-	saslFile := path.Join(i.configPath, "postfix", "sasl_passwd")
-	if !relay.Enabled {
-		_ = os.Remove(saslFile)
-		_ = os.Remove(saslFile + ".db")
-		return nil
+func (i *Installer) mydomain() (string, error) {
+	postconf := path.Join(i.appDir, "postfix", "usr", "sbin", "postconf")
+	postfixDir := path.Join(i.configPath, "postfix")
+	out, err := i.executor.RunDir(postfixDir, postconf, "-h", "-c", postfixDir, "mydomain")
+	if err != nil {
+		return "", err
 	}
-	line := fmt.Sprintf("[%s]:%d %s:%s\n", relay.Host, relay.Port, relay.User, relay.Password)
-	if err := os.WriteFile(saslFile, []byte(line), 0600); err != nil {
+	return strings.TrimSpace(out), nil
+}
+
+func (i *Installer) writeRelayMaps(relay RelayConfig, domain string) error {
+	postfixDir := path.Join(i.configPath, "postfix")
+	saslFile := path.Join(postfixDir, "sasl_passwd")
+	relayFile := path.Join(postfixDir, "relayhost")
+
+	saslContent := ""
+	relayContent := ""
+	if relay.Enabled {
+		host := fmt.Sprintf("[%s]:%d", relay.Host, relay.Port)
+		saslContent = fmt.Sprintf("%s %s:%s\n", host, relay.User, relay.Password)
+		relayContent = fmt.Sprintf("@%s %s\n", domain, host)
+	}
+
+	if err := os.WriteFile(saslFile, []byte(saslContent), 0600); err != nil {
 		return err
 	}
+	if err := os.WriteFile(relayFile, []byte(relayContent), 0644); err != nil {
+		return err
+	}
+
 	postmap := path.Join(i.appDir, "postfix", "usr", "sbin", "postmap")
-	postfixConfigDir := path.Join(i.configPath, "postfix")
-	_, err := i.executor.RunDir(postfixConfigDir, postmap, "-c", postfixConfigDir, "hash:"+saslFile)
-	return err
+	if _, err := i.executor.RunDir(postfixDir, postmap, "-c", postfixDir, "hash:"+saslFile); err != nil {
+		return err
+	}
+	if _, err := i.executor.RunDir(postfixDir, postmap, "-c", postfixDir, "hash:"+relayFile); err != nil {
+		return err
+	}
+	return nil
 }
