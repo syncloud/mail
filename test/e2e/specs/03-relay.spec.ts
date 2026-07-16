@@ -1,9 +1,18 @@
 import { test, expect } from '@playwright/test'
 import { shoot } from '../helpers/screenshot'
+import { login, expectInbox } from '../helpers/roundcube'
+
+const user = process.env.PLAYWRIGHT_DEVICE_USER ?? 'user'
+const password = process.env.PLAYWRIGHT_DEVICE_PASSWORD ?? 'Password1'
 
 test.describe('mail admin relay', () => {
   test('configure outbound relay', async ({ page }, testInfo) => {
-    await page.goto('/admin/')
+    await page.goto('/')
+    await login(page, user, password)
+    await expectInbox(page)
+    await shoot(page, testInfo, 'inbox')
+
+    await page.getByTestId('nav-admin').click()
     await expect(page.getByTestId('admin-title')).toBeVisible()
     await shoot(page, testInfo, 'admin')
 

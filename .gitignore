@@ -13,3 +13,4 @@ log
 lib
 src/version
 .drone.yml
+.amd64watch.py
