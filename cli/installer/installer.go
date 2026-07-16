@@ -300,7 +300,10 @@ func (i *Installer) setActivated(activated bool) error {
 		return err
 	}
 	cfg.Section("mail").Key("activated").SetValue(strconv.FormatBool(activated))
-	return cfg.SaveTo(i.userConfigFile)
+	if err := cfg.SaveTo(i.userConfigFile); err != nil {
+		return err
+	}
+	return linux.Chown(i.userConfigFile, UserName)
 }
 
 func (i *Installer) PrepareStorage() error {
