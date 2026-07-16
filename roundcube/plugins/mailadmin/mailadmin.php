@@ -22,7 +22,8 @@ class mailadmin extends rcube_plugin
         $this->api->output->add_footer(
             '<script>document.addEventListener("DOMContentLoaded",function(){' .
             'var a=document.querySelector("#taskmenu a.button-mailadmin");' .
-            'if(a){a.setAttribute("data-testid","nav-admin");}});</script>'
+            'if(a){a.setAttribute("href","/admin/");a.setAttribute("data-testid","nav-admin");' .
+            'a.addEventListener("click",function(e){e.stopPropagation();e.preventDefault();window.location.assign("/admin/");});}});</script>'
         );
     }
 }
