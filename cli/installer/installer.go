@@ -303,7 +303,8 @@ func (i *Installer) setActivated(activated bool) error {
 	if err := cfg.SaveTo(i.userConfigFile); err != nil {
 		return err
 	}
-	return linux.Chown(i.userConfigFile, UserName)
+	_, err = i.executor.RunDir("", "chown", fmt.Sprintf("%s:%s", UserName, UserName), i.userConfigFile)
+	return err
 }
 
 func (i *Installer) PrepareStorage() error {
