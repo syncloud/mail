@@ -336,6 +336,7 @@ smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:{{ .AppDataDir }}/config/postfix/sasl_passwd
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 sender_dependent_relayhost_maps = hash:{{ .AppDataDir }}/config/postfix/relayhost
+import_environment = MAIL_CONFIG MAIL_DEBUG MAIL_LOGTAG TZ XAUTHORITY DISPLAY LANG=C SASL_PATH={{ .AppDir }}/postfix/lib/sasl2
 #relayhost = [gateway.my.domain]
 #relayhost = [mailserver.isp.tld]
 #relayhost = uucphost
