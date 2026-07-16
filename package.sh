@@ -22,6 +22,7 @@ cp -r ${DIR}/bin/* ${SNAP_DIR}/bin
 cp -r ${DIR}/config ${SNAP_DIR}
 cp -r ${DIR}/meta ${SNAP_DIR}
 cp ${SNAP_DIR}/roundcubemail/config/defaults.inc.php ${SNAP_DIR}/config/roundcube/
+cp -r ${DIR}/roundcube/plugins/mailadmin ${SNAP_DIR}/roundcubemail/plugins/
 cp -r ${SNAP_DIR}/postfix/config/postfix/postfix-files ${SNAP_DIR}/config/postfix
 
 echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml

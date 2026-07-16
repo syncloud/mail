@@ -11,3 +11,4 @@ CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/configure"    ./cmd/config
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/pre-refresh"  ./cmd/pre-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/post-refresh" ./cmd/post-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_BIN/cli"            ./cmd/cli
+CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_BIN/webui"          ./cmd/webui

@@ -1,16 +1,18 @@
 local name = 'mail';
-local roundcube = '1.6.1';
+local roundcube = '1.6.15';
 local dovecot = '2.3.16';
 local nginx = '1.24.0';
 local postfix = '3.4.28';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
+local node = '20';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
 local php = 'php:8.0.30-fpm-bullseye';
 local postgres = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
+local mailpit = 'axllent/mailpit:latest';
 local store_publisher = 'stable-303';
 local distros = ['bookworm', 'buster'];
 
@@ -143,6 +145,13 @@ local build(arch, test_ui) = [{
       ],
     },
     {
+      name: 'www',
+      image: 'node:' + node,
+      commands: [
+        './www/build.sh',
+      ],
+    },
+    {
       name: 'package',
       image: 'debian:' + debian,
       commands: [
@@ -226,7 +235,16 @@ local build(arch, test_ui) = [{
       ],
     }
     for distro in distros
-  ],
+  ] + (if test_ui then [
+    {
+      name: 'mailpit',
+      image: mailpit,
+      environment: {
+        MP_SMTP_AUTH_ACCEPT_ANY: '1',
+        MP_SMTP_AUTH_ALLOW_INSECURE: '1',
+      },
+    },
+  ] else []),
   volumes: [
     { name: 'dbus', host: { path: '/var/run/dbus' } },
     { name: 'dev', host: { path: '/dev' } },

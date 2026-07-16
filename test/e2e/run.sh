@@ -15,6 +15,11 @@ export PLAYWRIGHT_SSH_USER=root
 export PLAYWRIGHT_SSH_PASSWORD=Password1
 export PLAYWRIGHT_PROJECT=${PROJECT}
 export PLAYWRIGHT_ARTIFACT_DIR=/drone/src/artifact/${ARTIFACT_SUBDIR}
+export PLAYWRIGHT_MAILPIT_URL=http://mailpit:8025
+export PLAYWRIGHT_RELAY_HOST=mailpit
+export PLAYWRIGHT_RELAY_PORT=1025
+export PLAYWRIGHT_RELAY_USER=relayuser
+export PLAYWRIGHT_RELAY_PASSWORD=relaypass
 
 apt-get update -qq
 apt-get install -y -qq sshpass openssh-client curl
