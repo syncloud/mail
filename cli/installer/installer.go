@@ -197,6 +197,7 @@ func (i *Installer) InitConfig() error {
 	boxDataDir := path.Join(i.dataDir, "box")
 
 	if err := linux.CreateMissingDirs(
+		i.commonDir,
 		path.Join(i.dataDir, "nginx"),
 		path.Join(i.dataDir, "config"),
 		i.logDir,
@@ -225,6 +226,9 @@ func (i *Installer) InitConfig() error {
 	}
 
 	if err := linux.Chown(i.dataDir, UserName); err != nil {
+		return err
+	}
+	if err := linux.Chown(i.commonDir, UserName); err != nil {
 		return err
 	}
 	if _, err := i.executor.RunDir("", "chown", "-R", "dovecot:dovecot", boxDataDir); err != nil {
