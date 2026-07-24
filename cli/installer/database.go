@@ -58,9 +58,6 @@ func (d *Database) Init() error {
 }
 
 func (d *Database) UpdateConfig() error {
-	if _, err := os.Stat(d.databaseDir); os.IsNotExist(err) {
-		return nil
-	}
 	src := path.Join(d.configDir, "postgresql", "postgresql.conf")
 	dst := path.Join(d.databaseDir, "postgresql.conf")
 	content, err := os.ReadFile(src)
