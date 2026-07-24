@@ -136,6 +136,9 @@ func (i *Installer) RegenerateConfigs() error {
 	return linux.Chown(i.configPath, UserName)
 }
 
+// MigrateCommonToData is a one-time shim relocating pre-2026-07 state from
+// $SNAP_COMMON to $SNAP_DATA. Safe to delete (with its InitConfig call) once
+// all devices have auto-refreshed past this release, after 2026-08-08.
 func (i *Installer) MigrateCommonToData() error {
 	marker := path.Join(i.dataDir, ".migrated_from_common")
 	if _, err := os.Stat(marker); err == nil {
