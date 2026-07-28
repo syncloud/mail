@@ -11,7 +11,7 @@ local php = 'php:8.0.30-fpm-bullseye';
 local postgres = 'postgres:9.4-alpine';
 local platform = '26.04.10';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
-local store_publisher = 'stable-303';
+local store_publisher = 'stable-346';
 local distros = ['bookworm', 'buster'];
 
 local platform_image(distro, arch) =
