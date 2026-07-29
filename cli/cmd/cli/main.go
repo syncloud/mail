@@ -34,6 +34,14 @@ func main() {
 	})
 
 	cmd.AddCommand(&cobra.Command{
+		Use: "mail-relay-change",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			logger.Info("mail-relay-change")
+			return installer.New(logger).MailRelayChange()
+		},
+	})
+
+	cmd.AddCommand(&cobra.Command{
 		Use: "certificate-change",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger.Info("certificate-change")

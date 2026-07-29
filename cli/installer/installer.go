@@ -104,7 +104,7 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
-	relay, err := i.GetRelay()
+	relay, err := i.platformClient.GetMailRelay()
 	if err != nil {
 		return err
 	}
@@ -338,6 +338,10 @@ func (i *Installer) StorageChange() error {
 
 func (i *Installer) AccessChange() error {
 	return i.UpdateDomain()
+}
+
+func (i *Installer) MailRelayChange() error {
+	return i.ApplyRelay()
 }
 
 func (i *Installer) PreRefresh() error {
