@@ -96,10 +96,7 @@ func (d *Database) psql() string {
 func (d *Database) Init() error {
 	d.logger.Info("initializing database")
 	initdb := path.Join(d.appDir, "postgresql", "bin", "initdb.sh")
-	// postgres 15 and later can default to the icu locale provider, whose data
-	// files are not reachable from these relocated binaries, so ask for libc
-	if _, err := d.executor.RunDir("", "sudo", "-H", "-u", d.user, initdb,
-		"--locale-provider=libc", "--encoding=UTF8", d.databaseDir); err != nil {
+	if _, err := d.executor.RunDir("", "sudo", "-H", "-u", d.user, initdb, d.databaseDir); err != nil {
 		return err
 	}
 	return d.UpdateConfig()
