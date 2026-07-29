@@ -41,7 +41,9 @@ func (i *Installer) writeRelayMaps(relay *platform.MailRelay, domain string) err
 	if relay.Enabled {
 		host := fmt.Sprintf("[%s]:%d", relay.Host, relay.Port)
 		saslContent = fmt.Sprintf("%s %s:%s\n", host, relay.Login, relay.Password)
-		relayContent = fmt.Sprintf("@%s %s\n", domain, host)
+		// the smtps transport wraps the connection in tls from the start, which
+		// is what the relay expects on this port
+		relayContent = fmt.Sprintf("@%s smtps:%s\n", domain, host)
 	}
 
 	if err := os.WriteFile(saslFile, []byte(saslContent), 0600); err != nil {

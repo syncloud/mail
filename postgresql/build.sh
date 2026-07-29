@@ -3,7 +3,7 @@
 DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
-MAJOR_VERSION=9.4-alpine
+MAJOR_VERSION=17-alpine
 BUILD_DIR=${DIR}/../build/snap/postgresql
 
 postgres --help

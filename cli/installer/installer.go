@@ -264,7 +264,7 @@ func (i *Installer) PostRefresh() error {
 	if err := i.InitConfig(); err != nil {
 		return err
 	}
-	return i.database.UpdateConfig()
+	return i.database.Rebuild()
 }
 
 func (i *Installer) Configure() error {
@@ -276,6 +276,8 @@ func (i *Installer) Configure() error {
 		if err := i.Initialize(); err != nil {
 			return err
 		}
+	} else if err := i.database.Restore(); err != nil {
+		return err
 	}
 	return i.PrepareStorage()
 }
@@ -345,7 +347,7 @@ func (i *Installer) MailRelayChange() error {
 }
 
 func (i *Installer) PreRefresh() error {
-	return nil
+	return i.database.Backup()
 }
 
 func (i *Installer) BackupPreStop() error {
