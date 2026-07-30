@@ -1,13 +1,10 @@
-#!/bin/bash -xe
+#!/bin/sh -ex
 
 DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 BUILD_DIR=${DIR}/../build/snap/postgresql
-cd ${BUILD_DIR}
-PGBIN=$(echo usr/lib/postgresql/*/bin)
-ldd $PGBIN/initdb || true
-./bin/initdb.sh --version
-./bin/psql.sh --version
-./bin/pg_dumpall.sh --version
-test -f ../db.major.version
+${BUILD_DIR}/bin/initdb.sh --version
+${BUILD_DIR}/bin/psql.sh --version
+${BUILD_DIR}/usr/local/bin/postgres --help
+test -f ${DIR}/../build/snap/db.major.version
