@@ -40,7 +40,9 @@ docker-php-ext-configure memcached
 docker-php-ext-install memcached
 docker-php-ext-install gmp
 pecl install imagick
-pecl install smbclient
+# libsmbclient refuses to build where off_t is 32 bit, which is the default on
+# 32 bit arm, and says so with an assert naming these flags
+CFLAGS="${CFLAGS} -D_FILE_OFFSET_BITS=64" CXXFLAGS="${CXXFLAGS} -D_FILE_OFFSET_BITS=64" pecl install smbclient
 pecl install apcu
 docker-php-ext-configure intl
 docker-php-ext-install intl
