@@ -10,7 +10,6 @@ apt-get update && apt-get install -y \
 		libjpeg62-turbo-dev \
 		libpng-dev \
 		libzip-dev \
-		libsmbclient-dev \
 		libxml2-dev \
 		libsqlite3-dev \
 		libpq-dev \
@@ -40,9 +39,6 @@ docker-php-ext-configure memcached
 docker-php-ext-install memcached
 docker-php-ext-install gmp
 pecl install imagick
-# libsmbclient refuses to build where off_t is 32 bit, which is the default on
-# 32 bit arm, and says so with an assert naming these flags
-CFLAGS="${CFLAGS} -D_FILE_OFFSET_BITS=64" CXXFLAGS="${CXXFLAGS} -D_FILE_OFFSET_BITS=64" pecl install smbclient
 pecl install apcu
 docker-php-ext-configure intl
 docker-php-ext-install intl
@@ -57,7 +53,6 @@ docker-php-ext-install zip
 docker-php-ext-install pcntl
 docker-php-ext-install exif
 docker-php-ext-enable imagick
-docker-php-ext-enable smbclient
 docker-php-ext-install pdo pdo_pgsql
 docker-php-ext-configure gd --with-freetype --with-jpeg
 docker-php-ext-install -j2 gd
