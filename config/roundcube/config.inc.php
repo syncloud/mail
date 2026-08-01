@@ -15,8 +15,7 @@ $config['smtp_host'] = 'localhost';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
-$config['plugins'] = array('mailadmin');
-$config['mailadmin_url'] = 'https://{{ .DeviceDomainName }}/email';
+$config['plugins'] = array();
 
 $config['imap_host'] = 'tls://localhost';
 
