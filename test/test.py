@@ -230,17 +230,17 @@ def faker_messages(domain):
     return response.json()
 
 
-def platform_session(domain, device_user, device_password):
+def platform_session(device, domain, device_user, device_password):
+    token = device.run_ssh('snap run platform.cli login {0} {1}'.format(device_user, device_password)).strip()
     session = requests.session()
-    session.post('https://{0}/rest/login'.format(domain), verify=False, allow_redirects=False,
-                 json={'username': device_user, 'password': device_password})
-    response = session.get('https://{0}/rest/user'.format(domain), verify=False, allow_redirects=False)
+    response = session.post('https://{0}/rest/login/token'.format(domain), verify=False,
+                            allow_redirects=False, json={'token': token})
     assert response.status_code == 200, response.text
     return session
 
 
-def set_mail_relay(domain, device_user, device_password, enabled):
-    session = platform_session(domain, device_user, device_password)
+def set_mail_relay(device, domain, device_user, device_password, enabled):
+    session = platform_session(device, domain, device_user, device_password)
     response = session.post('https://{0}/rest/mail_relay'.format(domain),
                             json={'enabled': enabled}, verify=False)
     assert response.status_code == 200, response.text
@@ -259,17 +259,17 @@ def send_outgoing(app_domain, device_user, device_password, mail_domain, subject
     server.quit()
 
 
-def test_mail_relay_disabled_does_not_use_relay(domain, app_domain, device_user, device_password):
+def test_mail_relay_disabled_does_not_use_relay(device, domain, app_domain, device_user, device_password):
     requests.delete(faker_url(domain, 'reset'), timeout=10)
-    set_mail_relay(domain, device_user, device_password, False)
+    set_mail_relay(device, domain, device_user, device_password, False)
     send_outgoing(app_domain, device_user, device_password, domain, 'direct')
     time.sleep(10)
     assert faker_messages(domain) == []
 
 
-def test_mail_relay_enabled_delivers_through_relay(domain, app_domain, device_user, device_password):
+def test_mail_relay_enabled_delivers_through_relay(device, domain, app_domain, device_user, device_password):
     requests.delete(faker_url(domain, 'reset'), timeout=10)
-    set_mail_relay(domain, device_user, device_password, True)
+    set_mail_relay(device, domain, device_user, device_password, True)
     send_outgoing(app_domain, device_user, device_password, domain, 'relayed')
 
     messages = retry_func(lambda: assert_relayed(domain), message='relay delivery', retries=20, sleep=3)
