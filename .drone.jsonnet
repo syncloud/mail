@@ -169,6 +169,16 @@ local build(arch, test_ui) = [{
     for distro in distros
   ] + [
     {
+      name: 'mail-relay.' + distro + '.com',
+      image: 'debian:' + debian,
+      detach: true,
+      commands: [
+        './redirect-faker/faker',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
       name: 'test ' + distro,
       image: 'python:' + python,
       commands: [
