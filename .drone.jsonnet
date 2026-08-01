@@ -143,14 +143,6 @@ local build(arch, test_ui) = [{
       ],
     },
     {
-      name: 'relay faker',
-      image: 'golang:' + golang,
-      commands: [
-        'cd relay-faker',
-        'CGO_ENABLED=0 go build -o faker .',
-      ],
-    },
-    {
       name: 'package',
       image: 'debian:' + debian,
       commands: [
@@ -160,10 +152,11 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'mail-relay.' + distro + '.com',
-      image: 'debian:' + debian,
+      image: 'golang:' + golang,
       detach: true,
       commands: [
-        './relay-faker/faker',
+        'cd relay-faker',
+        'CGO_ENABLED=0 go run .',
       ],
     }
     for distro in distros
