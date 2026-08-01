@@ -234,6 +234,18 @@ local build(arch, test_ui) = [{
       ],
     }
     for distro in distros
+  ] + [
+    {
+      name: 'mail-relay.' + distro + '.com',
+      image: 'golang:' + golang,
+      commands: [
+        'while [ ! -f /drone/src/relay-faker/main.go ]; do sleep 1; done',
+        'cd /drone/src/relay-faker',
+        'CGO_ENABLED=0 go build -o /relay-faker .',
+        '/relay-faker',
+      ],
+    }
+    for distro in distros
   ],
   volumes: [
     { name: 'dbus', host: { path: '/var/run/dbus' } },

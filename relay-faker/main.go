@@ -60,21 +60,56 @@ func (s *Store) Reset() {
 	log.Print("store reset")
 }
 
+const UpdateToken = "faker-update-token"
+
+type AcquireRequest struct {
+	Domain string `json:"domain"`
+}
+
 type Api struct {
 	store *Store
+}
+
+func (a *Api) write(writer http.ResponseWriter, body interface{}) {
+	writer.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(writer).Encode(body); err != nil {
+		log.Printf("encode error: %v", err)
+	}
+}
+
+func (a *Api) acquire(writer http.ResponseWriter, request *http.Request) {
+	acquire := AcquireRequest{}
+	if err := json.NewDecoder(request.Body).Decode(&acquire); err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	log.Printf("acquire domain %s", acquire.Domain)
+	a.write(writer, map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"name":         acquire.Domain,
+			"update_token": UpdateToken,
+		},
+	})
 }
 
 func (a *Api) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	switch {
 	case request.URL.Path == "/faker/messages" && request.Method == http.MethodGet:
-		writer.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(writer).Encode(a.store.Messages()); err != nil {
-			log.Printf("encode error: %v", err)
-		}
+		a.write(writer, a.store.Messages())
 	case request.URL.Path == "/faker/reset":
 		a.store.Reset()
 		writer.WriteHeader(http.StatusOK)
+	case request.URL.Path == "/user":
+		a.write(writer, map[string]interface{}{
+			"data": map[string]interface{}{"update_token": UpdateToken},
+		})
+	case request.URL.Path == "/domain/acquire_v2":
+		a.acquire(writer, request)
+	case request.URL.Path == "/domain/update":
+		a.write(writer, map[string]interface{}{"success": true, "data": map[string]interface{}{}})
 	default:
+		log.Printf("not found: %s %s", request.Method, request.URL.Path)
 		writer.WriteHeader(http.StatusNotFound)
 	}
 }
