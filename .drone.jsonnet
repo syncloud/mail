@@ -143,6 +143,14 @@ local build(arch, test_ui) = [{
       ],
     },
     {
+      name: 'relay faker',
+      image: 'golang:' + golang,
+      commands: [
+        'cd relay-faker',
+        'CGO_ENABLED=0 go build -o ../ci/relay-faker .',
+      ],
+    },
+    {
       name: 'package',
       image: 'debian:' + debian,
       commands: [
