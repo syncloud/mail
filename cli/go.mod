@@ -2,7 +2,7 @@ module hooks
 
 require (
 	github.com/spf13/cobra v1.8.0
-	github.com/syncloud/golib v1.1.21-0.20260729184907-cdecff5b87eb
+	github.com/syncloud/golib v1.1.21
 	go.uber.org/zap v1.26.0
 	gopkg.in/ini.v1 v1.67.3
 )

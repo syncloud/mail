@@ -42,7 +42,7 @@ compatibility_level = 2
 
 # LOCAL PATHNAME INFORMATION
 
-meta_directory = {{ .AppDataDir }}/config/postfix
+meta_directory = {{ .DataDir }}/config/postfix
 
 #
 # The queue_directory specifies the location of the Postfix queue.
@@ -50,7 +50,7 @@ meta_directory = {{ .AppDataDir }}/config/postfix
 # See the files in examples/chroot-setup for setting up Postfix chroot
 # environments on different UNIX systems.
 #
-queue_directory = {{ .AppDataDir }}/spool
+queue_directory = {{ .DataDir }}/spool
 
 # The command_directory parameter specifies the location of all
 # postXXX commands.
@@ -67,7 +67,7 @@ daemon_directory = {{ .AppDir }}/postfix/usr/libexec/postfix
 # data files (caches, random numbers). This directory must be owned
 # by the mail_owner account (see below).
 #
-data_directory = {{ .AppDataDir }}/data
+data_directory = {{ .DataDir }}/data
 
 # QUEUE AND PROCESS OWNERSHIP
 #
@@ -333,9 +333,9 @@ mynetworks_style = host
 relayhost =
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
-smtp_sasl_password_maps = hash:{{ .AppDataDir }}/config/postfix/sasl_passwd
+smtp_sasl_password_maps = hash:{{ .DataDir }}/config/postfix/sasl_passwd
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-sender_dependent_default_transport_maps = hash:{{ .AppDataDir }}/config/postfix/relayhost
+sender_dependent_default_transport_maps = hash:{{ .DataDir }}/config/postfix/relayhost
 import_environment = MAIL_CONFIG MAIL_DEBUG MAIL_LOGTAG TZ XAUTHORITY DISPLAY LANG=C SASL_PATH={{ .AppDir }}/postfix/lib/sasl2
 #relayhost = [gateway.my.domain]
 #relayhost = [mailserver.isp.tld]
@@ -412,7 +412,7 @@ import_environment = MAIL_CONFIG MAIL_DEBUG MAIL_LOGTAG TZ XAUTHORITY DISPLAY LA
 #alias_maps = hash:/etc/aliases
 #alias_maps = hash:/etc/aliases, nis:mail.aliases
 #alias_maps = netinfo:/aliases
-alias_maps = ldap:{{ .AppDataDir }}/config/postfix/ldap-aliases.cf
+alias_maps = ldap:{{ .DataDir }}/config/postfix/ldap-aliases.cf
 
 # The alias_database parameter specifies the alias database(s) that
 # are built with "newaliases" or "sendmail -bi".  This is a separate
@@ -688,7 +688,7 @@ sample_directory = {{ .AppDir }}/postfix/etc/postfix
 readme_directory = no
 inet_protocols = all
 
-smtpd_sasl_path = {{ .AppDataDir }}/dovecot/private/auth
+smtpd_sasl_path = {{ .DataDir }}/dovecot/private/auth
 smtpd_sasl_auth_enable = yes
 
 dovecot_destination_recipient_limit = 1
@@ -708,5 +708,5 @@ smtp_tls_security_level = may
 
 milter_protocol = 2
 milter_default_action = accept
-smtpd_milters = unix:{{ .AppDataDir }}/opendkim.socket
-non_smtpd_milters = unix:{{ .AppDataDir }}/opendkim.socket
+smtpd_milters = unix:{{ .DataDir }}/opendkim.socket
+non_smtpd_milters = unix:{{ .DataDir }}/opendkim.socket

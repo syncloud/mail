@@ -1,1 +1,1 @@
-mail._domainkey.{{ .DeviceDomainName }} {{ .DeviceDomainName }}:mail:{{ .AppDataDir }}/opendkim/keys/{{ .DeviceDomainName }}/mail.private
+mail._domainkey.{{ .DeviceDomainName }} {{ .DeviceDomainName }}:mail:{{ .DataDir }}/opendkim/keys/{{ .DeviceDomainName }}/mail.private

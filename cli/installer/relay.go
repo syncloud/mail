@@ -7,42 +7,57 @@ import (
 	"strings"
 
 	"github.com/syncloud/golib/platform"
+	"go.uber.org/zap"
 )
 
-func (i *Installer) ApplyRelay() error {
-	relay, err := i.platformClient.GetMailRelay()
-	if err != nil {
-		return err
-	}
-	domain, err := i.mydomain()
-	if err != nil {
-		return err
-	}
-	return i.writeRelayMaps(relay, domain)
+type Relay struct {
+	appDir         string
+	postfixDir     string
+	platformClient *platform.Client
+	executor       *Executor
+	logger         *zap.Logger
 }
 
-func (i *Installer) mydomain() (string, error) {
-	postconf := path.Join(i.appDir, "postfix", "usr", "sbin", "postconf")
-	postfixDir := path.Join(i.configPath, "postfix")
-	out, err := i.executor.RunDir(postfixDir, postconf, "-h", "-c", postfixDir, "mydomain")
+func NewRelay(appDir, configDir string, platformClient *platform.Client, executor *Executor, logger *zap.Logger) *Relay {
+	return &Relay{
+		appDir:         appDir,
+		postfixDir:     path.Join(configDir, "postfix"),
+		platformClient: platformClient,
+		executor:       executor,
+		logger:         logger,
+	}
+}
+
+func (r *Relay) Apply() error {
+	config, err := r.platformClient.GetMailRelay()
+	if err != nil {
+		return err
+	}
+	domain, err := r.mydomain()
+	if err != nil {
+		return err
+	}
+	return r.writeMaps(config, domain)
+}
+
+func (r *Relay) mydomain() (string, error) {
+	postconf := path.Join(r.appDir, "postfix", "usr", "sbin", "postconf")
+	out, err := r.executor.RunDir(r.postfixDir, postconf, "-h", "-c", r.postfixDir, "mydomain")
 	if err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(out), nil
 }
 
-func (i *Installer) writeRelayMaps(relay *platform.MailRelay, domain string) error {
-	postfixDir := path.Join(i.configPath, "postfix")
-	saslFile := path.Join(postfixDir, "sasl_passwd")
-	relayFile := path.Join(postfixDir, "relayhost")
+func (r *Relay) writeMaps(config *platform.MailRelay, domain string) error {
+	saslFile := path.Join(r.postfixDir, "sasl_passwd")
+	relayFile := path.Join(r.postfixDir, "relayhost")
 
 	saslContent := ""
 	relayContent := ""
-	if relay.Enabled {
-		host := fmt.Sprintf("[%s]:%d", relay.Host, relay.Port)
-		saslContent = fmt.Sprintf("%s %s:%s\n", host, relay.Login, relay.Password)
-		// the smtps transport wraps the connection in tls from the start, which
-		// is what the relay expects on this port
+	if config.Enabled {
+		host := fmt.Sprintf("[%s]:%d", config.Host, config.Port)
+		saslContent = fmt.Sprintf("%s %s:%s\n", host, config.Login, config.Password)
 		relayContent = fmt.Sprintf("@%s smtps:%s\n", domain, host)
 	}
 
@@ -53,11 +68,11 @@ func (i *Installer) writeRelayMaps(relay *platform.MailRelay, domain string) err
 		return err
 	}
 
-	postmap := path.Join(i.appDir, "postfix", "usr", "sbin", "postmap")
-	if _, err := i.executor.RunDir(postfixDir, postmap, "-c", postfixDir, "hash:"+saslFile); err != nil {
+	postmap := path.Join(r.appDir, "postfix", "usr", "sbin", "postmap")
+	if _, err := r.executor.RunDir(r.postfixDir, postmap, "-c", r.postfixDir, "hash:"+saslFile); err != nil {
 		return err
 	}
-	if _, err := i.executor.RunDir(postfixDir, postmap, "-c", postfixDir, "hash:"+relayFile); err != nil {
+	if _, err := r.executor.RunDir(r.postfixDir, postmap, "-c", r.postfixDir, "hash:"+relayFile); err != nil {
 		return err
 	}
 	return nil

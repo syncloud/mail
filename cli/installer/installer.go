@@ -29,8 +29,8 @@ var dkimKeyPattern = regexp.MustCompile(`(?s).*p=(.*?)".*`)
 
 type Variables struct {
 	AppDir           string
-	AppDataDir       string
-	AppCommonDir     string
+	DataDir          string
+	CommonDir        string
 	DbPsqlPath       string
 	DbPsqlPort       int
 	DbName           string
@@ -53,6 +53,7 @@ type Installer struct {
 	userConfigFile  string
 	platformClient  *platform.Client
 	database        *Database
+	relay           *Relay
 	executor        *Executor
 	logger          *zap.Logger
 }
@@ -63,6 +64,7 @@ func New(logger *zap.Logger) *Installer {
 	commonDir := fmt.Sprintf("/var/snap/%s/common", App)
 	configPath := path.Join(dataDir, "config")
 	executor := NewExecutor(logger)
+	platformClient := platform.New()
 	return &Installer{
 		appDir:          appDir,
 		dataDir:         dataDir,
@@ -72,8 +74,9 @@ func New(logger *zap.Logger) *Installer {
 		opendkimDir:     path.Join(dataDir, "opendkim"),
 		opendkimKeysDir: path.Join(dataDir, "opendkim", "keys"),
 		userConfigFile:  path.Join(dataDir, "user_mail.cfg"),
-		platformClient:  platform.New(),
+		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
+		relay:           NewRelay(appDir, configPath, platformClient, executor, logger),
 		executor:        executor,
 		logger:          logger,
 	}
@@ -104,15 +107,15 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
-	relay, err := i.platformClient.GetMailRelay()
+	relayConfig, err := i.platformClient.GetMailRelay()
 	if err != nil {
 		return err
 	}
 
 	variables := Variables{
 		AppDir:           i.appDir,
-		AppDataDir:       i.dataDir,
-		AppCommonDir:     i.commonDir,
+		DataDir:          i.dataDir,
+		CommonDir:        i.commonDir,
 		DbPsqlPath:       i.database.Dir(),
 		DbPsqlPort:       i.database.Port(),
 		DbName:           DbName,
@@ -129,16 +132,13 @@ func (i *Installer) RegenerateConfigs() error {
 		return err
 	}
 
-	if err := i.writeRelayMaps(relay, deviceDomainName); err != nil {
+	if err := i.relay.writeMaps(relayConfig, deviceDomainName); err != nil {
 		return err
 	}
 
 	return linux.Chown(i.configPath, UserName)
 }
 
-// MigrateCommonToData is a one-time shim relocating pre-2026-07 state from
-// $SNAP_COMMON to $SNAP_DATA. Safe to delete (with its InitConfig call) once
-// all devices have auto-refreshed past this release, after 2026-08-08.
 func (i *Installer) MigrateCommonToData() error {
 	marker := path.Join(i.dataDir, ".migrated_from_common")
 	if _, err := os.Stat(marker); err == nil {
@@ -343,7 +343,7 @@ func (i *Installer) AccessChange() error {
 }
 
 func (i *Installer) MailRelayChange() error {
-	return i.ApplyRelay()
+	return i.relay.Apply()
 }
 
 func (i *Installer) PreRefresh() error {

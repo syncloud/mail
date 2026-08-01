@@ -9,7 +9,7 @@ apps:
     restart-condition: always
     before: [php-fpm]
   dovecot:
-    command: bin/service.dovecot.sh start
+    command: bin/service.dovecot.sh
     daemon: simple
     plugs:
     - network
@@ -18,7 +18,7 @@ apps:
     before: [php-fpm]
   postgresql:
     user: mail
-    command: bin/service.postgresql.sh start
+    command: bin/service.postgresql.sh
     daemon: forking
     plugs:
     - network
@@ -38,7 +38,7 @@ apps:
     before: [nginx]
   opendkim:
     user: mail
-    command: bin/service.opendkim.sh start
+    command: bin/service.opendkim.sh
     daemon: forking
     plugs:
     - network

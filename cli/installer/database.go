@@ -50,10 +50,6 @@ func (d *Database) pgDumpAll() string {
 	return path.Join(d.appDir, "postgresql", "bin", "pg_dumpall.sh")
 }
 
-// Backup, Remove and Restore are always run around a refresh rather than only
-// when the postgres version changes, so that a major version bump needs no
-// detection and no in place upgrade: the cluster is simply rebuilt from a dump
-// the previous version produced.
 func (d *Database) Backup() error {
 	if _, err := os.Stat(d.databaseDir); os.IsNotExist(err) {
 		return nil
@@ -63,9 +59,6 @@ func (d *Database) Backup() error {
 	return err
 }
 
-// Rebuild throws away the cluster the previous revision left behind and starts
-// an empty one of the current version, ready for the dump to be loaded once
-// postgres is running. It is a no op without a dump to restore from.
 func (d *Database) Rebuild() error {
 	if _, err := os.Stat(d.backupFile); os.IsNotExist(err) {
 		return d.UpdateConfig()
