@@ -1,7 +1,6 @@
 apps:
   postfix:
-    command: bin/service.postfix.sh start
-    stop-command: bin/service.postfix.sh stop
+    command: bin/service.postfix.sh
     daemon: forking
     plugs:
     - network
@@ -27,13 +26,12 @@ apps:
     before: [php-fpm]
   php-fpm:
     user: mail
-    command: bin/service.php-fpm.sh start
+    command: bin/service.php-fpm.sh
     daemon: forking
     plugs:
     - network
     - network-bind
     restart-condition: always
-    post-start-command: bin/service.php-fpm.sh post-start
     after: [postgresql]
     before: [nginx]
   opendkim:
