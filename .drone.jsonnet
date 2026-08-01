@@ -147,7 +147,7 @@ local build(arch, test_ui) = [{
       image: 'golang:' + golang,
       commands: [
         'cd relay-faker',
-        'CGO_ENABLED=0 go build -o ../ci/relay-faker .',
+        'CGO_ENABLED=0 go build -o faker .',
       ],
     },
     {
@@ -157,6 +157,16 @@ local build(arch, test_ui) = [{
         './package.sh ' + name + ' $DRONE_BUILD_NUMBER',
       ],
     },
+  ] + [
+    {
+      name: 'mail-relay.' + distro + '.com',
+      image: 'debian:' + debian,
+      detach: true,
+      commands: [
+        './relay-faker/faker',
+      ],
+    }
+    for distro in distros
   ] + [
     {
       name: 'test ' + distro,
@@ -232,18 +242,6 @@ local build(arch, test_ui) = [{
       volumes: [
         { name: 'dbus', path: '/var/run/dbus' },
         { name: 'dev', path: '/dev' },
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'mail-relay.' + distro + '.com',
-      image: 'golang:' + golang,
-      commands: [
-        'while [ ! -f /drone/src/relay-faker/main.go ]; do sleep 1; done',
-        'cd /drone/src/relay-faker',
-        'CGO_ENABLED=0 go build -o /relay-faker .',
-        '/relay-faker',
       ],
     }
     for distro in distros
