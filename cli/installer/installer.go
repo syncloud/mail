@@ -323,13 +323,6 @@ func (i *Installer) PrepareStorage() error {
 	return linux.Chown(tmpStoragePath, UserName)
 }
 
-func (i *Installer) UpdateDomain() error {
-	if err := i.RegenerateConfigs(); err != nil {
-		return err
-	}
-	return i.platformClient.RestartService(SystemdDovecot)
-}
-
 func (i *Installer) CertificateChange() error {
 	return i.platformClient.RestartService(SystemdDovecot)
 }
@@ -339,7 +332,10 @@ func (i *Installer) StorageChange() error {
 }
 
 func (i *Installer) AccessChange() error {
-	return i.UpdateDomain()
+	if err := i.RegenerateConfigs(); err != nil {
+		return err
+	}
+	return i.platformClient.RestartService(SystemdDovecot)
 }
 
 func (i *Installer) MailRelayChange() error {
