@@ -9,13 +9,13 @@ local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
 local php = 'php:8.3-fpm-bookworm';
 local postgres = 'postgres:9.4-alpine';
-local platform = '26.06.01';
+local platform = '26.08.01';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-303';
 local distros = ['bookworm', 'buster'];
 
 local platform_image(distro, arch) =
-  'syncloud/platform-' + distro + '-' + arch + ':' + platform;
+  'syncloud/platform-' + distro + ':' + platform + '-' + arch;
 
 local build(arch, test_ui) = [{
   kind: 'pipeline',
