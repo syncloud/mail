@@ -3,6 +3,7 @@ import os
 import pytest
 import requests
 import smtplib
+import socket
 import ssl
 import time
 from email.mime.text import MIMEText
@@ -78,8 +79,9 @@ def test_start(module_setup, device_host, app, domain, device):
 
 def test_activate_device(device, domain):
     redirect_host = 'redirect.{0}'.format(domain)
-    device.run_ssh(
-        'getent hosts {0} | sed "s/{0}/mail-relay.{1}/" >> /etc/hosts'.format(redirect_host, domain))
+    redirect_ip = socket.gethostbyname(redirect_host)
+    device.run_ssh('echo "{0} mail-relay.{1}" >> /etc/hosts'.format(redirect_ip, domain))
+    device.run_ssh('getent hosts mail-relay.{0}'.format(domain))
     device.run_ssh('snap run platform.cli config set redirect.domain {0}'.format(domain))
     device.run_ssh('snap run platform.cli config set redirect.api_url http://{0}'.format(redirect_host))
     response = device.activate()
