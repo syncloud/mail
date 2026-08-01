@@ -81,7 +81,7 @@ def test_activate_device(device, domain):
     device.run_ssh(
         'getent hosts {0} | sed "s/{0}/mail-relay.{1}/" >> /etc/hosts'.format(redirect_host, domain))
     device.run_ssh('snap run platform.cli config set redirect.domain {0}'.format(domain))
-    device.run_ssh('snap run platform.cli config set redirect.api_url http://{0}:8025'.format(redirect_host))
+    device.run_ssh('snap run platform.cli config set redirect.api_url http://{0}'.format(redirect_host))
     response = device.activate()
     assert response.status_code == 200, response.text
 
@@ -221,7 +221,7 @@ def test_certificate_change(device):
 
 
 def faker_url(domain, path):
-    return 'http://redirect.{0}:8025/faker/{1}'.format(domain, path)
+    return 'http://redirect.{0}/faker/{1}'.format(domain, path)
 
 
 def faker_messages(domain):

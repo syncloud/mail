@@ -276,7 +276,7 @@ func env(name string, fallback string) string {
 func main() {
 	store := NewStore()
 
-	apiAddress := env("FAKER_API_ADDR", ":8025")
+	apiAddress := env("FAKER_API_ADDR", ":80")
 	go func() {
 		log.Printf("relay faker api listening on %s", apiAddress)
 		if err := http.ListenAndServe(apiAddress, &Api{store: store}); err != nil {
