@@ -199,7 +199,7 @@ func address(argument string) string {
 }
 
 func (s *Session) Run() error {
-	if err := s.send("220 mail-relay-faker ESMTP"); err != nil {
+	if err := s.send("220 redirect-faker ESMTP"); err != nil {
 		return err
 	}
 	for {
@@ -215,7 +215,7 @@ func (s *Session) Run() error {
 		}
 		switch command {
 		case "EHLO", "HELO":
-			err = s.send("250-mail-relay-faker\r\n250-AUTH PLAIN\r\n250 OK")
+			err = s.send("250-redirect-faker\r\n250-AUTH PLAIN\r\n250 OK")
 		case "AUTH":
 			err = s.auth(argument)
 		case "MAIL":
@@ -251,7 +251,7 @@ func certificate() (tls.Certificate, error) {
 	}
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(1),
-		Subject:      pkix.Name{CommonName: "mail-relay-faker"},
+		Subject:      pkix.Name{CommonName: "redirect-faker"},
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().AddDate(1, 0, 0),
 		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
