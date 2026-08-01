@@ -4,49 +4,25 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/syncloud/golib/platform"
 	"go.uber.org/zap"
 )
 
 type Relay struct {
-	appDir         string
-	postfixDir     string
-	platformClient *platform.Client
-	executor       *Executor
-	logger         *zap.Logger
+	appDir     string
+	postfixDir string
+	executor   *Executor
+	logger     *zap.Logger
 }
 
-func NewRelay(appDir, configDir string, platformClient *platform.Client, executor *Executor, logger *zap.Logger) *Relay {
+func NewRelay(appDir, configDir string, executor *Executor, logger *zap.Logger) *Relay {
 	return &Relay{
-		appDir:         appDir,
-		postfixDir:     path.Join(configDir, "postfix"),
-		platformClient: platformClient,
-		executor:       executor,
-		logger:         logger,
+		appDir:     appDir,
+		postfixDir: path.Join(configDir, "postfix"),
+		executor:   executor,
+		logger:     logger,
 	}
-}
-
-func (r *Relay) Apply() error {
-	config, err := r.platformClient.GetMailRelay()
-	if err != nil {
-		return err
-	}
-	domain, err := r.mydomain()
-	if err != nil {
-		return err
-	}
-	return r.writeMaps(config, domain)
-}
-
-func (r *Relay) mydomain() (string, error) {
-	postconf := path.Join(r.appDir, "postfix", "usr", "sbin", "postconf")
-	out, err := r.executor.RunDir(r.postfixDir, postconf, "-h", "-c", r.postfixDir, "mydomain")
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(out), nil
 }
 
 func (r *Relay) writeMaps(config *platform.MailRelay, domain string) error {

@@ -76,7 +76,7 @@ func New(logger *zap.Logger) *Installer {
 		userConfigFile:  path.Join(dataDir, "user_mail.cfg"),
 		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
-		relay:           NewRelay(appDir, configPath, platformClient, executor, logger),
+		relay:           NewRelay(appDir, configPath, executor, logger),
 		executor:        executor,
 		logger:          logger,
 	}
@@ -343,7 +343,7 @@ func (i *Installer) AccessChange() error {
 }
 
 func (i *Installer) MailRelayChange() error {
-	return i.relay.Apply()
+	return i.RegenerateConfigs()
 }
 
 func (i *Installer) PreRefresh() error {
