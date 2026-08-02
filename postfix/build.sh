@@ -14,7 +14,7 @@ PREFIX=/snap/mail/current/${NAME}
 echo "building ${NAME}"
 
 apt update
-apt -y install libdb-dev libldap2-dev libsasl2-dev m4 wget build-essential curl libssl-dev libsasl2-dev patchelf
+apt -y install libdb-dev libldap2-dev libsasl2-dev libsasl2-modules m4 wget build-essential curl libssl-dev patchelf
 
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
@@ -100,6 +100,9 @@ mkdir -p ${TARGET}/lib ${TARGET}/usr/lib ${TARGET}/bin
 cp -r /lib/*-linux-gnu* ${TARGET}/lib/
 cp -r /usr/lib/*-linux-gnu* ${TARGET}/usr/lib/
 cp -r $PREFIX/* ${TARGET}
+
+mkdir -p ${TARGET}/lib/sasl2
+cp /usr/lib/*-linux-gnu*/sasl2/*.so* ${TARGET}/lib/sasl2/
 
 cp $DIR/postfix.sh ${TARGET}/bin
 cp $DIR/postconf.sh ${TARGET}/bin

@@ -29,7 +29,8 @@ var dkimKeyPattern = regexp.MustCompile(`(?s).*p=(.*?)".*`)
 
 type Variables struct {
 	AppDir           string
-	AppDataDir       string
+	DataDir          string
+	CommonDir        string
 	DbPsqlPath       string
 	DbPsqlPort       int
 	DbName           string
@@ -44,6 +45,7 @@ type Variables struct {
 type Installer struct {
 	appDir          string
 	dataDir         string
+	commonDir       string
 	configPath      string
 	logDir          string
 	opendkimDir     string
@@ -51,25 +53,30 @@ type Installer struct {
 	userConfigFile  string
 	platformClient  *platform.Client
 	database        *Database
+	relay           *Relay
 	executor        *Executor
 	logger          *zap.Logger
 }
 
 func New(logger *zap.Logger) *Installer {
 	appDir := fmt.Sprintf("/snap/%s/current", App)
-	dataDir := fmt.Sprintf("/var/snap/%s/common", App)
+	dataDir := fmt.Sprintf("/var/snap/%s/current", App)
+	commonDir := fmt.Sprintf("/var/snap/%s/common", App)
 	configPath := path.Join(dataDir, "config")
 	executor := NewExecutor(logger)
+	platformClient := platform.New()
 	return &Installer{
 		appDir:          appDir,
 		dataDir:         dataDir,
+		commonDir:       commonDir,
 		configPath:      configPath,
 		logDir:          path.Join(dataDir, "log"),
 		opendkimDir:     path.Join(dataDir, "opendkim"),
 		opendkimKeysDir: path.Join(dataDir, "opendkim", "keys"),
 		userConfigFile:  path.Join(dataDir, "user_mail.cfg"),
-		platformClient:  platform.New(),
+		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
+		relay:           NewRelay(appDir, configPath, executor, logger),
 		executor:        executor,
 		logger:          logger,
 	}
@@ -100,10 +107,15 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
+	relayConfig, err := i.platformClient.GetMailRelay()
+	if err != nil {
+		return err
+	}
 
 	variables := Variables{
 		AppDir:           i.appDir,
-		AppDataDir:       i.dataDir,
+		DataDir:          i.dataDir,
+		CommonDir:        i.commonDir,
 		DbPsqlPath:       i.database.Dir(),
 		DbPsqlPort:       i.database.Port(),
 		DbName:           DbName,
@@ -120,10 +132,49 @@ func (i *Installer) RegenerateConfigs() error {
 		return err
 	}
 
+	if err := i.relay.writeMaps(relayConfig, deviceDomainName); err != nil {
+		return err
+	}
+
 	return linux.Chown(i.configPath, UserName)
 }
 
+func (i *Installer) MigrateCommonToData() error {
+	marker := path.Join(i.dataDir, ".migrated_from_common")
+	if _, err := os.Stat(marker); err == nil {
+		return nil
+	}
+	if err := linux.CreateMissingDirs(i.dataDir); err != nil {
+		return err
+	}
+	entries, err := os.ReadDir(i.commonDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.WriteFile(marker, []byte{}, 0644)
+		}
+		return err
+	}
+	for _, entry := range entries {
+		name := entry.Name()
+		if name == "web.socket" || strings.HasSuffix(name, ".socket") {
+			continue
+		}
+		dst := path.Join(i.dataDir, name)
+		if _, err := os.Stat(dst); err == nil {
+			continue
+		}
+		i.logger.Info("migrating to data", zap.String("name", name))
+		if err := os.Rename(path.Join(i.commonDir, name), dst); err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(marker, []byte{}, 0644)
+}
+
 func (i *Installer) InitConfig() error {
+	if err := i.MigrateCommonToData(); err != nil {
+		return err
+	}
 	if err := linux.CreateUser("maildrop"); err != nil {
 		return err
 	}
@@ -142,6 +193,7 @@ func (i *Installer) InitConfig() error {
 	boxDataDir := path.Join(i.dataDir, "box")
 
 	if err := linux.CreateMissingDirs(
+		i.commonDir,
 		path.Join(i.dataDir, "nginx"),
 		path.Join(i.dataDir, "config"),
 		i.logDir,
@@ -170,6 +222,9 @@ func (i *Installer) InitConfig() error {
 	}
 
 	if err := linux.Chown(i.dataDir, UserName); err != nil {
+		return err
+	}
+	if err := linux.Chown(i.commonDir, UserName); err != nil {
 		return err
 	}
 	if _, err := i.executor.RunDir("", "chown", "-R", "dovecot:dovecot", boxDataDir); err != nil {
@@ -206,7 +261,10 @@ func (i *Installer) Install() error {
 }
 
 func (i *Installer) PostRefresh() error {
-	return i.InitConfig()
+	if err := i.InitConfig(); err != nil {
+		return err
+	}
+	return i.database.Rebuild()
 }
 
 func (i *Installer) Configure() error {
@@ -218,6 +276,8 @@ func (i *Installer) Configure() error {
 		if err := i.Initialize(); err != nil {
 			return err
 		}
+	} else if err := i.database.Restore(); err != nil {
+		return err
 	}
 	return i.PrepareStorage()
 }
@@ -244,7 +304,11 @@ func (i *Installer) setActivated(activated bool) error {
 		return err
 	}
 	cfg.Section("mail").Key("activated").SetValue(strconv.FormatBool(activated))
-	return cfg.SaveTo(i.userConfigFile)
+	if err := cfg.SaveTo(i.userConfigFile); err != nil {
+		return err
+	}
+	_, err = i.executor.RunDir("", "chown", fmt.Sprintf("%s:%s", UserName, UserName), i.userConfigFile)
+	return err
 }
 
 func (i *Installer) PrepareStorage() error {
@@ -259,13 +323,6 @@ func (i *Installer) PrepareStorage() error {
 	return linux.Chown(tmpStoragePath, UserName)
 }
 
-func (i *Installer) UpdateDomain() error {
-	if err := i.RegenerateConfigs(); err != nil {
-		return err
-	}
-	return i.platformClient.RestartService(SystemdDovecot)
-}
-
 func (i *Installer) CertificateChange() error {
 	return i.platformClient.RestartService(SystemdDovecot)
 }
@@ -275,11 +332,18 @@ func (i *Installer) StorageChange() error {
 }
 
 func (i *Installer) AccessChange() error {
-	return i.UpdateDomain()
+	if err := i.RegenerateConfigs(); err != nil {
+		return err
+	}
+	return i.platformClient.RestartService(SystemdDovecot)
+}
+
+func (i *Installer) MailRelayChange() error {
+	return i.RegenerateConfigs()
 }
 
 func (i *Installer) PreRefresh() error {
-	return nil
+	return i.database.Backup()
 }
 
 func (i *Installer) BackupPreStop() error {

@@ -17,6 +17,7 @@ type Database struct {
 	password    string
 	port        int
 	initFile    string
+	backupFile  string
 	executor    *Executor
 	logger      *zap.Logger
 }
@@ -31,6 +32,7 @@ func NewDatabase(appDir, dataDir, configDir, name, user, password string, port i
 		password:    password,
 		port:        port,
 		initFile:    path.Join(appDir, "roundcubemail", "SQL", "postgres.initial.sql"),
+		backupFile:  path.Join(dataDir, "database.dump.sql"),
 		executor:    executor,
 		logger:      logger,
 	}
@@ -44,6 +46,42 @@ func (d *Database) Port() int {
 	return d.port
 }
 
+func (d *Database) pgDumpAll() string {
+	return path.Join(d.appDir, "postgresql", "bin", "pg_dumpall.sh")
+}
+
+func (d *Database) Backup() error {
+	if _, err := os.Stat(d.databaseDir); os.IsNotExist(err) {
+		return nil
+	}
+	d.logger.Info("dumping database")
+	_, err := d.executor.RunDir("", d.pgDumpAll(), "-U", d.user, "-h", d.databaseDir, "-f", d.backupFile)
+	return err
+}
+
+func (d *Database) Rebuild() error {
+	if _, err := os.Stat(d.backupFile); os.IsNotExist(err) {
+		return d.UpdateConfig()
+	}
+	d.logger.Info("removing old cluster")
+	if err := os.RemoveAll(d.databaseDir); err != nil {
+		return err
+	}
+	return d.Init()
+}
+
+func (d *Database) Restore() error {
+	if _, err := os.Stat(d.backupFile); os.IsNotExist(err) {
+		return nil
+	}
+	d.logger.Info("restoring database")
+	if _, err := d.executor.RunDir("", d.psql(), "-U", d.user, "-h", d.databaseDir,
+		"-d", "postgres", "-f", d.backupFile); err != nil {
+		return err
+	}
+	return os.Remove(d.backupFile)
+}
+
 func (d *Database) psql() string {
 	return path.Join(d.appDir, "postgresql", "bin", "psql.sh")
 }
@@ -54,6 +92,10 @@ func (d *Database) Init() error {
 	if _, err := d.executor.RunDir("", "sudo", "-H", "-u", d.user, initdb, d.databaseDir); err != nil {
 		return err
 	}
+	return d.UpdateConfig()
+}
+
+func (d *Database) UpdateConfig() error {
 	src := path.Join(d.configDir, "postgresql", "postgresql.conf")
 	dst := path.Join(d.databaseDir, "postgresql.conf")
 	content, err := os.ReadFile(src)
