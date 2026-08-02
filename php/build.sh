@@ -10,7 +10,6 @@ apt-get update && apt-get install -y \
 		libjpeg62-turbo-dev \
 		libpng-dev \
 		libzip-dev \
-		libsmbclient-dev \
 		libxml2-dev \
 		libsqlite3-dev \
 		libpq-dev \
@@ -22,7 +21,6 @@ apt-get update && apt-get install -y \
 		libtiff5-dev \
 		libwebp-dev \
 		libmemcached-dev \
-		libmcrypt-dev \
 		zip \
 		wget \
 		unzip \
@@ -41,14 +39,11 @@ docker-php-ext-configure memcached
 docker-php-ext-install memcached
 docker-php-ext-install gmp
 pecl install imagick
-pecl install smbclient
 pecl install apcu
-pecl install mcrypt-1.0.4
 docker-php-ext-configure intl
 docker-php-ext-install intl
 docker-php-ext-enable apcu
 docker-php-ext-install ldap
-docker-php-ext-enable mcrypt
 docker-php-ext-install bcmath
 docker-php-ext-install pdo_mysql
 docker-php-ext-install mysqli
@@ -58,7 +53,6 @@ docker-php-ext-install zip
 docker-php-ext-install pcntl
 docker-php-ext-install exif
 docker-php-ext-enable imagick
-docker-php-ext-enable smbclient
 docker-php-ext-install pdo pdo_pgsql
 docker-php-ext-configure gd --with-freetype --with-jpeg
 docker-php-ext-install -j2 gd

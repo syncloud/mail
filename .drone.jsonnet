@@ -1,21 +1,21 @@
 local name = 'mail';
-local roundcube = '1.6.1';
-local dovecot = '2.3.16';
-local nginx = '1.24.0';
-local postfix = '3.4.28';
+local roundcube = '1.6.15';
+local dovecot = '2.3.21';
+local nginx = '1.30.4';
+local postfix = '3.11.5';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
 local bullseye = 'bullseye-slim';
-local php = 'php:8.0.30-fpm-bullseye';
+local php = 'php:8.3-fpm-bookworm';
 local postgres = 'postgres:9.4-alpine';
-local platform = '26.04.10';
+local platform = '26.08.01';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-346';
 local distros = ['bookworm', 'buster'];
 
 local platform_image(distro, arch) =
-  'syncloud/platform-' + distro + '-' + arch + ':' + platform;
+  'syncloud/platform-' + distro + ':' + platform + '-' + arch;
 
 local build(arch, test_ui) = [{
   kind: 'pipeline',
@@ -143,12 +143,40 @@ local build(arch, test_ui) = [{
       ],
     },
     {
+      name: 'redirect faker',
+      image: 'golang:' + golang,
+      commands: [
+        'cd redirect-faker',
+        'CGO_ENABLED=0 go build -o faker .',
+      ],
+    },
+    {
       name: 'package',
       image: 'debian:' + debian,
       commands: [
         './package.sh ' + name + ' $DRONE_BUILD_NUMBER',
       ],
     },
+  ] + [
+    {
+      name: 'redirect.' + distro + '.com',
+      image: 'debian:' + debian,
+      detach: true,
+      commands: [
+        './redirect-faker/faker',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'mail-relay.' + distro + '.com',
+      image: 'debian:' + debian,
+      detach: true,
+      commands: [
+        './redirect-faker/faker',
+      ],
+    }
+    for distro in distros
   ] + [
     {
       name: 'test ' + distro,
@@ -220,6 +248,7 @@ local build(arch, test_ui) = [{
       name: name + '.' + distro + '.com',
       image: platform_image(distro, arch),
       privileged: true,
+      entrypoint: ['/bin/sh', '-c', "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
       volumes: [
         { name: 'dbus', path: '/var/run/dbus' },
         { name: 'dev', path: '/dev' },

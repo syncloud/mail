@@ -1,6 +1,7 @@
 import imaplib
 import os
 import pytest
+import requests
 import smtplib
 import ssl
 import time
@@ -75,8 +76,10 @@ def test_start(module_setup, device_host, app, domain, device):
     device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
 
 
-def test_activate_device(device):
-    response = device.activate_custom()
+def test_activate_device(device, domain):
+    device.run_ssh('snap run platform.cli config set redirect.domain {0}'.format(domain))
+    device.run_ssh('snap run platform.cli config set redirect.api_url http://redirect.{0}'.format(domain))
+    response = device.activate()
     assert response.status_code == 200, response.text
 
 
@@ -212,3 +215,67 @@ def test_storage_change(device):
 
 def test_certificate_change(device):
     device.run_ssh('snap run mail.certificate-change > {0}/certificate-change.hook.log'.format(TMP_DIR))
+
+
+def faker_url(domain, path):
+    return 'http://mail-relay.{0}/faker/{1}'.format(domain, path)
+
+
+def faker_messages(domain):
+    response = requests.get(faker_url(domain, 'messages'), timeout=10)
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def platform_session(device, domain, device_user, device_password):
+    token = device.run_ssh('snap run platform.cli login {0} {1}'.format(device_user, device_password)).strip()
+    session = requests.session()
+    response = session.post('https://{0}/rest/login/token'.format(domain), verify=False,
+                            allow_redirects=False, json={'token': token})
+    assert response.status_code == 200, response.text
+    return session
+
+
+def set_mail_relay(device, domain, device_user, device_password, enabled):
+    session = platform_session(device, domain, device_user, device_password)
+    response = session.post('https://{0}/rest/mail_relay'.format(domain),
+                            json={'enabled': enabled}, verify=False)
+    assert response.status_code == 200, response.text
+    assert response.json()['success'], response.text
+
+
+def send_outgoing(app_domain, device_user, device_password, mail_domain, subject):
+    server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
+    server.ehlo()
+    server.login(device_user, device_password)
+    msg = MIMEText('relay body')
+    msg['Subject'] = subject
+    msg['From'] = '{0}@{1}'.format(device_user, mail_domain)
+    msg['To'] = 'outside@example.com'
+    server.sendmail(msg['From'], [msg['To']], msg.as_string())
+    server.quit()
+
+
+def test_mail_relay_disabled_does_not_use_relay(device, domain, app_domain, device_user, device_password):
+    requests.delete(faker_url(domain, 'reset'), timeout=10)
+    set_mail_relay(device, domain, device_user, device_password, False)
+    send_outgoing(app_domain, device_user, device_password, domain, 'direct')
+    time.sleep(10)
+    assert faker_messages(domain) == []
+
+
+def test_mail_relay_enabled_delivers_through_relay(device, domain, app_domain, device_user, device_password):
+    requests.delete(faker_url(domain, 'reset'), timeout=10)
+    set_mail_relay(device, domain, device_user, device_password, True)
+    send_outgoing(app_domain, device_user, device_password, domain, 'relayed')
+
+    messages = retry_func(lambda: assert_relayed(domain), message='relay delivery', retries=20, sleep=3)
+    assert messages[0]['login'] == domain, messages
+    assert messages[0]['recipients'] == ['outside@example.com'], messages
+    assert 'relayed' in messages[0]['body'], messages
+
+
+def assert_relayed(domain):
+    messages = faker_messages(domain)
+    assert len(messages) > 0, 'relay received nothing'
+    return messages

@@ -1,7 +1,6 @@
 apps:
   postfix:
-    command: bin/service.postfix.sh start
-    stop-command: bin/service.postfix.sh stop
+    command: bin/service.postfix.sh
     daemon: forking
     plugs:
     - network
@@ -9,7 +8,7 @@ apps:
     restart-condition: always
     before: [php-fpm]
   dovecot:
-    command: bin/service.dovecot.sh start
+    command: bin/service.dovecot.sh
     daemon: simple
     plugs:
     - network
@@ -18,7 +17,7 @@ apps:
     before: [php-fpm]
   postgresql:
     user: mail
-    command: bin/service.postgresql.sh start
+    command: bin/service.postgresql.sh
     daemon: forking
     plugs:
     - network
@@ -27,18 +26,17 @@ apps:
     before: [php-fpm]
   php-fpm:
     user: mail
-    command: bin/service.php-fpm.sh start
+    command: bin/service.php-fpm.sh
     daemon: forking
     plugs:
     - network
     - network-bind
     restart-condition: always
-    post-start-command: bin/service.php-fpm.sh post-start
     after: [postgresql]
     before: [nginx]
   opendkim:
     user: mail
-    command: bin/service.opendkim.sh start
+    command: bin/service.opendkim.sh
     daemon: forking
     plugs:
     - network
@@ -60,6 +58,9 @@ apps:
 
   access-change:
     command: bin/cli access-change
+
+  mail-relay-change:
+    command: bin/cli mail-relay-change
 
   certificate-change:
     command: bin/cli certificate-change
