@@ -59,6 +59,7 @@ relay     unix  -       -       n       -       -       smtp
 smtps     unix  -       -       n       -       -       smtp
   -o smtp_tls_wrappermode=yes
   -o smtp_tls_security_level=encrypt
+  -o smtp_tls_servername=hostname
 #       -o smtp_helo_timeout=5 -o smtp_connect_timeout=5
 showq     unix  n       -       n       -       -       showq
 error     unix  -       -       n       -       -       error

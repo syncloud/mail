@@ -289,7 +289,16 @@ func main() {
 		log.Fatalf("certificate: %v", err)
 	}
 	smtpAddress := env("FAKER_SMTP_ADDR", ":465")
-	listener, err := tls.Listen("tcp", smtpAddress, &tls.Config{Certificates: []tls.Certificate{cert}})
+	config := &tls.Config{
+		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			if hello.ServerName == "" {
+				log.Printf("refusing handshake without sni from %s", hello.Conn.RemoteAddr())
+				return nil, fmt.Errorf("no certificate available without sni")
+			}
+			return &cert, nil
+		},
+	}
+	listener, err := tls.Listen("tcp", smtpAddress, config)
 	if err != nil {
 		log.Fatalf("listen: %v", err)
 	}
