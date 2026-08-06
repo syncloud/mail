@@ -14,6 +14,25 @@ smtp      inet  n       -       n       -       -       smtpd
 #smtpd     pass  -       -       n       -       -       smtpd
 #dnsblog   unix  -       -       n       -       0       dnsblog
 #tlsproxy  unix  -       -       n       -       0       tlsproxy
+# mail arriving from the internet through the relay tunnel.
+#
+# bound to loopback because frpc is the only thing that reaches it. mynetworks
+# trusts loopback, so it is emptied here: otherwise anything reaching this port
+# could relay to any destination.
+#
+# the milters are dropped because opendkim runs in sign and verify mode and
+# treats 127.0.0.1 as an internal host, so it would sign mail from the whole
+# internet with this device's key instead of verifying it.
+127.0.0.1:10025 inet n    -       n       -       -       smtpd
+  -o syslog_name=postfix/tunnel
+  -o mynetworks=
+  -o smtpd_relay_restrictions=reject_unauth_destination
+  -o smtpd_recipient_restrictions=
+  -o smtpd_sasl_auth_enable=no
+  -o smtpd_tls_security_level=none
+  -o smtpd_milters=
+  -o non_smtpd_milters=
+
 submission inet n       -       n       -       -       smtpd
   -o syslog_name=postfix/submission
 #  -o smtpd_tls_security_level=encrypt

@@ -279,3 +279,81 @@ def assert_relayed(domain):
     messages = faker_messages(domain)
     assert len(messages) > 0, 'relay received nothing'
     return messages
+
+
+def tunnel_smtp(device, script):
+    return device.run_ssh(
+        "python3 - <<'TUNNEL'\n{0}\nTUNNEL".format(script), throw=False)
+
+
+def test_tunnel_port_is_loopback_only(device):
+    listening = device.run_ssh("ss -lnt | grep ':10025' || true", throw=False)
+    assert '10025' in listening, listening
+    # the internet reaches this port only through frpc, never directly
+    assert '0.0.0.0:10025' not in listening, listening
+    assert '*:10025' not in listening, listening
+
+
+def test_tunnel_delivers_to_a_local_user(device, domain, device_user, app_domain,
+                                         device_password):
+    before = get_message_count(app_domain, device_user, device_password)
+    out = tunnel_smtp(device, '''
+import smtplib
+from email.mime.text import MIMEText
+msg = MIMEText("through the tunnel")
+msg["Subject"] = "tunnel-delivery"
+msg["From"] = "outside@example.com"
+msg["To"] = "{user}@{domain}"
+s = smtplib.SMTP("127.0.0.1", 10025, timeout=20)
+s.sendmail("outside@example.com", ["{user}@{domain}"], msg.as_string())
+s.quit()
+print("SENT")
+'''.format(user=device_user, domain=domain))
+    assert 'SENT' in out, out
+
+    after = retry_func(
+        lambda: assert_arrived(app_domain, device_user, device_password, before),
+        message='tunnel delivery', retries=20, sleep=3)
+    assert after > before
+
+
+def assert_arrived(app_domain, device_user, device_password, before):
+    count = get_message_count(app_domain, device_user, device_password)
+    assert count > before, 'nothing arrived through the tunnel'
+    return count
+
+
+def test_tunnel_refuses_to_relay_elsewhere(device):
+    # mynetworks is emptied for this service, so loopback is not trusted and
+    # the port cannot be used to send mail to the rest of the world
+    out = tunnel_smtp(device, '''
+import smtplib
+s = smtplib.SMTP("127.0.0.1", 10025, timeout=20)
+s.ehlo()
+print("MAIL", s.mail("outside@example.com"))
+print("RCPT", s.rcpt("victim@example.com"))
+s.quit()
+''')
+    assert 'RCPT' in out, out
+    assert '554' in out or '550' in out, out
+
+
+def latest_message(app_domain, device_user, device_password):
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
+    server.login(device_user, device_password)
+    server.select('inbox')
+    _, data = server.search(None, 'SUBJECT', '"tunnel-delivery"')
+    ids = data[0].split()
+    assert ids, 'the tunnel delivered message is not in the mailbox'
+    _, fetched = server.fetch(ids[-1], '(RFC822)')
+    server.logout()
+    return fetched[0][1].decode('utf-8', 'replace')
+
+
+def test_tunnel_does_not_sign_incoming_mail(app_domain, domain, device_user, device_password):
+    # opendkim treats 127.0.0.1 as internal and runs in sign and verify mode,
+    # so leaving its milter on this service would sign mail from the whole
+    # internet with this device's key and make forgeries look authenticated
+    message = latest_message(app_domain, device_user, device_password)
+    signed_by_us = 'd={0}'.format(domain)
+    assert signed_by_us not in message, message[:2000]
