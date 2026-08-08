@@ -283,7 +283,8 @@ def assert_relayed(domain):
 
 def tunnel_smtp(device, script):
     return device.run_ssh(
-        "python3 - <<'TUNNEL'\n{0}\nTUNNEL".format(script), throw=False)
+        'exec 3<>/dev/tcp/127.0.0.1/10025\n{0}timeout 15 cat <&3'.format(script),
+        throw=False)
 
 
 def test_tunnel_port_is_loopback_only(device):
@@ -297,18 +298,11 @@ def test_tunnel_delivers_to_a_local_user(device, domain, device_user, app_domain
                                          device_password):
     before = get_message_count(app_domain, device_user, device_password)
     out = tunnel_smtp(device, '''
-import smtplib
-from email.mime.text import MIMEText
-msg = MIMEText('through the tunnel')
-msg['Subject'] = 'tunnel-delivery'
-msg['From'] = 'outside@example.com'
-msg['To'] = '{user}@{domain}'
-s = smtplib.SMTP('127.0.0.1', 10025, timeout=20)
-s.sendmail('outside@example.com', ['{user}@{domain}'], msg.as_string())
-s.quit()
-print('SENT')
+printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<{user}@{domain}>\\r\\nDATA\\r\\n' >&3
+sleep 2
+printf 'Subject: tunnel-delivery\\r\\nFrom: outside@example.com\\r\\nTo: {user}@{domain}\\r\\n\\r\\nthrough the tunnel\\r\\n.\\r\\nQUIT\\r\\n' >&3
 '''.format(user=device_user, domain=domain))
-    assert 'SENT' in out, out
+    assert 'queued' in out, out
 
     after = retry_func(
         lambda: assert_arrived(app_domain, device_user, device_password, before),
@@ -324,14 +318,8 @@ def assert_arrived(app_domain, device_user, device_password, before):
 
 def test_tunnel_refuses_to_relay_elsewhere(device):
     out = tunnel_smtp(device, '''
-import smtplib
-s = smtplib.SMTP('127.0.0.1', 10025, timeout=20)
-s.ehlo()
-print('MAIL', s.mail('outside@example.com'))
-print('RCPT', s.rcpt('victim@example.com'))
-s.quit()
+printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<victim@example.com>\\r\\nQUIT\\r\\n' >&3
 ''')
-    assert 'RCPT' in out, out
     assert '554' in out or '550' in out, out
 
 
