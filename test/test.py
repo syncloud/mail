@@ -281,26 +281,39 @@ def assert_relayed(domain):
     return messages
 
 
+TUNNEL_SOCKET = '/var/snap/mail/current/spool/public/tunnel'
+
+
+@pytest.fixture(scope="session")
+def socat(device):
+    device.run_ssh(
+        'command -v socat || (apt-get update -qq && apt-get install -y -qq socat)',
+        throw=False)
+    installed = device.run_ssh('command -v socat', throw=False)
+    assert 'socat' in installed, installed
+
+
 def tunnel_smtp(device, script):
     return device.run_ssh(
-        'exec 3<>/dev/tcp/127.0.0.1/10025\n{0}timeout 15 cat <&3'.format(script),
+        '{{ {0} }} | timeout 20 socat - UNIX-CONNECT:{1}'.format(script, TUNNEL_SOCKET),
         throw=False)
 
 
-def test_tunnel_port_is_loopback_only(device):
-    listening = device.run_ssh("ss -lnt | grep ':10025' || true", throw=False)
-    assert '10025' in listening, listening
-    assert '0.0.0.0:10025' not in listening, listening
-    assert '*:10025' not in listening, listening
+def test_tunnel_listens_on_a_socket_not_a_port(device):
+    listening = device.run_ssh("ss -lnt || true", throw=False)
+    assert ':10025' not in listening, listening
+
+    socket = device.run_ssh("ls -l {0}".format(TUNNEL_SOCKET), throw=False)
+    assert 'srw' in socket, socket
 
 
-def test_tunnel_delivers_to_a_local_user(device, domain, device_user, app_domain,
+def test_tunnel_delivers_to_a_local_user(socat, device, domain, device_user, app_domain,
                                          device_password):
     before = get_message_count(app_domain, device_user, device_password)
     out = tunnel_smtp(device, '''
-printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<{user}@{domain}>\\r\\nDATA\\r\\n' >&3
+printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<{user}@{domain}>\\r\\nDATA\\r\\n'
 sleep 2
-printf 'Subject: tunnel-delivery\\r\\nFrom: outside@example.com\\r\\nTo: {user}@{domain}\\r\\n\\r\\nthrough the tunnel\\r\\n.\\r\\nQUIT\\r\\n' >&3
+printf 'Subject: tunnel-delivery\\r\\nFrom: outside@example.com\\r\\nTo: {user}@{domain}\\r\\n\\r\\nthrough the tunnel\\r\\n.\\r\\nQUIT\\r\\n'
 '''.format(user=device_user, domain=domain))
     assert 'queued' in out, out
 
@@ -316,9 +329,9 @@ def assert_arrived(app_domain, device_user, device_password, before):
     return count
 
 
-def test_tunnel_refuses_to_relay_elsewhere(device):
+def test_tunnel_refuses_to_relay_elsewhere(socat, device):
     out = tunnel_smtp(device, '''
-printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<victim@example.com>\\r\\nQUIT\\r\\n' >&3
+printf 'EHLO tunnel.test\\r\\nMAIL FROM:<outside@example.com>\\r\\nRCPT TO:<victim@example.com>\\r\\nQUIT\\r\\n'
 ''')
     assert '554' in out or '550' in out, out
 
