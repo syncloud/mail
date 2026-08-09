@@ -290,11 +290,19 @@ PHP = '/snap/mail/current/bin/php'
 def tunnel_smtp(device, conversation):
     code = (
         '<?php\n'
+        'function reply($f) {{\n'
+        '    $out = "";\n'
+        '    while (($l = fgets($f)) !== false) {{\n'
+        '        $out .= $l;\n'
+        '        if (strlen($l) < 4 || $l[3] != "-") break;\n'
+        '    }}\n'
+        '    return $out;\n'
+        '}}\n'
         '$f = stream_socket_client("unix://{0}", $errno, $error, 20);\n'
         'if (!$f) {{ echo "connect failed: " . $error; exit(1); }}\n'
-        '{1}'
         'stream_set_timeout($f, 20);\n'
-        'while (($line = fgets($f)) !== false) {{ echo $line; }}\n'
+        'echo reply($f);\n'
+        '{1}'
     ).format(TUNNEL_SOCKET, conversation)
     escaped = code.replace('$', '\\$').replace('"', '\\"')
     return device.run_ssh(
@@ -302,6 +310,10 @@ def tunnel_smtp(device, conversation):
 
 
 def send(line):
+    return 'fwrite($f, "{0}\\r\\n");\necho reply($f);\n'.format(line)
+
+
+def write(line):
     return 'fwrite($f, "{0}\\r\\n");\n'.format(line)
 
 
@@ -321,10 +333,9 @@ def test_tunnel_delivers_to_a_local_user(device, domain, device_user, app_domain
         + send('MAIL FROM:<outside@example.com>')
         + send('RCPT TO:<{0}@{1}>'.format(device_user, domain))
         + send('DATA')
-        + 'sleep(2);'
-        + send('Subject: tunnel-delivery')
-        + send('')
-        + send('through the tunnel')
+        + write('Subject: tunnel-delivery')
+        + write('')
+        + write('through the tunnel')
         + send('.')
         + send('QUIT')))
     assert 'queued' in out, out
