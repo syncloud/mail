@@ -36,6 +36,10 @@ func (m *MailInbound) Register() error {
 		return err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		m.logger.Info("this platform does not take inbound mail registrations")
+		return nil
+	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("unable to register the inbound mail socket: %s %s",

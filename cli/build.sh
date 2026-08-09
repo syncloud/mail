@@ -2,6 +2,8 @@
 DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$DIR"
 
+go test ./...
+
 OUT_HOOKS=../build/snap/meta/hooks
 OUT_BIN=../build/snap/bin
 mkdir -p "$OUT_HOOKS" "$OUT_BIN"
