@@ -3,7 +3,7 @@ module hooks
 require (
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.11.1
-	github.com/syncloud/golib v1.1.21
+	github.com/syncloud/golib v1.1.22
 	go.uber.org/zap v1.26.0
 	gopkg.in/ini.v1 v1.67.3
 )

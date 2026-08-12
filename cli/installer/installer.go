@@ -78,7 +78,7 @@ func New(logger *zap.Logger) *Installer {
 		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		relay:           NewRelay(appDir, configPath, executor, logger),
-		mailInbound:     NewMailInbound(dataDir, platform.NewHttpClient(), logger),
+		mailInbound:     NewMailInbound(dataDir, platformClient, logger),
 		executor:        executor,
 		logger:          logger,
 	}
