@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 APP_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
-${APP_DIR}/php/bin/php.sh -c ${APP_DIR}/config/php/php.ini $@
+DATA_DIR=${SNAP_DATA:-/var${APP_DIR}}
+${APP_DIR}/php/bin/php.sh -c ${DATA_DIR}/config/php/php.ini "$@"

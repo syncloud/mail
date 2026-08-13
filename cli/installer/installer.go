@@ -54,6 +54,7 @@ type Installer struct {
 	platformClient  *platform.Client
 	database        *Database
 	relay           *Relay
+	mailInbound     *MailInbound
 	executor        *Executor
 	logger          *zap.Logger
 }
@@ -77,6 +78,7 @@ func New(logger *zap.Logger) *Installer {
 		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		relay:           NewRelay(appDir, configPath, executor, logger),
+		mailInbound:     NewMailInbound(dataDir, platformClient, logger),
 		executor:        executor,
 		logger:          logger,
 	}
@@ -257,11 +259,17 @@ func (i *Installer) Install() error {
 	if err := i.InitConfig(); err != nil {
 		return err
 	}
+	if err := i.mailInbound.Register(); err != nil {
+		return err
+	}
 	return i.database.Init()
 }
 
 func (i *Installer) PostRefresh() error {
 	if err := i.InitConfig(); err != nil {
+		return err
+	}
+	if err := i.mailInbound.Register(); err != nil {
 		return err
 	}
 	return i.database.Rebuild()
