@@ -2,6 +2,8 @@
 DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$DIR"
 
+go test ./...
+
 OUT_HOOKS=../build/snap/meta/hooks
 OUT_BIN=../build/snap/bin
 mkdir -p "$OUT_HOOKS" "$OUT_BIN"
@@ -11,3 +13,5 @@ CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/configure"    ./cmd/config
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/pre-refresh"  ./cmd/pre-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_HOOKS/post-refresh" ./cmd/post-refresh
 CGO_ENABLED=0 go build -buildvcs=false -o "$OUT_BIN/cli"            ./cmd/cli
+
+CGO_ENABLED=0 go build -buildvcs=false -o ../build/smtp                ./cmd/smtp

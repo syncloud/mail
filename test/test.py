@@ -11,6 +11,7 @@ from ssl import SSLContext
 from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
+from syncloudlib.integration.ssh import run_scp
 
 from test.util.helper import retry_func
 
@@ -279,3 +280,75 @@ def assert_relayed(domain):
     messages = faker_messages(domain)
     assert len(messages) > 0, 'relay received nothing'
     return messages
+
+
+TUNNEL_SOCKET = '/var/snap/mail/current/spool/public/tunnel'
+
+
+SMTP_TOOL = '/tmp/smtp'
+
+
+@pytest.fixture(scope="session")
+def smtp(device, device_host):
+    run_scp('{0}/../build/smtp root@{1}:{2}'.format(DIR, device_host, SMTP_TOOL),
+            password=device.ssh_password)
+    device.run_ssh('chmod +x {0}'.format(SMTP_TOOL))
+    return SMTP_TOOL
+
+
+def tunnel_smtp(device, sender, recipient, subject='', body=''):
+    command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(
+        SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
+    if subject:
+        command += " -subject '{0}' -body '{1}'".format(subject, body)
+    return device.run_ssh(command, throw=False)
+
+
+def test_tunnel_listens_on_a_socket_not_a_port(device):
+    listening = device.run_ssh("ss -lnt || true", throw=False)
+    assert ':10025' not in listening, listening
+
+    socket = device.run_ssh("ls -l {0}".format(TUNNEL_SOCKET), throw=False)
+    assert 'srw' in socket, socket
+
+
+def test_tunnel_delivers_to_a_local_user(smtp, device, domain, device_user, app_domain,
+                                         device_password):
+    before = get_message_count(app_domain, device_user, device_password)
+    out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
+                      subject='tunnel-delivery', body='through the tunnel')
+    assert 'queued' in out, out
+
+    after = retry_func(
+        lambda: assert_arrived(app_domain, device_user, device_password, before),
+        message='tunnel delivery', retries=20, sleep=3)
+    assert after > before
+
+
+def assert_arrived(app_domain, device_user, device_password, before):
+    count = get_message_count(app_domain, device_user, device_password)
+    assert count > before, 'nothing arrived through the tunnel'
+    return count
+
+
+def test_tunnel_refuses_to_relay_elsewhere(smtp, device):
+    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com')
+    assert '554' in out or '550' in out, out
+
+
+def latest_message(app_domain, device_user, device_password):
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
+    server.login(device_user, device_password)
+    server.select('inbox')
+    _, data = server.search(None, 'SUBJECT', '"tunnel-delivery"')
+    ids = data[0].split()
+    assert ids, 'the tunnel delivered message is not in the mailbox'
+    _, fetched = server.fetch(ids[-1], '(RFC822)')
+    server.logout()
+    return fetched[0][1].decode('utf-8', 'replace')
+
+
+def test_tunnel_does_not_sign_incoming_mail(app_domain, domain, device_user, device_password):
+    message = latest_message(app_domain, device_user, device_password)
+    signed_by_us = 'd={0}'.format(domain)
+    assert signed_by_us not in message, message[:2000]
