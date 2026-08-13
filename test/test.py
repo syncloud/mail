@@ -11,6 +11,7 @@ from ssl import SSLContext
 from subprocess import check_output
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
+from syncloudlib.integration.ssh import run_scp
 
 from test.util.helper import retry_func
 
@@ -284,37 +285,22 @@ def assert_relayed(domain):
 TUNNEL_SOCKET = '/var/snap/mail/current/spool/public/tunnel'
 
 
-PHP = '/snap/mail/current/bin/php'
+SMTP_TOOL = '/tmp/smtp'
 
 
-def tunnel_smtp(device, conversation):
-    code = (
-        '<?php\n'
-        'function reply($f) {{\n'
-        '    $out = "";\n'
-        '    while (($l = fgets($f)) !== false) {{\n'
-        '        $out .= $l;\n'
-        '        if (strlen($l) < 4 || $l[3] != "-") break;\n'
-        '    }}\n'
-        '    return $out;\n'
-        '}}\n'
-        '$f = stream_socket_client("unix://{0}", $errno, $error, 20);\n'
-        'if (!$f) {{ echo "connect failed: " . $error; exit(1); }}\n'
-        'stream_set_timeout($f, 20);\n'
-        'echo reply($f);\n'
-        '{1}'
-    ).format(TUNNEL_SOCKET, conversation)
-    escaped = code.replace('$', '\\$').replace('"', '\\"')
-    return device.run_ssh(
-        "{0} <<'PHPEOF'\n{1}PHPEOF".format(PHP, escaped), throw=False)
+@pytest.fixture(scope="session")
+def smtp(device, device_host):
+    run_scp('{0}/../build/smtp root@{1}:{2}'.format(DIR, device_host, SMTP_TOOL))
+    device.run_ssh('chmod +x {0}'.format(SMTP_TOOL))
+    return SMTP_TOOL
 
 
-def send(line):
-    return 'fwrite($f, "{0}\\r\\n");\necho reply($f);\n'.format(line)
-
-
-def write(line):
-    return 'fwrite($f, "{0}\\r\\n");\n'.format(line)
+def tunnel_smtp(device, sender, recipient, subject='', body=''):
+    command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(
+        SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
+    if subject:
+        command += " -subject '{0}' -body '{1}'".format(subject, body)
+    return device.run_ssh(command, throw=False)
 
 
 def test_tunnel_listens_on_a_socket_not_a_port(device):
@@ -325,19 +311,11 @@ def test_tunnel_listens_on_a_socket_not_a_port(device):
     assert 'srw' in socket, socket
 
 
-def test_tunnel_delivers_to_a_local_user(device, domain, device_user, app_domain,
+def test_tunnel_delivers_to_a_local_user(smtp, device, domain, device_user, app_domain,
                                          device_password):
     before = get_message_count(app_domain, device_user, device_password)
-    out = tunnel_smtp(device, (
-        send('EHLO tunnel.test')
-        + send('MAIL FROM:<outside@example.com>')
-        + send('RCPT TO:<{0}@{1}>'.format(device_user, domain))
-        + send('DATA')
-        + write('Subject: tunnel-delivery')
-        + write('')
-        + write('through the tunnel')
-        + send('.')
-        + send('QUIT')))
+    out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
+                      subject='tunnel-delivery', body='through the tunnel')
     assert 'queued' in out, out
 
     after = retry_func(
@@ -352,12 +330,8 @@ def assert_arrived(app_domain, device_user, device_password, before):
     return count
 
 
-def test_tunnel_refuses_to_relay_elsewhere(device):
-    out = tunnel_smtp(device, (
-        send('EHLO tunnel.test')
-        + send('MAIL FROM:<outside@example.com>')
-        + send('RCPT TO:<victim@example.com>')
-        + send('QUIT')))
+def test_tunnel_refuses_to_relay_elsewhere(smtp, device):
+    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com')
     assert '554' in out or '550' in out, out
 
 
