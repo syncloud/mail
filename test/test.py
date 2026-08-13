@@ -290,7 +290,8 @@ SMTP_TOOL = '/tmp/smtp'
 
 @pytest.fixture(scope="session")
 def smtp(device, device_host):
-    run_scp('{0}/../build/smtp root@{1}:{2}'.format(DIR, device_host, SMTP_TOOL))
+    run_scp('{0}/../build/smtp root@{1}:{2}'.format(DIR, device_host, SMTP_TOOL),
+            password=device.ssh_password)
     device.run_ssh('chmod +x {0}'.format(SMTP_TOOL))
     return SMTP_TOOL
 
