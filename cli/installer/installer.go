@@ -54,6 +54,7 @@ type Installer struct {
 	platformClient  *platform.Client
 	database        *Database
 	relay           *Relay
+	sieve           *Sieve
 	mailInbound     *MailInbound
 	executor        *Executor
 	logger          *zap.Logger
@@ -78,6 +79,7 @@ func New(logger *zap.Logger) *Installer {
 		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		relay:           NewRelay(appDir, configPath, executor, logger),
+		sieve:           NewSieve(appDir, configPath, executor, logger),
 		mailInbound:     NewMailInbound(dataDir, platformClient, logger),
 		executor:        executor,
 		logger:          logger,
@@ -135,6 +137,10 @@ func (i *Installer) RegenerateConfigs() error {
 	}
 
 	if err := i.relay.writeMaps(relayConfig, deviceDomainName); err != nil {
+		return err
+	}
+
+	if err := i.sieve.Compile(); err != nil {
 		return err
 	}
 
@@ -203,6 +209,8 @@ func (i *Installer) InitConfig() error {
 		path.Join(i.dataDir, "dovecot"),
 		path.Join(i.dataDir, "dovecot", "private"),
 		path.Join(i.dataDir, "data"),
+		path.Join(i.dataDir, "redis"),
+		path.Join(i.dataDir, "rspamd"),
 		boxDataDir,
 		i.opendkimDir,
 		i.opendkimKeysDir,

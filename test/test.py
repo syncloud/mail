@@ -296,11 +296,15 @@ def smtp(device, device_host):
     return SMTP_TOOL
 
 
-def tunnel_smtp(device, sender, recipient, subject='', body=''):
+def tunnel_smtp(device, sender, recipient, subject='', body='', xclient='', headers=()):
     command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(
         SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
     if subject:
         command += " -subject '{0}' -body '{1}'".format(subject, body)
+    if xclient:
+        command += " -xclient '{0}'".format(xclient)
+    for header in headers:
+        command += " -header '{0}'".format(header)
     return device.run_ssh(command, throw=False)
 
 
@@ -352,3 +356,65 @@ def test_tunnel_does_not_sign_incoming_mail(app_domain, domain, device_user, dev
     message = latest_message(app_domain, device_user, device_password)
     signed_by_us = 'd={0}'.format(domain)
     assert signed_by_us not in message, message[:2000]
+
+
+GTUBE = 'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X'
+
+
+def test_rspamd_and_redis_listen_on_sockets(device, data_dir):
+    milter = device.run_ssh("ls -l {0}/rspamd/milter.sock".format(data_dir), throw=False)
+    assert 'srw' in milter, milter
+
+    redis = device.run_ssh("ls -l {0}/redis/redis.sock".format(data_dir), throw=False)
+    assert 'srw' in redis, redis
+
+
+def test_tunnel_takes_the_announced_client_address(smtp, device, domain, device_user):
+    out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
+                      subject='xclient-announced', body='announced',
+                      xclient='ADDR=192.0.2.77 NAME=announced.example.com')
+    assert 'queued' in out, out
+
+    logged = device.run_ssh(
+        "grep -h postfix/tunnel /var/log/mail.log /var/log/syslog 2>/dev/null | tail -20; "
+        "journalctl --since '5 min ago' --no-pager 2>/dev/null | grep postfix/tunnel | tail -20",
+        throw=False)
+    assert '192.0.2.77' in logged, logged
+
+
+def test_spam_is_rejected_before_the_mailbox(smtp, device, domain, device_user):
+    out = tunnel_smtp(device, 'spammer@example.com', '{0}@{1}'.format(device_user, domain),
+                      subject='gtube-probe', body=GTUBE)
+    assert 'queued' not in out, out
+    assert '554' in out or '550' in out, out
+
+
+def test_tagged_mail_is_filed_into_junk(app_domain, domain, device_user, device_password):
+    subject = 'junk-filing'
+    message = MIMEText('tagged as spam')
+    message['Subject'] = subject
+    message['From'] = 'outside@example.com'
+    message['To'] = '{0}@{1}'.format(device_user, domain)
+    message['X-Spam'] = 'Yes'
+    server = smtplib.SMTP(app_domain, timeout=10)
+    server.send_message(message)
+    server.quit()
+
+    retry_func(lambda: assert_in_junk(app_domain, device_user, device_password, subject),
+               message='junk filing', retries=20, sleep=3)
+
+
+def assert_in_junk(app_domain, device_user, device_password, subject):
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
+    server.login(device_user, device_password)
+    try:
+        server.select('Junk')
+        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
+        junk = data[0].split()
+        server.select('inbox')
+        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
+        inbox = data[0].split()
+    finally:
+        server.logout()
+    assert junk, 'the tagged message is not in Junk'
+    assert not inbox, 'the tagged message also reached the inbox'

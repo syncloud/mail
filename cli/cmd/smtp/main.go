@@ -14,6 +14,12 @@ func main() {
 	subject := flag.String("subject", "", "subject, delivery is skipped when empty")
 	body := flag.String("body", "", "message body")
 	repeat := flag.Int("repeat", 1, "how many lines the body is repeated to")
+	xclient := flag.String("xclient", "", "xclient attributes announced before the transaction")
+	var headers []string
+	flag.Func("header", "extra header line, repeatable", func(value string) error {
+		headers = append(headers, value)
+		return nil
+	})
 	flag.Parse()
 
 	if *socket == "" || *from == "" || *recipient == "" {
@@ -33,7 +39,15 @@ func main() {
 		text = strings.TrimSuffix(strings.Repeat(*body+"\n", *repeat), "\n")
 	}
 
-	deliverErr := session.Deliver(*from, *recipient, *subject, text)
+	if *xclient != "" {
+		if err := session.Xclient(*xclient); err != nil {
+			fmt.Print(session.Transcript())
+			fmt.Fprintf(os.Stderr, "xclient failed: %v\n", err)
+			os.Exit(1)
+		}
+	}
+
+	deliverErr := session.Deliver(*from, *recipient, *subject, text, headers)
 	fmt.Print(session.Transcript())
 	if deliverErr != nil {
 		fmt.Fprintf(os.Stderr, "conversation failed: %v\n", deliverErr)

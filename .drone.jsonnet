@@ -1,6 +1,7 @@
 local name = 'mail';
 local roundcube = '1.6.15';
 local dovecot = '2.3.21';
+local pigeonhole = '0.5.21';
 local nginx = '1.30.4';
 local postfix = '3.11.5';
 local python = '3.12-slim-bookworm';
@@ -47,7 +48,7 @@ local build(arch, test_ui) = [{
       name: 'dovecot',
       image: 'debian:' + debian,
       commands: [
-        './dovecot/build.sh ' + dovecot,
+        './dovecot/build.sh ' + dovecot + ' ' + pigeonhole,
       ],
     },
   ] + [
@@ -124,6 +125,40 @@ local build(arch, test_ui) = [{
       image: platform_image(distro, arch),
       commands: [
         './postfix/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'redis',
+      image: 'debian:' + debian,
+      commands: [
+        './redis/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'redis test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './redis/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'rspamd',
+      image: 'debian:' + debian,
+      commands: [
+        './rspamd/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'rspamd test ' + distro,
+      image: platform_image(distro, arch),
+      commands: [
+        './rspamd/test.sh',
       ],
     }
     for distro in distros

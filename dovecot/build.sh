@@ -7,6 +7,7 @@ export TMPDIR=/tmp
 export TMP=/tmp
 NAME=dovecot
 VERSION=$1
+PIGEONHOLE=$2
 PREFIX=/snap/mail/current/${NAME}
 OUTPUT=${DIR}/../build/snap/${NAME}
 
@@ -27,6 +28,18 @@ cd ${NAME}-${VERSION}
 ./configure --prefix=${PREFIX} \
     --with-rawlog \
     --with-ldap \
+    --disable-rpath
+
+make -j4
+make install
+
+cd ${DIR}/work
+wget http://www.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-${PIGEONHOLE}.tar.gz --progress dot:giga
+tar xzf dovecot-2.3-pigeonhole-${PIGEONHOLE}.tar.gz
+cd dovecot-2.3-pigeonhole-${PIGEONHOLE}
+
+./configure --prefix=${PREFIX} \
+    --with-dovecot=${PREFIX}/lib/dovecot \
     --disable-rpath
 
 make -j4
@@ -62,6 +75,7 @@ ldd ${PREFIX}/libexec/dovecot/auth
 cp ${DIR}/dovecot.sh ${PREFIX}/bin
 cp ${DIR}/lda.sh ${PREFIX}/bin
 cp ${DIR}/doveadm.sh ${PREFIX}/bin
+cp ${DIR}/sievec.sh ${PREFIX}/bin
 cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 
 apt-get -y install patchelf
@@ -105,6 +119,12 @@ patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX
 patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/submission
 patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/submission-login
 patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${PREFIX}/libexec/dovecot/xml2text
+
+for binary in ${PREFIX}/bin/sieve* ${PREFIX}/libexec/dovecot/managesieve*; do
+    if [ -f "${binary}" ]; then
+        patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${binary}
+    fi
+done
 
 rm -rf ${OUTPUT}
 mkdir -p ${DIR}/../build/snap

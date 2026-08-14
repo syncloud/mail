@@ -21,7 +21,8 @@ tunnel    unix  n       -       n       -       -       smtpd
   -o smtpd_recipient_restrictions=
   -o smtpd_sasl_auth_enable=no
   -o smtpd_tls_security_level=none
-  -o smtpd_milters=
+  -o smtpd_authorized_xclient_hosts=static:all
+  -o smtpd_milters=unix:{{ .DataDir }}/rspamd/milter.sock
   -o non_smtpd_milters=
 
 submission inet n       -       n       -       -       smtpd
