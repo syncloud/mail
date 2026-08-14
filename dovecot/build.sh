@@ -34,7 +34,7 @@ make -j4
 make install
 
 cd ${DIR}/work
-wget http://www.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-${PIGEONHOLE}.tar.gz --progress dot:giga
+wget https://pigeonhole.dovecot.org/releases/2.3/dovecot-2.3-pigeonhole-${PIGEONHOLE}.tar.gz --progress dot:giga
 tar xzf dovecot-2.3-pigeonhole-${PIGEONHOLE}.tar.gz
 cd dovecot-2.3-pigeonhole-${PIGEONHOLE}
 
