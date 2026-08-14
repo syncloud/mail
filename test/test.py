@@ -418,3 +418,25 @@ def assert_in_junk(app_domain, device_user, device_password, subject):
         server.logout()
     assert junk, 'the tagged message is not in Junk'
     assert not inbox, 'the tagged message also reached the inbox'
+
+
+def test_spam_arriving_directly_is_also_rejected(app_domain, domain, device_user):
+    message = MIMEText(GTUBE)
+    message['Subject'] = 'gtube-direct'
+    message['From'] = 'spammer@example.com'
+    message['To'] = '{0}@{1}'.format(device_user, domain)
+    server = smtplib.SMTP(app_domain, timeout=10)
+    with pytest.raises(smtplib.SMTPDataError) as rejected:
+        server.send_message(message)
+    assert rejected.value.smtp_code in (550, 554), rejected.value
+
+
+def test_owner_mail_is_not_filtered(app_domain, domain, device_user, device_password):
+    message = MIMEText(GTUBE)
+    message['Subject'] = 'gtube-authenticated'
+    message['From'] = '{0}@{1}'.format(device_user, domain)
+    message['To'] = '{0}@{1}'.format(device_user, domain)
+    server = smtplib.SMTP(app_domain, timeout=10)
+    server.login(device_user, device_password)
+    server.send_message(message)
+    server.quit()

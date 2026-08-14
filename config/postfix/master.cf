@@ -10,6 +10,7 @@
 #               (yes)   (yes)   (yes)   (never) (100)
 # ==========================================================================
 smtp      inet  n       -       n       -       -       smtpd
+  -o smtpd_milters=unix:{{ .DataDir }}/opendkim.socket,unix:{{ .DataDir }}/rspamd/milter.sock
 #smtp      inet  n       -       n       -       1       postscreen
 #smtpd     pass  -       -       n       -       -       smtpd
 #dnsblog   unix  -       -       n       -       0       dnsblog
