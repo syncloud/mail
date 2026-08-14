@@ -5,8 +5,8 @@ RSPAMD=${DIR}/../build/snap/rspamd
 
 ${RSPAMD}/bin/rspamd.sh --version
 ${RSPAMD}/bin/rspamadm.sh --version
-${RSPAMD}/bin/rspamc.sh --version
 
+test -x ${RSPAMD}/sbin/rspamc
 test -f ${RSPAMD}/etc/rspamd.conf
 test -d ${RSPAMD}/share/lualib
 test -d ${RSPAMD}/share/rules
