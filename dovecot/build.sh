@@ -75,7 +75,6 @@ ldd ${PREFIX}/libexec/dovecot/auth
 cp ${DIR}/dovecot.sh ${PREFIX}/bin
 cp ${DIR}/lda.sh ${PREFIX}/bin
 cp ${DIR}/doveadm.sh ${PREFIX}/bin
-cp ${DIR}/sievec.sh ${PREFIX}/bin
 cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 
 apt-get -y install patchelf
@@ -125,6 +124,8 @@ for binary in ${PREFIX}/bin/sieve* ${PREFIX}/libexec/dovecot/managesieve*; do
         patchelf --set-interpreter "$INTERP" --set-rpath "$RPATH" --force-rpath ${binary}
     fi
 done
+
+cp ${DIR}/sievec.sh ${PREFIX}/bin
 
 rm -rf ${OUTPUT}
 mkdir -p ${DIR}/../build/snap
