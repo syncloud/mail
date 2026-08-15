@@ -432,11 +432,31 @@ def test_spam_arriving_directly_is_also_rejected(app_domain, domain, device_user
 
 
 def test_owner_mail_is_not_filtered(app_domain, domain, device_user, device_password):
-    message = MIMEText(GTUBE)
-    message['Subject'] = 'gtube-authenticated'
+    subject = 'owner-submission'
+    message = MIMEText('sent by the owner')
+    message['Subject'] = subject
     message['From'] = '{0}@{1}'.format(device_user, domain)
     message['To'] = '{0}@{1}'.format(device_user, domain)
     server = smtplib.SMTP(app_domain, timeout=10)
     server.login(device_user, device_password)
     server.send_message(message)
     server.quit()
+
+    retry_func(lambda: assert_in_inbox(app_domain, device_user, device_password, subject),
+               message='owner submission', retries=20, sleep=3)
+
+
+def assert_in_inbox(app_domain, device_user, device_password, subject):
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
+    server.login(device_user, device_password)
+    try:
+        server.select('inbox')
+        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
+        inbox = data[0].split()
+        server.select('Junk')
+        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
+        junk = data[0].split()
+    finally:
+        server.logout()
+    assert inbox, 'the owner submission never reached the inbox'
+    assert not junk, 'the owner submission was filed as junk'
