@@ -27,7 +27,10 @@ func TestSieve_CompilesTheSpamScript(t *testing.T) {
 	assert.NoError(t, sieve.Compile())
 
 	assert.Equal(t, "/snap/mail/current/dovecot/bin/sievec.sh", runner.app)
-	assert.Equal(t, []string{"/var/snap/mail/current/config/sieve/spam.sieve"}, runner.args)
+	assert.Equal(t, []string{
+		"-c", "/var/snap/mail/current/config/dovecot/dovecot.conf",
+		"/var/snap/mail/current/config/sieve/spam.sieve",
+	}, runner.args)
 }
 
 func TestSieve_ReportsCompilationFailure(t *testing.T) {

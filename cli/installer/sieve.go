@@ -31,6 +31,7 @@ func (s *Sieve) Compile() error {
 	script := s.ScriptPath()
 	s.logger.Info("compiling the spam filing script", zap.String("script", script))
 	sievec := path.Join(s.appDir, "dovecot", "bin", "sievec.sh")
-	_, err := s.executor.RunDir("", sievec, script)
+	config := path.Join(s.configPath, "dovecot", "dovecot.conf")
+	_, err := s.executor.RunDir("", sievec, "-c", config, script)
 	return err
 }
