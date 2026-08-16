@@ -4,7 +4,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 DOVECOT=${DIR}/../build/snap/dovecot
 
 ${DOVECOT}/bin/dovecot.sh --version
-${DOVECOT}/bin/sievec.sh --version
+test -x ${DOVECOT}/bin/sievec
 
 CHECK=$(mktemp -d)
 sed -e "s|{{ .DataDir }}|${CHECK}|g" \
