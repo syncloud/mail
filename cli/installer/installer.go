@@ -40,6 +40,7 @@ type Variables struct {
 	DeviceDomainName string
 	AppDomainName    string
 	Timezone         string
+	RspamdPassword   string
 }
 
 type Installer struct {
@@ -54,6 +55,8 @@ type Installer struct {
 	platformClient  *platform.Client
 	database        *Database
 	relay           *Relay
+	sieve           *Sieve
+	rspamd          *Rspamd
 	mailInbound     *MailInbound
 	executor        *Executor
 	logger          *zap.Logger
@@ -78,6 +81,8 @@ func New(logger *zap.Logger) *Installer {
 		platformClient:  platformClient,
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		relay:           NewRelay(appDir, configPath, executor, logger),
+		sieve:           NewSieve(appDir, configPath, executor, logger),
+		rspamd:          NewRspamd(appDir, dataDir, executor, logger),
 		mailInbound:     NewMailInbound(dataDir, platformClient, logger),
 		executor:        executor,
 		logger:          logger,
@@ -113,6 +118,10 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
+	rspamdPassword, err := i.rspamd.HashedPassword()
+	if err != nil {
+		return err
+	}
 
 	variables := Variables{
 		AppDir:           i.appDir,
@@ -127,6 +136,7 @@ func (i *Installer) RegenerateConfigs() error {
 		DeviceDomainName: deviceDomainName,
 		AppDomainName:    appDomainName,
 		Timezone:         tz,
+		RspamdPassword:   rspamdPassword,
 	}
 
 	templatesPath := path.Join(i.appDir, "config")
@@ -138,49 +148,21 @@ func (i *Installer) RegenerateConfigs() error {
 		return err
 	}
 
+	if err := i.sieve.Compile(); err != nil {
+		return err
+	}
+
 	return linux.Chown(i.configPath, UserName)
 }
 
-func (i *Installer) MigrateCommonToData() error {
-	marker := path.Join(i.dataDir, ".migrated_from_common")
-	if _, err := os.Stat(marker); err == nil {
-		return nil
-	}
-	if err := linux.CreateMissingDirs(i.dataDir); err != nil {
-		return err
-	}
-	entries, err := os.ReadDir(i.commonDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return os.WriteFile(marker, []byte{}, 0644)
-		}
-		return err
-	}
-	for _, entry := range entries {
-		name := entry.Name()
-		if name == "web.socket" || strings.HasSuffix(name, ".socket") {
-			continue
-		}
-		dst := path.Join(i.dataDir, name)
-		if _, err := os.Stat(dst); err == nil {
-			continue
-		}
-		i.logger.Info("migrating to data", zap.String("name", name))
-		if err := os.Rename(path.Join(i.commonDir, name), dst); err != nil {
-			return err
-		}
-	}
-	return os.WriteFile(marker, []byte{}, 0644)
-}
-
 func (i *Installer) InitConfig() error {
-	if err := i.MigrateCommonToData(); err != nil {
-		return err
-	}
 	if err := linux.CreateUser("maildrop"); err != nil {
 		return err
 	}
 	if err := linux.CreateUser("dovecot"); err != nil {
+		return err
+	}
+	if err := linux.CreateUser("dovenull"); err != nil {
 		return err
 	}
 	if err := linux.CreateUser(UserName); err != nil {
@@ -203,6 +185,8 @@ func (i *Installer) InitConfig() error {
 		path.Join(i.dataDir, "dovecot"),
 		path.Join(i.dataDir, "dovecot", "private"),
 		path.Join(i.dataDir, "data"),
+		path.Join(i.dataDir, "redis"),
+		path.Join(i.dataDir, "rspamd"),
 		boxDataDir,
 		i.opendkimDir,
 		i.opendkimKeysDir,

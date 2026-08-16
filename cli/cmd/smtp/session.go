@@ -71,7 +71,14 @@ func (s *Session) reply() error {
 	}
 }
 
-func (s *Session) Deliver(from string, recipient string, subject string, body string) error {
+func (s *Session) Xclient(attributes string) error {
+	if err := s.Send("EHLO smtp.test"); err != nil {
+		return err
+	}
+	return s.Send(fmt.Sprintf("XCLIENT %s", attributes))
+}
+
+func (s *Session) Deliver(from string, recipient string, subject string, body string, headers []string) error {
 	if err := s.Send("EHLO smtp.test"); err != nil {
 		return err
 	}
@@ -93,6 +100,11 @@ func (s *Session) Deliver(from string, recipient string, subject string, body st
 		}
 		if err := s.Write(fmt.Sprintf("To: %s", recipient)); err != nil {
 			return err
+		}
+		for _, header := range headers {
+			if err := s.Write(header); err != nil {
+				return err
+			}
 		}
 		if err := s.Write(""); err != nil {
 			return err

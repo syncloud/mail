@@ -1,6 +1,7 @@
 local name = 'mail';
 local roundcube = '1.6.15';
-local dovecot = '2.3.21';
+local dovecot = '2.4.4';
+local pigeonhole = '2.4.4';
 local nginx = '1.30.4';
 local postfix = '3.11.5';
 local python = '3.12-slim-bookworm';
@@ -14,8 +15,8 @@ local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-346';
 local distros = ['bookworm', 'buster'];
 
-local platform_image(distro, arch) =
-  'syncloud/platform-' + distro + ':' + platform + '-' + arch;
+local platform_image(distro) =
+  'syncloud/platform-' + distro + ':' + platform;
 
 local build(arch, test_ui) = [{
   kind: 'pipeline',
@@ -36,7 +37,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'nginx test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './nginx/test.sh',
       ],
@@ -47,13 +48,13 @@ local build(arch, test_ui) = [{
       name: 'dovecot',
       image: 'debian:' + debian,
       commands: [
-        './dovecot/build.sh ' + dovecot,
+        './dovecot/build.sh ' + dovecot + ' ' + pigeonhole,
       ],
     },
   ] + [
     {
       name: 'dovecot test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './dovecot/test.sh',
       ],
@@ -70,7 +71,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'opendkim test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './opendkim/test.sh',
       ],
@@ -87,7 +88,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'php test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './php/test.sh',
       ],
@@ -104,7 +105,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postgresql test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './postgresql/test.sh',
       ],
@@ -121,9 +122,43 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postfix test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './postfix/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'redis',
+      image: 'debian:' + debian,
+      commands: [
+        './redis/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'redis test ' + distro,
+      image: platform_image(distro),
+      commands: [
+        './redis/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'rspamd',
+      image: 'debian:' + debian,
+      commands: [
+        './rspamd/build.sh',
+      ],
+    },
+  ] + [
+    {
+      name: 'rspamd test ' + distro,
+      image: platform_image(distro),
+      commands: [
+        './rspamd/test.sh',
       ],
     }
     for distro in distros
@@ -246,7 +281,7 @@ local build(arch, test_ui) = [{
   services: [
     {
       name: name + '.' + distro + '.com',
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       privileged: true,
       entrypoint: ['/bin/sh', '-c', "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
       volumes: [
