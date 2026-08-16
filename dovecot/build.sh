@@ -12,7 +12,7 @@ PREFIX=/snap/mail/current/${NAME}
 OUTPUT=${DIR}/../build/snap/${NAME}
 
 apt-get update
-apt-get -y install build-essential libncurses5-dev libldap2-dev libsasl2-dev libssl-dev libldb-dev wget
+apt-get -y install build-essential libncurses5-dev libldap2-dev libsasl2-dev libssl-dev libldb-dev zlib1g-dev pkg-config wget
 
 rm -rf ${PREFIX}
 mkdir -p ${PREFIX}
