@@ -40,6 +40,7 @@ type Variables struct {
 	DeviceDomainName string
 	AppDomainName    string
 	Timezone         string
+	RspamdPassword   string
 }
 
 type Installer struct {
@@ -55,6 +56,7 @@ type Installer struct {
 	database        *Database
 	relay           *Relay
 	sieve           *Sieve
+	rspamd          *Rspamd
 	mailInbound     *MailInbound
 	executor        *Executor
 	logger          *zap.Logger
@@ -80,6 +82,7 @@ func New(logger *zap.Logger) *Installer {
 		database:        NewDatabase(appDir, dataDir, configPath, DbName, DbUser, DbPass, PsqlPort, executor, logger),
 		relay:           NewRelay(appDir, configPath, executor, logger),
 		sieve:           NewSieve(appDir, configPath, executor, logger),
+		rspamd:          NewRspamd(appDir, dataDir, executor, logger),
 		mailInbound:     NewMailInbound(dataDir, platformClient, logger),
 		executor:        executor,
 		logger:          logger,
@@ -115,6 +118,10 @@ func (i *Installer) RegenerateConfigs() error {
 	if err != nil {
 		return err
 	}
+	rspamdPassword, err := i.rspamd.HashedPassword()
+	if err != nil {
+		return err
+	}
 
 	variables := Variables{
 		AppDir:           i.appDir,
@@ -129,6 +136,7 @@ func (i *Installer) RegenerateConfigs() error {
 		DeviceDomainName: deviceDomainName,
 		AppDomainName:    appDomainName,
 		Timezone:         tz,
+		RspamdPassword:   rspamdPassword,
 	}
 
 	templatesPath := path.Join(i.appDir, "config")

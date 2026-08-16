@@ -15,8 +15,8 @@ local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-346';
 local distros = ['bookworm', 'buster'];
 
-local platform_image(distro, arch) =
-  'syncloud/platform-' + distro + ':' + platform + '-' + arch;
+local platform_image(distro) =
+  'syncloud/platform-' + distro + ':' + platform;
 
 local build(arch, test_ui) = [{
   kind: 'pipeline',
@@ -37,7 +37,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'nginx test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './nginx/test.sh',
       ],
@@ -54,7 +54,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'dovecot test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './dovecot/test.sh',
       ],
@@ -71,7 +71,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'opendkim test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './opendkim/test.sh',
       ],
@@ -88,7 +88,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'php test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './php/test.sh',
       ],
@@ -105,7 +105,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postgresql test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './postgresql/test.sh',
       ],
@@ -122,7 +122,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'postfix test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './postfix/test.sh',
       ],
@@ -139,7 +139,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'redis test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './redis/test.sh',
       ],
@@ -156,7 +156,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'rspamd test ' + distro,
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       commands: [
         './rspamd/test.sh',
       ],
@@ -281,7 +281,7 @@ local build(arch, test_ui) = [{
   services: [
     {
       name: name + '.' + distro + '.com',
-      image: platform_image(distro, arch),
+      image: platform_image(distro),
       privileged: true,
       entrypoint: ['/bin/sh', '-c', "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
       volumes: [

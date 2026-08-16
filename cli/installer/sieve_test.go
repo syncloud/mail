@@ -10,6 +10,7 @@ import (
 
 type fakeRunner struct {
 	err  error
+	out  string
 	app  string
 	args []string
 }
@@ -17,7 +18,7 @@ type fakeRunner struct {
 func (f *fakeRunner) RunDir(_ string, app string, args ...string) (string, error) {
 	f.app = app
 	f.args = args
-	return "", f.err
+	return f.out, f.err
 }
 
 func TestSieve_CompilesTheSpamScript(t *testing.T) {
