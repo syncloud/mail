@@ -6,6 +6,10 @@ DOVECOT=${DIR}/../build/snap/dovecot
 ${DOVECOT}/bin/dovecot.sh --version
 test -x ${DOVECOT}/bin/sievec
 
+rm -rf /snap/mail/current
+mkdir -p /snap/mail
+ln -sfn ${DIR}/../build/snap /snap/mail/current
+
 CHECK=$(mktemp -d)
 sed -e "s|{{ .DataDir }}|${CHECK}|g" \
     -e "s|{{ .AppDir }}|${DIR}/..|g" \
