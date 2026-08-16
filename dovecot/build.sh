@@ -74,6 +74,7 @@ ldd ${PREFIX}/libexec/dovecot/auth
 cp ${DIR}/dovecot.sh ${PREFIX}/bin
 cp ${DIR}/lda.sh ${PREFIX}/bin
 cp ${DIR}/doveadm.sh ${PREFIX}/bin
+cp ${DIR}/doveconf.sh ${PREFIX}/bin
 cp ${DIR}/auth.sh ${PREFIX}/libexec/dovecot
 
 apt-get -y install patchelf
