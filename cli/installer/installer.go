@@ -147,46 +147,14 @@ func (i *Installer) RegenerateConfigs() error {
 	return linux.Chown(i.configPath, UserName)
 }
 
-func (i *Installer) MigrateCommonToData() error {
-	marker := path.Join(i.dataDir, ".migrated_from_common")
-	if _, err := os.Stat(marker); err == nil {
-		return nil
-	}
-	if err := linux.CreateMissingDirs(i.dataDir); err != nil {
-		return err
-	}
-	entries, err := os.ReadDir(i.commonDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return os.WriteFile(marker, []byte{}, 0644)
-		}
-		return err
-	}
-	for _, entry := range entries {
-		name := entry.Name()
-		if name == "web.socket" || strings.HasSuffix(name, ".socket") {
-			continue
-		}
-		dst := path.Join(i.dataDir, name)
-		if _, err := os.Stat(dst); err == nil {
-			continue
-		}
-		i.logger.Info("migrating to data", zap.String("name", name))
-		if err := os.Rename(path.Join(i.commonDir, name), dst); err != nil {
-			return err
-		}
-	}
-	return os.WriteFile(marker, []byte{}, 0644)
-}
-
 func (i *Installer) InitConfig() error {
-	if err := i.MigrateCommonToData(); err != nil {
-		return err
-	}
 	if err := linux.CreateUser("maildrop"); err != nil {
 		return err
 	}
 	if err := linux.CreateUser("dovecot"); err != nil {
+		return err
+	}
+	if err := linux.CreateUser("dovenull"); err != nil {
 		return err
 	}
 	if err := linux.CreateUser(UserName); err != nil {
