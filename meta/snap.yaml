@@ -52,6 +52,25 @@ apps:
     - network
     - network-bind
     restart-condition: always
+  redis:
+    user: mail
+    command: bin/service.redis.sh
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    before: [rspamd]
+  rspamd:
+    user: mail
+    command: bin/service.rspamd.sh
+    daemon: simple
+    plugs:
+    - network
+    - network-bind
+    restart-condition: always
+    after: [redis]
+    before: [postfix]
 
   storage-change:
     command: bin/cli storage-change
