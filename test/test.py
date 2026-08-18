@@ -1,4 +1,5 @@
 import imaplib
+import json
 import os
 import pytest
 import requests
@@ -367,6 +368,20 @@ def test_rspamd_and_redis_listen_on_sockets(device, data_dir):
 
     redis = device.run_ssh("ls -l {0}/redis/redis.sock".format(data_dir), throw=False)
     assert 'srw' in redis, redis
+
+
+def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, data_dir):
+    password = device.run_ssh("cat {0}/rspamd/password".format(data_dir), throw=False).strip()
+    symbols = device.run_ssh(
+        "curl -s --unix-socket {0}/rspamd/controller.sock -H 'Password: {1}' "
+        "http://localhost/symbols".format(data_dir, password), throw=False)
+    trusted = [rule
+               for group in json.loads(symbols)
+               for rule in group.get('rules', [])
+               if rule.get('symbol') == 'ARC_ALLOW_TRUSTED']
+    assert trusted, symbols[:2000]
+    for rule in trusted:
+        assert rule['weight'] == -4.0, rule
 
 
 def test_tunnel_takes_the_announced_client_address(smtp, device, domain, device_user):
