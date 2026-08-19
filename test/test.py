@@ -391,18 +391,26 @@ def assert_rspamd_answers(device, data_dir):
     assert 'pong' in out, out
 
 
-def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, data_dir):
+def rspamd_symbols(device, data_dir):
     password = device.run_ssh("cat {0}/rspamd/password".format(data_dir), throw=False).strip()
     symbols = device.run_ssh(
         "curl -s --unix-socket {0}/rspamd/controller.sock -H 'Password: {1}' "
         "http://localhost/symbols".format(data_dir, password), throw=False)
-    trusted = [rule
-               for group in json.loads(symbols)
-               for rule in group.get('rules', [])
+    return [rule for group in json.loads(symbols) for rule in group.get('rules', [])]
+
+
+def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, data_dir):
+    trusted = [rule for rule in rspamd_symbols(device, data_dir)
                if rule.get('symbol') == 'ARC_ALLOW_TRUSTED']
-    assert trusted, symbols[:2000]
+    assert trusted, 'ARC_ALLOW_TRUSTED is not registered'
     for rule in trusted:
         assert rule['weight'] == -4.0, rule
+
+
+def test_neural_is_not_running(device, data_dir):
+    neural = sorted({rule['symbol'] for rule in rspamd_symbols(device, data_dir)
+                     if rule.get('symbol', '').startswith('NEURAL')})
+    assert neural == [], neural
 
 
 def test_tunnel_takes_the_announced_client_address(smtp, device, domain, device_user):
