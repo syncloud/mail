@@ -370,6 +370,27 @@ def test_rspamd_and_redis_listen_on_sockets(device, data_dir):
     assert 'srw' in redis, redis
 
 
+def rspamd_cache_complaints(device, data_dir):
+    out = device.run_ssh("grep -c save_items {0}/log/rspamd.log || true".format(data_dir), throw=False)
+    return int(out.strip() or 0)
+
+
+def test_rspamd_shutdown_does_not_complain_about_the_symbol_cache(device, data_dir):
+    before = rspamd_cache_complaints(device, data_dir)
+    device.run_ssh("snap restart mail.rspamd", throw=False)
+    retry_func(lambda: assert_rspamd_answers(device, data_dir),
+               message='rspamd back after restart', retries=20, sleep=3)
+
+    assert rspamd_cache_complaints(device, data_dir) == before
+
+
+def assert_rspamd_answers(device, data_dir):
+    out = device.run_ssh(
+        "curl -s --unix-socket {0}/rspamd/controller.sock http://localhost/ping".format(data_dir),
+        throw=False)
+    assert 'pong' in out, out
+
+
 def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, data_dir):
     password = device.run_ssh("cat {0}/rspamd/password".format(data_dir), throw=False).strip()
     symbols = device.run_ssh(
