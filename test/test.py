@@ -407,6 +407,12 @@ def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, dat
         assert rule['weight'] == -4.0, rule
 
 
+def test_rspamd_checks_dkim_but_leaves_the_signing_to_opendkim(device, data_dir):
+    registered = {rule.get('symbol') for rule in rspamd_symbols(device, data_dir)}
+    assert 'R_DKIM_ALLOW' in registered, 'dkim checking is gone'
+    assert 'DKIM_SIGNED' not in registered, 'rspamd is still set up to sign'
+
+
 def test_neural_is_not_running(device, data_dir):
     neural = sorted({rule['symbol'] for rule in rspamd_symbols(device, data_dir)
                      if rule.get('symbol', '').startswith('NEURAL')})
