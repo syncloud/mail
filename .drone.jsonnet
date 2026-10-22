@@ -7,8 +7,7 @@ local postfix = '3.11.5';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
-local bullseye = 'bullseye-slim';
-local php = 'php:8.3-fpm-bookworm';
+local php = 'php:8.3.36-fpm-bookworm';
 local postgres = 'postgres:9.4-alpine';
 local platform = '26.08.01';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
@@ -63,7 +62,7 @@ local build(arch, test_ui) = [{
   ] + [
     {
       name: 'opendkim',
-      image: 'debian:' + bullseye,
+      image: 'debian:' + debian,
       commands: [
         './opendkim/build.sh',
       ],
@@ -252,7 +251,7 @@ local build(arch, test_ui) = [{
       },
       command: ['snap', '-c', '${DRONE_BRANCH}'],
       when: {
-        branch: ['master', 'stable'],
+        branch: ['stable'],
         event: ['push'],
       },
     },
