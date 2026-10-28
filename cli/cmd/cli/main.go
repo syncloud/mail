@@ -73,6 +73,14 @@ func main() {
 		},
 	})
 
+	cmd.AddCommand(&cobra.Command{
+		Use: "migrate",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			logger.Info("migrate")
+			return installer.New(logger).Migrate()
+		},
+	})
+
 	err := cmd.Execute()
 	if err != nil {
 		fmt.Print(err)

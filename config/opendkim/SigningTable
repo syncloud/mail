@@ -1,1 +1,0 @@
-*@{{ .DeviceDomainName }} mail._domainkey.{{ .DeviceDomainName }} 

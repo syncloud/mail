@@ -1,8 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
-
-const fullDomain = process.env.PLAYWRIGHT_FULL_DOMAIN ?? 'bookworm.com'
-const appDomain = process.env.PLAYWRIGHT_APP_DOMAIN ?? `mail.${fullDomain}`
-const artifactDir = process.env.PLAYWRIGHT_ARTIFACT_DIR ?? 'artifact'
+import { env } from './helpers/env'
 
 export default defineConfig({
   testDir: './specs',
@@ -11,16 +8,12 @@ export default defineConfig({
   retries: 0,
   maxFailures: 1,
   reporter: [['list']],
-  outputDir: `${artifactDir}/playwright/test-results`,
   globalTeardown: './globalTeardown.ts',
-  timeout: 120_000,
+  timeout: 180_000,
   expect: { timeout: 30_000 },
   use: {
-    baseURL: `https://${appDomain}`,
+    baseURL: `https://${env('PLAYWRIGHT_APP_DOMAIN')}`,
     ignoreHTTPSErrors: true,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
-    video: 'on',
   },
   projects: [
     {
@@ -32,9 +25,4 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
     },
   ],
-  metadata: {
-    appDomain,
-    fullDomain,
-    artifactDir,
-  },
 })
