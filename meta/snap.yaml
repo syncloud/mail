@@ -1,76 +1,43 @@
+name: mail
+summary: Mail server
+description: Mail, contacts and calendars with a web interface, compatible with popular mail apps
+grade: stable
+
 apps:
-  postfix:
-    command: bin/service.postfix.sh
-    daemon: forking
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    before: [php-fpm]
-  dovecot:
-    command: bin/service.dovecot.sh
+  stalwart:
+    command: bin/service.stalwart.sh
     daemon: simple
-    plugs:
-    - network
-    - network-bind
     restart-condition: always
-    before: [php-fpm]
-  postgresql:
+    restart-delay: 10s
+    start-timeout: 600s
+    before: [bulwark, nginx, migrate]
+  bulwark:
     user: mail
-    command: bin/service.postgresql.sh
-    daemon: forking
-    plugs:
-    - network
-    - network-bind
+    command: bin/service.bulwark.sh
+    daemon: simple
     restart-condition: always
-    before: [php-fpm]
-  php-fpm:
-    user: mail
-    command: bin/service.php-fpm.sh
-    daemon: forking
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    after: [postgresql]
-    before: [nginx]
-  opendkim:
-    user: mail
-    command: bin/service.opendkim.sh
-    daemon: forking
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    after: [postgresql]
+    restart-delay: 10s
+    start-timeout: 600s
+    after: [stalwart]
     before: [nginx]
   nginx:
+    user: mail
     command: bin/service.nginx.sh
-    user: mail
     daemon: simple
-    plugs:
-    - network
-    - network-bind
     restart-condition: always
-  redis:
+    restart-delay: 10s
+    start-timeout: 600s
+    after: [bulwark]
+  migrate:
     user: mail
-    command: bin/service.redis.sh
+    command: bin/cli migrate
     daemon: simple
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    before: [rspamd]
-  rspamd:
-    user: mail
-    command: bin/service.rspamd.sh
-    daemon: simple
-    plugs:
-    - network
-    - network-bind
-    restart-condition: always
-    after: [redis]
-    before: [postfix]
+    restart-condition: on-failure
+    restart-delay: 10s
+    after: [stalwart]
+
+  cli:
+    command: bin/cli
 
   storage-change:
     command: bin/cli storage-change
@@ -92,9 +59,3 @@ apps:
 
   restore-post-start:
     command: bin/cli restore-post-start
-
-confinement: strict
-description: Mail with Web interface and compatible with popular mail apps
-grade: stable
-name: mail
-summary: Mail server

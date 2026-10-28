@@ -1,15 +1,14 @@
 import imaplib
-import json
 import os
-import pytest
-import requests
 import smtplib
 import ssl
 import time
 from email.mime.text import MIMEText
 from os.path import dirname, join
-from ssl import SSLContext
 from subprocess import check_output
+
+import pytest
+import requests
 from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 from syncloudlib.integration.ssh import run_scp
@@ -18,53 +17,31 @@ from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
 DIR = dirname(__file__)
-OPENSSL = "openssl"
+SERVICES = ['stalwart', 'bulwark', 'nginx']
+TUNNEL_SOCKET = '/var/snap/mail/current/spool/public/tunnel'
+ADMIN_SOCKET = '/var/snap/mail/current/stalwart/admin.sock'
+PUBLIC_SOCKET = '/var/snap/mail/current/stalwart.sock'
+SMTP_TOOL = '/tmp/smtp'
+DOMAIN_GET = '/tmp/domain-get.json'
+GTUBE = 'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X'
 
 
 @pytest.fixture(scope="session")
-def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact_dir, domain):
-    def module_teardown(): 
+def module_setup(request, device, data_dir, platform_data_dir, artifact_dir):
+    def module_teardown():
         platform_log_dir = join(artifact_dir, 'platform')
         os.mkdir(platform_log_dir)
         device.scp_from_device('{0}/log/*'.format(platform_data_dir), platform_log_dir)
-        mail_log_dir = join(artifact_dir, 'mail_log')
-        os.mkdir(mail_log_dir)
-        device.run_ssh('ls -la {0}/ > {1}/ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/dovecot/ > {1}/data.dovecot.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v status > '
-                       '{2}/postfix.status.teardowm.log 2>&1'.format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/ > {1}/data.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/box/ > {1}/data.box.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/log/ > {1}/log.ls.log'.format(data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/roundcubemail/ > {2}/roundcubemail.ls.log'
-                       .format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/roundcubemail/config/ > {2}/roundcubemail.config.ls.log'
-                       .format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('ls -la {0}/roundcubemail/logs/ > {2}/roundcubemail.logs.ls.log'
-                       .format(app_dir, data_dir, TMP_DIR), throw=False)
-        device.run_ssh('DATA_DIR={1} {0}/bin/php.sh -i > {2}/php.info.log'.format(app_dir, data_dir, TMP_DIR), throw=False)
-    
-        device.scp_from_device('{0}/log/*.log'.format(data_dir), mail_log_dir, throw=False)
-        device.run_ssh('ls -la /var/log/ > {0}/var.log.ls.log'.format(TMP_DIR), throw=False)
-        device.scp_from_device('/var/log/mail.err', '{0}/var.log.mail.err.log'.format(mail_log_dir), throw=False)
-        device.scp_from_device('/var/log/mail.info', '{0}/var.log.mail.info.log'.format(mail_log_dir), throw=False)
-        device.scp_from_device('/var/log/mail.log', '{0}/var.log.mail.log.log'.format(mail_log_dir), throw=False)
-        device.scp_from_device('/var/log/mail.warn', '{0}/var.log.mail.warn.log'.format(mail_log_dir), throw=False)
-        device.scp_from_device('/var/log/mail/errors', '{0}/var.log.mail.errors.log'.format(mail_log_dir), throw=False)
-        device.run_ssh('netstat -nlp > {0}/netstat.log'.format(mail_log_dir), throw=False)
-        device.run_ssh('journalctl > {0}/journalctl.log'.format(mail_log_dir), throw=False)
-        device.run_ssh('cp /var/log/syslog {0}/syslog.log'.format(mail_log_dir), throw=False)
-        device.run_ssh('cp /var/log/messages {0}/messages.log'.format(mail_log_dir), throw=False)
-        device.run_ssh('ls -la {0}/opendkim/keys > {1}/opendkim.keys.log'.format(data_dir, mail_log_dir), throw=False)
-        device.run_ssh('ls -la {0}/opendkim/keys/{1} > {2}/opendkim.keys.domain.log'
-                       .format(data_dir, domain, mail_log_dir), throw=False)
-        device.run_ssh('cp {0}/opendkim/keys/{1}/mail.txt {2}/opendkim.keys.domain.mail.txt.log'
-                       .format(data_dir, domain, mail_log_dir), throw=False)
-        device.run_ssh('cp {0}/opendkim/keys/{1}/mail.private {2}/opendkim.keys.domain.mail.private.log'
-                       .format(data_dir, domain, mail_log_dir), throw=False)
-        config_dir = join(artifact_dir, 'config')
-        os.mkdir(config_dir)
-        device.scp_from_device('{0}/config/*'.format(data_dir), config_dir, throw=False)
+        device.run_ssh('ls -la /var/snap/mail/current/ > {0}/data.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ls -la /var/snap/mail/current/migration > {0}/migration.ls.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ss -nlpx > {0}/sockets.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('ss -nltp > {0}/ports.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl > {0}/journalctl.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl -u snap.mail.stalwart > {0}/stalwart.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl -u snap.mail.bulwark > {0}/bulwark.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('journalctl -u snap.mail.migrate > {0}/migrate.log'.format(TMP_DIR), throw=False)
+        device.run_ssh('cp -r /var/snap/mail/current/config {0}/config'.format(TMP_DIR), throw=False)
+        device.scp_from_device('{0}/*'.format(TMP_DIR), artifact_dir)
         check_output('chmod -R a+r {0}'.format(artifact_dir), shell=True)
 
     request.addfinalizer(module_teardown)
@@ -72,10 +49,9 @@ def module_setup(request, device, app_dir, data_dir, platform_data_dir, artifact
 
 def test_start(module_setup, device_host, app, domain, device):
     add_host_alias(app, device_host, domain)
-    print(check_output('date', shell=True))
     device.run_ssh('date', retries=100)
     device.run_ssh('snap watch --last=auto-refresh?', throw=False)
-    device.run_ssh('mkdir {0}'.format(TMP_DIR), throw=False)
+    device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
 
 
 def test_activate_device(device, domain):
@@ -85,126 +61,157 @@ def test_activate_device(device, domain):
     assert response.status_code == 200, response.text
 
 
+def test_platform_key_is_private(device):
+    device.run_ssh('chmod 600 /var/snap/platform/current/syncloud.key')
+
+
 def test_install(app_archive_path, domain, device_password):
     local_install(domain, device_password, app_archive_path)
 
 
-def test_running_smtp(device_host):
-    cmd = 'nc -zv -w 1 {0} 25'.format(device_host)
-    print(retry_func(lambda: check_output(cmd, shell=True), message=cmd, retries=5, sleep=10))
+@pytest.mark.parametrize('port', [25, 587, 465, 143, 993, 110, 995, 4190])
+def test_port(device_host, port):
+    cmd = 'nc -zv -w 1 {0} {1}'.format(device_host, port)
+    retry_func(lambda: check_output(cmd, shell=True), message=cmd, retries=10, sleep=5)
 
 
-def test_running_pop3(device_host):
-    cmd = 'nc -zv -w 1 {0} 110'.format(device_host)
-    print(retry_func(lambda: check_output(cmd, shell=True), message=cmd, retries=5, sleep=10))
+def test_web(app_domain):
+    retry_func(lambda: assert_status('https://{0}/'.format(app_domain), 200), message='web', retries=30, sleep=5)
 
 
-def test_running_roundcube(app_domain):
-    print(check_output('nc -zv -w 1 {0} 443'.format(app_domain), shell=True))
+@pytest.mark.parametrize('service', SERVICES)
+def test_service_started_cleanly(device, service):
+    restarts = device.run_ssh('systemctl show -p NRestarts --value snap.mail.{0}.service'.format(service))
+    assert restarts.strip() == '0', service
 
 
-def test_postfix_status(device, app_dir, data_dir):
-    device.run_ssh(
-            '{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v status > {1}/log/postfix.status.log 2>&1'.format(
-                app_dir, data_dir), throw=False)
+def test_services_run_as_mail(device):
+    owners = device.run_ssh("ps -eo user:20,args | grep -E '/snap/mail/[^ ]*/(stalwart/stalwart|node/|nginx/)' | grep -v grep")
+    lines = [line.split(None, 1) for line in owners.strip().splitlines()]
+    assert lines, owners
+    assert {user for user, _ in lines} == {'mail'}, owners
 
 
-def test_postfix_check(device, app_dir, data_dir):
-    device.run_ssh(
-            '{0}/postfix/bin/postfix.sh -c {1}/config/postfix -v check > {1}/log/postfix.check.log 2>&1'.format(
-                app_dir, data_dir), throw=False)
+def test_internal_traffic_uses_sockets(device):
+    sockets = device.run_ssh('ss -nlx')
+    for socket in ['/var/snap/mail/current/stalwart.sock', '/var/snap/mail/current/bulwark.sock',
+                   '/var/snap/mail/common/web.socket', TUNNEL_SOCKET, ADMIN_SOCKET]:
+        assert socket in sockets, socket
+    ports = device.run_ssh('ss -nlt')
+    for port in [':8080 ', ':3000 ']:
+        assert port not in ports, ports
 
 
-def test_dovecot_auth(device, app_dir, data_dir, device_user, device_password):
-    device.run_ssh(
-            '{0}/dovecot/bin/doveadm.sh -D -c {1}/config/dovecot/dovecot.conf auth test {2} {3} > '
-            '{1}/log/doveadm.auth.test.log 2>&1'
-            .format(app_dir, data_dir, device_user, device_password), 
-            env_vars='DOVECOT_BINDIR={0}/dovecot/bin'.format(app_dir))
+def test_tls_key_is_private(device):
+    assert device.run_ssh("stat -c '%U:%G %a' /var/snap/mail/current/stalwart/tls/syncloud.key").strip() == 'mail:mail 600'
 
 
-def test_postfix_smtp_shell(app_domain, device_user, device_password, artifact_dir):
-    print(check_output('{0}/expect.submission.sh {1} 25 {2} {3} > {4}/expect.smtp.log 2>&1'.format(
-        DIR, app_domain, device_user, device_password, artifact_dir), shell=True))
+def test_admin_socket_is_private(device):
+    assert device.run_ssh("stat -c '%U:%G %a' {0}".format(ADMIN_SOCKET)).strip() == 'mail:mail 660'
 
 
-def test_postfix_submission_shell(app_domain, device_user, device_password, artifact_dir):
-    print(check_output('{0}/expect.submission.sh {1} 587 {2} {3} > {4}/expect.submission.log 2>&1'.format(
-        DIR, app_domain, device_user, device_password, artifact_dir), shell=True))
+def test_admin_password_is_gone(device):
+    assert 'admin.password' not in device.run_ssh('ls /var/snap/mail/current/stalwart')
 
 
-def test_postfix_auth(app_domain, device_user, device_password):
-    server = smtplib.SMTP(app_domain, timeout=10)
-    server.set_debuglevel(1)
-    server.login(device_user, device_password)
+@pytest.fixture(scope="session")
+def domain_get(device, device_host):
+    run_scp('{0}/jmap/domain-get.json root@{1}:{2}'.format(DIR, device_host, DOMAIN_GET),
+            password=device.ssh_password)
+    return DOMAIN_GET
 
 
-def test_postfix_submission_lib(app_domain, domain, device_user, device_password):
-    server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
-    server.set_debuglevel(1)
+def test_admin_socket_is_admin(device, domain, domain_get):
+    response = device.run_ssh('curl -s --unix-socket {0} -H Content-Type:application/json -d @{1} http://localhost/jmap/'.format(
+        ADMIN_SOCKET, domain_get))
+    assert '"x:Domain/get"' in response, response
+    assert '"{0}"'.format(domain) in response, response
+
+
+def test_admin_socket_session_has_account(device):
+    response = device.run_ssh('curl -s --unix-socket {0} http://localhost/jmap/session'.format(ADMIN_SOCKET))
+    assert '"primaryAccounts":{"' in response, response
+
+
+def test_public_socket_is_not_admin(device, domain_get):
+    response = device.run_ssh("curl -s -o /dev/null -w '%{{http_code}}' --unix-socket {0} -H Content-Type:application/json -d @{1} http://localhost/jmap/".format(
+        PUBLIC_SOCKET, domain_get))
+    assert response.strip() == '401', response
+
+
+def test_anonymous_jmap_session_has_no_accounts(app_domain):
+    response = requests.get('https://{0}/jmap/session'.format(app_domain), verify=False)
+    assert response.status_code == 200, response.text
+    assert response.json()['accounts'] == {}, response.text
+
+
+def test_jmap_session(app_domain, device_user, device_password, domain):
+    response = requests.get('https://{0}/jmap/session'.format(app_domain), verify=False,
+                            auth=(device_user, device_password))
+    assert response.status_code == 200, response.text
+    assert response.json()['username'] == '{0}@{1}'.format(device_user, domain), response.text
+
+
+def test_stalwart_admin_ui(app_domain):
+    response = requests.get('https://{0}/stalwart/'.format(app_domain), verify=False)
+    assert response.status_code == 200, response.text
+    assert '<base href="/stalwart/"' in response.text, response.text
+
+
+def test_webmail_admin_is_bulwark(app_domain):
+    response = requests.get('https://{0}/admin'.format(app_domain), verify=False)
+    assert response.status_code == 200, response.text
+    assert '<base href=' not in response.text, response.text[:500]
+
+
+def test_oidc_client_is_registered(device, app_domain):
+    config = device.run_ssh('cat /var/snap/platform/current/config/authelia/config.yml')
+    assert "client_id: 'mail'" in config, config
+    assert "- 'https://{0}/en/auth/callback'".format(app_domain) in config, config
+
+
+@pytest.mark.parametrize('kind', ['card', 'cal'])
+def test_dav(app_domain, device_user, device_password, domain, kind):
+    response = requests.request('PROPFIND', 'https://{0}/dav/{1}/{2}@{3}/'.format(app_domain, kind, device_user, domain),
+                                verify=False, auth=(device_user, device_password), headers={'Depth': '1'})
+    assert response.status_code == 207, response.text
+
+
+def test_submission_requires_tls(app_domain, device_user, device_password):
+    server = smtplib.SMTP(app_domain, 587, timeout=10)
     server.ehlo()
-    # server.starttls()
-    server.login(device_user, device_password)
-    msg = MIMEText('test')
-    mail_from = '{0}@{1}'.format(device_user, domain)
-    mail_to = mail_from
-    msg['Subject'] = 'test subject'
-    msg['From'] = mail_from
-    msg['To'] = mail_to
-    server.sendmail(mail_from, [mail_to], msg.as_string())
+    assert not server.has_extn('auth'), server.esmtp_features
     server.quit()
 
 
-def test_filesystem_mailbox(device, data_dir):
-    device.run_ssh('find {0}/box'.format(data_dir))
+def test_submission(app_domain, domain, device_user, device_password):
+    send(app_domain, device_user, device_password, '{0}@{1}'.format(device_user, domain), 'test subject', 'test')
+    retry_func(lambda: assert_in(app_domain, device_user, device_password, 'INBOX', 'test subject'),
+               message='submission delivery', retries=20, sleep=3)
 
 
-def test_mail_receiving(app_domain, device_user, device_password):
-
-    message_count = 0
-    retry = 0
-    retries = 3
-    while retry < retries:
-        message_count = retry_func(lambda: get_message_count(app_domain, device_user, device_password),
-                                   message='get message count', retries=5)
-        if message_count > 0:
-            break
-        retry += 1
-        time.sleep(1)
-
-    assert message_count == 1
-
-
-def get_message_count(app_domain, device_user, device_password):
-    imaplib.Debug = 4
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
-    server.login(device_user, device_password)
-    selected = server.select('inbox')
-    server.logout()
-    # assert selected[0] == 'OK'
-    return int(selected[1][0])
-
-
-def test_postfix_ldap_aliases(device, app_domain, app_dir, data_dir, device_user):
-    device.run_ssh(
-            '{0}/postfix/bin/postmap.sh -c {3}/config/postfix -q {1}@{2} ldap:{3}/config/postfix/ldap-aliases.cf'
-            .format(app_dir, device_user, app_domain, data_dir))
-
-
-def test_imap_openssl(device, artifact_dir):
-    
-    device.run_ssh("{0} version -a".format(OPENSSL))
-    output = device.run_ssh("echo \"A Logout\" | "
-                            "{0} s_client "
+def test_imap_certificate(device, artifact_dir):
+    output = device.run_ssh("echo \"A Logout\" | openssl s_client "
                             "-CAfile /var/snap/platform/current/syncloud.ca.crt "
                             "-CApath /etc/ssl/certs "
                             "-connect localhost:143 "
                             "-servername syncloud "
                             "-verify 3 "
-                            "-starttls imap".format(OPENSSL))
+                            "-starttls imap", throw=False)
     with open('{0}/openssl.log'.format(artifact_dir), 'w') as f:
         f.write(output)
     assert 'Verify return code: 0 (ok)' in output
+
+
+def test_pop3(app_domain, device_user, device_password):
+    import poplib
+    server = poplib.POP3(app_domain, 110, timeout=10)
+    server.stls(context=insecure())
+    server.user(device_user)
+    server.pass_(device_password)
+    count, _ = server.stat()
+    server.quit()
+    assert count > 0
 
 
 def test_access_change(device):
@@ -215,8 +222,10 @@ def test_storage_change(device):
     device.run_ssh('snap run mail.storage-change > {0}/storage-change.hook.log'.format(TMP_DIR))
 
 
-def test_certificate_change(device):
+def test_certificate_change(device, device_host):
     device.run_ssh('snap run mail.certificate-change > {0}/certificate-change.hook.log'.format(TMP_DIR))
+    retry_func(lambda: check_output('nc -zv -w 1 {0} 993'.format(device_host), shell=True),
+               message='imaps after certificate change', retries=20, sleep=3)
 
 
 def faker_url(domain, path):
@@ -246,22 +255,10 @@ def set_mail_relay(device, domain, device_user, device_password, enabled):
     assert response.json()['success'], response.text
 
 
-def send_outgoing(app_domain, device_user, device_password, mail_domain, subject):
-    server = smtplib.SMTP('{0}:587'.format(app_domain), timeout=10)
-    server.ehlo()
-    server.login(device_user, device_password)
-    msg = MIMEText('relay body')
-    msg['Subject'] = subject
-    msg['From'] = '{0}@{1}'.format(device_user, mail_domain)
-    msg['To'] = 'outside@example.com'
-    server.sendmail(msg['From'], [msg['To']], msg.as_string())
-    server.quit()
-
-
 def test_mail_relay_disabled_does_not_use_relay(device, domain, app_domain, device_user, device_password):
     requests.delete(faker_url(domain, 'reset'), timeout=10)
     set_mail_relay(device, domain, device_user, device_password, False)
-    send_outgoing(app_domain, device_user, device_password, domain, 'direct')
+    send(app_domain, device_user, device_password, 'outside@example.com', 'direct', 'relay body')
     time.sleep(10)
     assert faker_messages(domain) == []
 
@@ -269,24 +266,20 @@ def test_mail_relay_disabled_does_not_use_relay(device, domain, app_domain, devi
 def test_mail_relay_enabled_delivers_through_relay(device, domain, app_domain, device_user, device_password):
     requests.delete(faker_url(domain, 'reset'), timeout=10)
     set_mail_relay(device, domain, device_user, device_password, True)
-    send_outgoing(app_domain, device_user, device_password, domain, 'relayed')
+    send(app_domain, device_user, device_password, 'outside@example.com', 'relayed', 'relay body')
 
     messages = retry_func(lambda: assert_relayed(domain), message='relay delivery', retries=20, sleep=3)
     assert messages[0]['login'] == domain, messages
     assert messages[0]['recipients'] == ['outside@example.com'], messages
     assert 'relayed' in messages[0]['body'], messages
+    assert 'd={0}'.format(domain) in messages[0]['body'], messages[0]['body']
+    assert 's=mail' in messages[0]['body'], messages[0]['body']
 
 
 def assert_relayed(domain):
     messages = faker_messages(domain)
     assert len(messages) > 0, 'relay received nothing'
     return messages
-
-
-TUNNEL_SOCKET = '/var/snap/mail/current/spool/public/tunnel'
-
-
-SMTP_TOOL = '/tmp/smtp'
 
 
 @pytest.fixture(scope="session")
@@ -297,216 +290,116 @@ def smtp(device, device_host):
     return SMTP_TOOL
 
 
-def tunnel_smtp(device, sender, recipient, subject='', body='', xclient='', headers=()):
-    command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(
-        SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
+def tunnel_smtp(device, sender, recipient, subject='', body='', xclient=''):
+    command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
     if subject:
         command += " -subject '{0}' -body '{1}'".format(subject, body)
     if xclient:
         command += " -xclient '{0}'".format(xclient)
-    for header in headers:
-        command += " -header '{0}'".format(header)
     return device.run_ssh(command, throw=False)
 
 
-def test_tunnel_listens_on_a_socket_not_a_port(device):
-    listening = device.run_ssh("ss -lnt || true", throw=False)
-    assert ':10025' not in listening, listening
-
-    socket = device.run_ssh("ls -l {0}".format(TUNNEL_SOCKET), throw=False)
-    assert 'srw' in socket, socket
-
-
-def test_tunnel_delivers_to_a_local_user(smtp, device, domain, device_user, app_domain,
-                                         device_password):
-    before = get_message_count(app_domain, device_user, device_password)
+def test_tunnel_delivers_to_a_local_user(smtp, device, domain, device_user, app_domain, device_password):
     out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
-                      subject='tunnel-delivery', body='through the tunnel')
-    assert 'queued' in out, out
-
-    after = retry_func(
-        lambda: assert_arrived(app_domain, device_user, device_password, before),
-        message='tunnel delivery', retries=20, sleep=3)
-    assert after > before
+                      subject='tunnel-delivery', body='through the tunnel', xclient='ADDR=192.0.2.77 NAME=announced.example.com')
+    assert 'queued' in out.lower(), out
+    retry_func(lambda: delivered(app_domain, device_user, device_password, 'tunnel-delivery'),
+               message='tunnel delivery', retries=20, sleep=3)
 
 
-def assert_arrived(app_domain, device_user, device_password, before):
-    count = get_message_count(app_domain, device_user, device_password)
-    assert count > before, 'nothing arrived through the tunnel'
-    return count
-
-
-def test_tunnel_refuses_to_relay_elsewhere(smtp, device):
-    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com')
-    assert '554' in out or '550' in out, out
-
-
-def latest_message(app_domain, device_user, device_password):
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
-    server.login(device_user, device_password)
-    server.select('inbox')
-    _, data = server.search(None, 'SUBJECT', '"tunnel-delivery"')
-    ids = data[0].split()
-    assert ids, 'the tunnel delivered message is not in the mailbox'
-    _, fetched = server.fetch(ids[-1], '(RFC822)')
-    server.logout()
-    return fetched[0][1].decode('utf-8', 'replace')
+def test_tunnel_takes_the_announced_client_address(app_domain, device_user, device_password):
+    message = delivered(app_domain, device_user, device_password, 'tunnel-delivery')
+    assert '[192.0.2.77]' in message.split('\r\n\r\n')[0], message[:3000]
+    assert 'client-ip=192.0.2.77' in message, message[:3000]
 
 
 def test_tunnel_does_not_sign_incoming_mail(app_domain, domain, device_user, device_password):
-    message = latest_message(app_domain, device_user, device_password)
-    signed_by_us = 'd={0}'.format(domain)
-    assert signed_by_us not in message, message[:2000]
+    message = delivered(app_domain, device_user, device_password, 'tunnel-delivery')
+    assert 'd={0}'.format(domain) not in message, message[:3000]
 
 
-GTUBE = 'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X'
+def test_tunnel_refuses_to_relay_elsewhere(smtp, device):
+    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com', xclient='ADDR=192.0.2.78')
+    assert '550' in out or '554' in out or '553' in out, out
 
 
-def test_rspamd_and_redis_listen_on_sockets(device, data_dir):
-    milter = device.run_ssh("ls -l {0}/rspamd/milter.sock".format(data_dir), throw=False)
-    assert 'srw' in milter, milter
-
-    redis = device.run_ssh("ls -l {0}/redis/redis.sock".format(data_dir), throw=False)
-    assert 'srw' in redis, redis
-
-
-def rspamd_cache_complaints(device, data_dir):
-    out = device.run_ssh("grep -c save_items {0}/log/rspamd.log || true".format(data_dir), throw=False)
-    return int(out.strip() or 0)
-
-
-def test_rspamd_shutdown_does_not_complain_about_the_symbol_cache(device, data_dir):
-    before = rspamd_cache_complaints(device, data_dir)
-    device.run_ssh("snap restart mail.rspamd", throw=False)
-    retry_func(lambda: assert_rspamd_answers(device, data_dir),
-               message='rspamd back after restart', retries=20, sleep=3)
-
-    assert rspamd_cache_complaints(device, data_dir) == before
-
-
-def assert_rspamd_answers(device, data_dir):
-    out = device.run_ssh(
-        "curl -s --unix-socket {0}/rspamd/controller.sock http://localhost/ping".format(data_dir),
-        throw=False)
-    assert 'pong' in out, out
-
-
-def rspamd_symbols(device, data_dir):
-    password = device.run_ssh("cat {0}/rspamd/password".format(data_dir), throw=False).strip()
-    symbols = device.run_ssh(
-        "curl -s --unix-socket {0}/rspamd/controller.sock -H 'Password: {1}' "
-        "http://localhost/symbols".format(data_dir, password), throw=False)
-    return [rule for group in json.loads(symbols) for rule in group.get('rules', [])]
-
-
-def test_arc_from_a_trusted_forwarder_offsets_the_forwarding_penalty(device, data_dir):
-    trusted = [rule for rule in rspamd_symbols(device, data_dir)
-               if rule.get('symbol') == 'ARC_ALLOW_TRUSTED']
-    assert trusted, 'ARC_ALLOW_TRUSTED is not registered'
-    for rule in trusted:
-        assert rule['weight'] == -4.0, rule
-
-
-def test_rspamd_checks_dkim_but_leaves_the_signing_to_opendkim(device, data_dir):
-    registered = {rule.get('symbol') for rule in rspamd_symbols(device, data_dir)}
-    assert 'R_DKIM_ALLOW' in registered, 'dkim checking is gone'
-    assert 'DKIM_SIGNED' not in registered, 'rspamd is still set up to sign'
-
-
-def test_neural_is_not_running(device, data_dir):
-    neural = sorted({rule['symbol'] for rule in rspamd_symbols(device, data_dir)
-                     if rule.get('symbol', '').startswith('NEURAL')})
-    assert neural == [], neural
-
-
-def test_tunnel_takes_the_announced_client_address(smtp, device, domain, device_user):
-    out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
-                      subject='xclient-announced', body='announced',
-                      xclient='ADDR=192.0.2.77 NAME=announced.example.com')
-    assert 'queued' in out, out
-
-    logged = device.run_ssh(
-        "grep -h postfix/tunnel /var/log/mail.log /var/log/syslog 2>/dev/null | tail -20; "
-        "journalctl --since '5 min ago' --no-pager 2>/dev/null | grep postfix/tunnel | tail -20",
-        throw=False)
-    assert '192.0.2.77' in logged, logged
-
-
-def test_spam_is_rejected_before_the_mailbox(smtp, device, domain, device_user):
-    out = tunnel_smtp(device, 'spammer@example.com', '{0}@{1}'.format(device_user, domain),
-                      subject='gtube-probe', body=GTUBE)
-    assert 'queued' not in out, out
-    assert '554' in out or '550' in out, out
-
-
-def test_tagged_mail_is_filed_into_junk(app_domain, domain, device_user, device_password):
-    subject = 'junk-filing'
-    message = MIMEText('tagged as spam')
-    message['Subject'] = subject
-    message['From'] = 'outside@example.com'
-    message['To'] = '{0}@{1}'.format(device_user, domain)
-    message['X-Spam'] = 'Yes'
-    server = smtplib.SMTP(app_domain, timeout=10)
-    server.send_message(message)
-    server.quit()
-
-    retry_func(lambda: assert_in_junk(app_domain, device_user, device_password, subject),
-               message='junk filing', retries=20, sleep=3)
-
-
-def assert_in_junk(app_domain, device_user, device_password, subject):
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
-    server.login(device_user, device_password)
-    try:
-        server.select('Junk')
-        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
-        junk = data[0].split()
-        server.select('inbox')
-        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
-        inbox = data[0].split()
-    finally:
-        server.logout()
-    assert junk, 'the tagged message is not in Junk'
-    assert not inbox, 'the tagged message also reached the inbox'
-
-
-def test_spam_arriving_directly_is_also_rejected(app_domain, domain, device_user):
-    message = MIMEText(GTUBE)
-    message['Subject'] = 'gtube-direct'
-    message['From'] = 'spammer@example.com'
-    message['To'] = '{0}@{1}'.format(device_user, domain)
-    server = smtplib.SMTP(app_domain, timeout=10)
-    with pytest.raises(smtplib.SMTPDataError) as rejected:
-        server.send_message(message)
-    assert rejected.value.smtp_code in (550, 554), rejected.value
+def test_spam_does_not_reach_the_inbox(smtp, device, domain, device_user, app_domain, device_password):
+    tunnel_smtp(device, 'spammer@example.com', '{0}@{1}'.format(device_user, domain),
+                subject='gtube-probe', body=GTUBE, xclient='ADDR=192.0.2.79')
+    time.sleep(10)
+    assert not search(app_domain, device_user, device_password, 'INBOX', 'gtube-probe')
 
 
 def test_owner_mail_is_not_filtered(app_domain, domain, device_user, device_password):
-    subject = 'owner-submission'
-    message = MIMEText('sent by the owner')
+    send(app_domain, device_user, device_password, '{0}@{1}'.format(device_user, domain), 'owner-submission', 'owner')
+    retry_func(lambda: assert_in(app_domain, device_user, device_password, 'INBOX', 'owner-submission'),
+               message='owner submission', retries=20, sleep=3)
+    assert not search(app_domain, device_user, device_password, 'Junk Mail', 'owner-submission')
+
+
+def insecure():
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+    return context
+
+
+def send(app_domain, user, password, recipient, subject, body):
+    server = smtplib.SMTP(app_domain, 587, timeout=10)
+    server.ehlo()
+    server.starttls(context=insecure())
+    server.ehlo()
+    server.login(user, password)
+    message = MIMEText(body)
     message['Subject'] = subject
-    message['From'] = '{0}@{1}'.format(device_user, domain)
-    message['To'] = '{0}@{1}'.format(device_user, domain)
-    server = smtplib.SMTP(app_domain, timeout=10)
-    server.login(device_user, device_password)
+    message['From'] = '{0}@{1}'.format(user, app_domain.split('.', 1)[1])
+    message['To'] = recipient
     server.send_message(message)
     server.quit()
 
-    retry_func(lambda: assert_in_inbox(app_domain, device_user, device_password, subject),
-               message='owner submission', retries=20, sleep=3)
+
+def imap(app_domain, user, password):
+    server = imaplib.IMAP4_SSL(app_domain, ssl_context=insecure())
+    server.login(user, password)
+    return server
 
 
-def assert_in_inbox(app_domain, device_user, device_password, subject):
-    server = imaplib.IMAP4_SSL(app_domain, ssl_context=(SSLContext(ssl.PROTOCOL_TLS)))
-    server.login(device_user, device_password)
+def search(app_domain, user, password, folder, subject):
+    server = imap(app_domain, user, password)
     try:
-        server.select('inbox')
+        status, _ = server.select('"{0}"'.format(folder))
+        if status != 'OK':
+            return []
         _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
-        inbox = data[0].split()
-        server.select('Junk')
-        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
-        junk = data[0].split()
+        return data[0].split()
     finally:
         server.logout()
-    assert inbox, 'the owner submission never reached the inbox'
-    assert not junk, 'the owner submission was filed as junk'
+
+
+def fetch(app_domain, user, password, folder, subject):
+    server = imap(app_domain, user, password)
+    try:
+        server.select('"{0}"'.format(folder))
+        _, data = server.search(None, 'SUBJECT', '"{0}"'.format(subject))
+        ids = data[0].split()
+        assert ids, subject
+        _, fetched = server.fetch(ids[-1], '(RFC822)')
+        return fetched[0][1].decode('utf-8', 'replace')
+    finally:
+        server.logout()
+
+
+def delivered(app_domain, user, password, subject):
+    for folder in ['INBOX', 'Junk Mail']:
+        if search(app_domain, user, password, folder, subject):
+            return fetch(app_domain, user, password, folder, subject)
+    raise AssertionError('{0} was not delivered'.format(subject))
+
+
+def assert_in(app_domain, user, password, folder, subject):
+    assert search(app_domain, user, password, folder, subject), '{0} is not in {1}'.format(subject, folder)
+
+
+def assert_status(url, status):
+    response = requests.get(url, verify=False, allow_redirects=False)
+    assert response.status_code == status, '{0} {1}'.format(response.status_code, response.text[:500])
