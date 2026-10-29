@@ -7,4 +7,5 @@ type NetworkListener struct {
 	Protocol    string          `json:"protocol"`
 	UseTls      bool            `json:"useTls"`
 	ImplicitTls bool            `json:"implicitTls"`
+	ProxyTrust  map[string]bool `json:"overrideProxyTrustedNetworks"`
 }

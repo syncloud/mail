@@ -288,6 +288,8 @@ func (i *Installer) settings() (stalwart.Settings, error) {
 	return stalwart.Settings{
 		DeviceDomain:     deviceDomainName,
 		AppDomain:        appDomainName,
+		HttpSocket:       path.Join(i.dataDir, "stalwart.sock"),
+		TunnelSocket:     path.Join(i.dataDir, "spool", "public", "tunnel"),
 		LdapUrl:          LdapUrl,
 		LdapBindDn:       LdapBindDn,
 		LdapBindPassword: LdapPassword,

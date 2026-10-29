@@ -1,0 +1,1 @@
+{"using":["urn:ietf:params:jmap:core","urn:stalwart:jmap"],"methodCalls":[["x:NetworkListener/get",{"properties":["name","bind"]},"0"]]}
