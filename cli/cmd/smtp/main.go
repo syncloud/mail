@@ -14,7 +14,7 @@ func main() {
 	subject := flag.String("subject", "", "subject, delivery is skipped when empty")
 	body := flag.String("body", "", "message body")
 	repeat := flag.Int("repeat", 1, "how many lines the body is repeated to")
-	xclient := flag.String("xclient", "", "xclient attributes announced before the transaction")
+	proxy := flag.String("proxy", "", "client address sent in a PROXY v2 header before the greeting")
 	var headers []string
 	flag.Func("header", "extra header line, repeatable", func(value string) error {
 		headers = append(headers, value)
@@ -27,7 +27,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	session, err := Dial(*socket)
+	session, err := Dial(*socket, *proxy)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "cannot reach %s: %v\n", *socket, err)
 		os.Exit(1)
@@ -37,14 +37,6 @@ func main() {
 	text := *body
 	if *repeat > 1 {
 		text = strings.TrimSuffix(strings.Repeat(*body+"\n", *repeat), "\n")
-	}
-
-	if *xclient != "" {
-		if err := session.Xclient(*xclient); err != nil {
-			fmt.Print(session.Transcript())
-			fmt.Fprintf(os.Stderr, "xclient failed: %v\n", err)
-			os.Exit(1)
-		}
 	}
 
 	deliverErr := session.Deliver(*from, *recipient, *subject, text, headers)

@@ -32,14 +32,6 @@ func (r *HookInstance) adminSocket() string {
 	return path.Join(r.socketDir(), "admin.sock")
 }
 
-func (r *HookInstance) listeners() string {
-	var listeners []string
-	for _, name := range []string{"smtp", "submission", "submissions", "imap", "imaps", "pop3", "pop3s", "sieve", "http", "tunnel"} {
-		listeners = append(listeners, name+"="+path.Join(r.socketDir(), name+".sock"))
-	}
-	return strings.Join(listeners, ",")
-}
-
 func (r *HookInstance) Start() (*stalwart.Client, error) {
 	if err := os.MkdirAll(r.socketDir(), 0700); err != nil {
 		return nil, err
@@ -53,7 +45,7 @@ func (r *HookInstance) Start() (*stalwart.Client, error) {
 	}
 	command := exec.Command(path.Join(r.appDir, "stalwart", "stalwart"), "-c", path.Join(r.dataDir, "config", "stalwart", "config.json"))
 	command.Env = append(os.Environ(), strings.Split(strings.TrimSpace(string(env)), "\n")...)
-	command.Env = append(command.Env, "STALWART_UNIX_LISTENERS="+r.listeners(), "STALWART_ADMIN_SOCKET="+r.adminSocket())
+	command.Env = append(command.Env, "STALWART_ADMIN_SOCKET="+r.adminSocket())
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	if err := command.Start(); err != nil {

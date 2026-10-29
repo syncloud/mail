@@ -11,8 +11,9 @@ const (
 	RelayRouteName       = "relay"
 	DkimSelector         = "mail"
 	AdminGroup           = "syncloud"
-	HttpBind             = "127.0.0.1:443"
-	TunnelBind           = "127.0.0.1:25"
+	HttpPort             = 443
+	SmtpPort             = 25
+	TunnelProxy          = "127.0.0.1"
 )
 
 type Provisioner struct {
@@ -32,7 +33,7 @@ func (p *Provisioner) Apply(settings Settings) error {
 	if err := p.tracer(accountId); err != nil {
 		return err
 	}
-	if err := p.listeners(accountId); err != nil {
+	if err := p.listeners(accountId, settings); err != nil {
 		return err
 	}
 	directoryId, err := p.directory(accountId, settings)
@@ -138,18 +139,18 @@ func (p *Provisioner) tracer(accountId string) error {
 	return err
 }
 
-func (p *Provisioner) listeners(accountId string) error {
+func (p *Provisioner) listeners(accountId string, settings Settings) error {
 	wanted := []NetworkListener{
-		{Name: "smtp", Bind: bind("[::]:25"), Protocol: "smtp", UseTls: true},
-		{Name: "submission", Bind: bind("[::]:587"), Protocol: "smtp", UseTls: true},
-		{Name: "submissions", Bind: bind("[::]:465"), Protocol: "smtp", UseTls: true, ImplicitTls: true},
-		{Name: "imap", Bind: bind("[::]:143"), Protocol: "imap", UseTls: true},
-		{Name: "imaps", Bind: bind("[::]:993"), Protocol: "imap", UseTls: true, ImplicitTls: true},
-		{Name: "pop3", Bind: bind("[::]:110"), Protocol: "pop3", UseTls: true},
-		{Name: "pop3s", Bind: bind("[::]:995"), Protocol: "pop3", UseTls: true, ImplicitTls: true},
-		{Name: "sieve", Bind: bind("[::]:4190"), Protocol: "manageSieve", UseTls: true},
-		{Name: "http", Bind: bind(HttpBind), Protocol: "http"},
-		{Name: "tunnel", Bind: bind(TunnelBind), Protocol: "smtp"},
+		{Name: "smtp", Bind: bind("[::]:25"), Protocol: "smtp", UseTls: true, ProxyTrust: networks()},
+		{Name: "submission", Bind: bind("[::]:587"), Protocol: "smtp", UseTls: true, ProxyTrust: networks()},
+		{Name: "submissions", Bind: bind("[::]:465"), Protocol: "smtp", UseTls: true, ImplicitTls: true, ProxyTrust: networks()},
+		{Name: "imap", Bind: bind("[::]:143"), Protocol: "imap", UseTls: true, ProxyTrust: networks()},
+		{Name: "imaps", Bind: bind("[::]:993"), Protocol: "imap", UseTls: true, ImplicitTls: true, ProxyTrust: networks()},
+		{Name: "pop3", Bind: bind("[::]:110"), Protocol: "pop3", UseTls: true, ProxyTrust: networks()},
+		{Name: "pop3s", Bind: bind("[::]:995"), Protocol: "pop3", UseTls: true, ImplicitTls: true, ProxyTrust: networks()},
+		{Name: "sieve", Bind: bind("[::]:4190"), Protocol: "manageSieve", UseTls: true, ProxyTrust: networks()},
+		{Name: "http", Bind: bind(unixBind(settings.HttpSocket, HttpPort)), Protocol: "http", ProxyTrust: networks()},
+		{Name: "tunnel", Bind: bind(unixBind(settings.TunnelSocket, SmtpPort)), Protocol: "smtp", ProxyTrust: networks(TunnelProxy)},
 	}
 	current, err := List[NetworkListener](p.client, accountId, "x:NetworkListener")
 	if err != nil {
@@ -383,4 +384,16 @@ func (p *Provisioner) relay(accountId string, relay Relay) error {
 
 func bind(address string) map[string]bool {
 	return map[string]bool{address: true}
+}
+
+func networks(values ...string) map[string]bool {
+	set := map[string]bool{}
+	for _, value := range values {
+		set[value] = true
+	}
+	return set
+}
+
+func unixBind(path string, port int) string {
+	return fmt.Sprintf("unix:%s:%d", path, port)
 }

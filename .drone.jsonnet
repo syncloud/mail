@@ -1,5 +1,5 @@
 local name = 'mail';
-local stalwart = 'v1.0.0-syncloud.6';
+local stalwart = 'v1.0.1-syncloud.1';
 local webui = 'v2.0.1';
 local spam_filter = 'v3.0.3';
 local bulwark = '1.18.0';
@@ -143,41 +143,48 @@ local build(arch, test_ui) = [{
            ],
          },
          {
-           name: 'test-upgrade-prev',
+           name: 'test-migrate-postfix-before',
            image: 'python:' + python,
            commands: [
-             './ci/test.sh upgrade_prev.py ' + distro_default + ' ' + arch,
+             './ci/test.sh migrate_postfix_before.py ' + distro_default + ' ' + arch,
            ],
          },
          {
-           name: 'e2e-before-upgrade',
+           name: 'e2e-migrate-postfix-before',
            image: playwright,
            commands: [
-             './test/e2e/run.sh specs/02-pre-upgrade.spec.ts desktop',
+             './test/e2e/run.sh specs/02-migrate-postfix-before.spec.ts desktop',
            ],
          },
          {
-           name: 'test-upgrade',
+           name: 'test-migrate-postfix',
            image: 'python:' + python,
            commands: [
-             './ci/test.sh upgrade.py ' + distro_default + ' ' + arch,
+             './ci/test.sh migrate_postfix.py ' + distro_default + ' ' + arch,
            ],
          },
          {
-           name: 'e2e-after-upgrade',
+           name: 'e2e-migrate-postfix-after',
            image: playwright,
            commands: [
-             './test/e2e/run.sh specs/03-post-upgrade.spec.ts desktop',
+             './test/e2e/run.sh specs/03-migrate-postfix-after.spec.ts desktop',
            ],
          },
          {
-           name: 'e2e-after-upgrade-mobile',
+           name: 'e2e-migrate-postfix-after-mobile',
            image: playwright,
            commands: [
-             './test/e2e/run.sh specs/03-post-upgrade.spec.ts mobile',
+             './test/e2e/run.sh specs/03-migrate-postfix-after.spec.ts mobile',
            ],
          },
        ] else []) + [
+    {
+      name: 'test-upgrade',
+      image: 'python:' + python,
+      commands: [
+        './ci/test.sh upgrade.py ' + distro_default + ' ' + arch,
+      ],
+    },
     {
       name: 'publish',
       image: 'syncloud/store-publisher:' + store_publisher,

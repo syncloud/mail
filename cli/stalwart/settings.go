@@ -3,6 +3,8 @@ package stalwart
 type Settings struct {
 	DeviceDomain     string
 	AppDomain        string
+	HttpSocket       string
+	TunnelSocket     string
 	LdapUrl          string
 	LdapBindDn       string
 	LdapBindPassword string
