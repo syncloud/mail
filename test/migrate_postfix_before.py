@@ -14,6 +14,7 @@ from syncloudlib.integration.hosts import add_host_alias
 from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
+POSTFIX_REVISION = 463
 USERS = {
     'alice': 'Alice-Password1',
     'bob': 'Bob-Password1',
@@ -41,9 +42,9 @@ def test_start(module_setup, app, device_host, domain, device):
     device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
 
 
-def test_install_released(device):
+def test_install_postfix_release(device):
     device.run_ssh('snap remove mail')
-    device.run_ssh('snap install mail', retries=3)
+    device.run_ssh('snap install mail --revision={0}'.format(POSTFIX_REVISION), retries=3)
     assert 'dovecot' in device.run_ssh('snap services mail')
 
 

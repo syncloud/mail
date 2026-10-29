@@ -1,4 +1,5 @@
 import imaplib
+import json
 import os
 import smtplib
 import ssl
@@ -23,6 +24,7 @@ ADMIN_SOCKET = '/var/snap/mail/current/stalwart/admin.sock'
 PUBLIC_SOCKET = '/var/snap/mail/current/stalwart.sock'
 SMTP_TOOL = '/tmp/smtp'
 DOMAIN_GET = '/tmp/domain-get.json'
+LISTENER_GET = '/tmp/listener-get.json'
 GTUBE = 'XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X'
 
 
@@ -119,6 +121,22 @@ def domain_get(device, device_host):
     run_scp('{0}/jmap/domain-get.json root@{1}:{2}'.format(DIR, device_host, DOMAIN_GET),
             password=device.ssh_password)
     return DOMAIN_GET
+
+
+@pytest.fixture(scope="session")
+def listener_get(device, device_host):
+    run_scp('{0}/jmap/listener-get.json root@{1}:{2}'.format(DIR, device_host, LISTENER_GET),
+            password=device.ssh_password)
+    return LISTENER_GET
+
+
+def test_listeners_on_unix_sockets(device, listener_get):
+    response = device.run_ssh('curl -s --unix-socket {0} -H Content-Type:application/json -d @{1} http://localhost/jmap/'.format(
+        ADMIN_SOCKET, listener_get))
+    listeners = {listener['name']: list(listener['bind']) for listener in json.loads(response)['methodResponses'][0][1]['list']}
+    assert listeners.pop('http') == ['unix:{0}:443'.format(PUBLIC_SOCKET)], response
+    assert listeners.pop('tunnel') == ['unix:{0}:25'.format(TUNNEL_SOCKET)], response
+    assert not any(address.startswith('unix:') for bind in listeners.values() for address in bind), response
 
 
 def test_admin_socket_is_admin(device, domain, domain_get):
@@ -290,24 +308,24 @@ def smtp(device, device_host):
     return SMTP_TOOL
 
 
-def tunnel_smtp(device, sender, recipient, subject='', body='', xclient=''):
+def tunnel_smtp(device, sender, recipient, subject='', body='', proxy=''):
     command = "{0} -socket {1} -from '{2}' -rcpt '{3}'".format(SMTP_TOOL, TUNNEL_SOCKET, sender, recipient)
     if subject:
         command += " -subject '{0}' -body '{1}'".format(subject, body)
-    if xclient:
-        command += " -xclient '{0}'".format(xclient)
+    if proxy:
+        command += " -proxy {0}".format(proxy)
     return device.run_ssh(command, throw=False)
 
 
 def test_tunnel_delivers_to_a_local_user(smtp, device, domain, device_user, app_domain, device_password):
     out = tunnel_smtp(device, 'outside@example.com', '{0}@{1}'.format(device_user, domain),
-                      subject='tunnel-delivery', body='through the tunnel', xclient='ADDR=192.0.2.77 NAME=announced.example.com')
+                      subject='tunnel-delivery', body='through the tunnel', proxy='192.0.2.77')
     assert 'queued' in out.lower(), out
     retry_func(lambda: delivered(app_domain, device_user, device_password, 'tunnel-delivery'),
                message='tunnel delivery', retries=20, sleep=3)
 
 
-def test_tunnel_takes_the_announced_client_address(app_domain, device_user, device_password):
+def test_tunnel_takes_the_proxied_client_address(app_domain, device_user, device_password):
     message = delivered(app_domain, device_user, device_password, 'tunnel-delivery')
     assert '[192.0.2.77]' in message.split('\r\n\r\n')[0], message[:3000]
     assert 'client-ip=192.0.2.77' in message, message[:3000]
@@ -319,13 +337,13 @@ def test_tunnel_does_not_sign_incoming_mail(app_domain, domain, device_user, dev
 
 
 def test_tunnel_refuses_to_relay_elsewhere(smtp, device):
-    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com', xclient='ADDR=192.0.2.78')
+    out = tunnel_smtp(device, 'outside@example.com', 'victim@example.com', proxy='192.0.2.78')
     assert '550' in out or '554' in out or '553' in out, out
 
 
 def test_spam_does_not_reach_the_inbox(smtp, device, domain, device_user, app_domain, device_password):
     tunnel_smtp(device, 'spammer@example.com', '{0}@{1}'.format(device_user, domain),
-                subject='gtube-probe', body=GTUBE, xclient='ADDR=192.0.2.79')
+                subject='gtube-probe', body=GTUBE, proxy='192.0.2.79')
     time.sleep(10)
     assert not search(app_domain, device_user, device_password, 'INBOX', 'gtube-probe')
 

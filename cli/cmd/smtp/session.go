@@ -17,13 +17,22 @@ type Session struct {
 	transcript strings.Builder
 }
 
-func Dial(socket string) (*Session, error) {
+func Dial(socket, proxy string) (*Session, error) {
 	connection, err := net.DialTimeout("unix", socket, timeout)
 	if err != nil {
 		return nil, err
 	}
 	if err := connection.SetDeadline(time.Now().Add(timeout)); err != nil {
 		return nil, err
+	}
+	if proxy != "" {
+		header, err := proxyHeader(proxy)
+		if err != nil {
+			return nil, err
+		}
+		if _, err := connection.Write(header); err != nil {
+			return nil, err
+		}
 	}
 	session := &Session{connection: connection, reader: bufio.NewReader(connection)}
 	if err := session.reply(); err != nil {
@@ -69,13 +78,6 @@ func (s *Session) reply() error {
 			return nil
 		}
 	}
-}
-
-func (s *Session) Xclient(attributes string) error {
-	if err := s.Send("EHLO smtp.test"); err != nil {
-		return err
-	}
-	return s.Send(fmt.Sprintf("XCLIENT %s", attributes))
 }
 
 func (s *Session) Deliver(from string, recipient string, subject string, body string, headers []string) error {
