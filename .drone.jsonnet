@@ -1,18 +1,18 @@
 local name = 'mail';
-local roundcube = '1.6.15';
-local dovecot = '2.4.4';
-local pigeonhole = '2.4.4';
+local stalwart = 'v1.0.0-syncloud.6';
+local webui = 'v2.0.1';
+local spam_filter = 'v3.0.3';
+local bulwark = '1.18.0';
+local node = 'node:22.23.4-bookworm-slim';
 local nginx = '1.30.4';
-local postfix = '3.11.5';
 local python = '3.12-slim-bookworm';
 local golang = '1.24.0';
 local debian = 'bookworm-slim';
-local php = 'php:8.3.36-fpm-bookworm';
-local postgres = 'postgres:9.4-alpine';
-local platform = '26.08.01';
+local platform = '26.10.02';
 local playwright = 'mcr.microsoft.com/playwright:v1.48.2-jammy';
 local store_publisher = 'stable-346';
 local distros = ['bookworm', 'buster'];
+local distro_default = 'bookworm';
 
 local platform_image(distro) =
   'syncloud/platform-' + distro + ':' + platform;
@@ -44,131 +44,39 @@ local build(arch, test_ui) = [{
     for distro in distros
   ] + [
     {
-      name: 'dovecot',
+      name: 'stalwart',
       image: 'debian:' + debian,
       commands: [
-        './dovecot/build.sh ' + dovecot + ' ' + pigeonhole,
+        './stalwart/build.sh ' + stalwart + ' ' + webui + ' ' + spam_filter,
       ],
     },
   ] + [
     {
-      name: 'dovecot test ' + distro,
+      name: 'stalwart test ' + distro,
       image: platform_image(distro),
       commands: [
-        './dovecot/test.sh',
+        './stalwart/test.sh',
       ],
     }
     for distro in distros
   ] + [
     {
-      name: 'opendkim',
-      image: 'debian:' + debian,
+      name: 'bulwark',
+      image: node,
       commands: [
-        './opendkim/build.sh',
+        './bulwark/build.sh ' + bulwark,
       ],
     },
   ] + [
     {
-      name: 'opendkim test ' + distro,
+      name: 'bulwark test ' + distro,
       image: platform_image(distro),
       commands: [
-        './opendkim/test.sh',
+        './bulwark/test.sh',
       ],
     }
     for distro in distros
   ] + [
-    {
-      name: 'php',
-      image: php,
-      commands: [
-        './php/build.sh',
-      ],
-    },
-  ] + [
-    {
-      name: 'php test ' + distro,
-      image: platform_image(distro),
-      commands: [
-        './php/test.sh',
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'postgresql',
-      image: postgres,
-      commands: [
-        './postgresql/build.sh',
-      ],
-    },
-  ] + [
-    {
-      name: 'postgresql test ' + distro,
-      image: platform_image(distro),
-      commands: [
-        './postgresql/test.sh',
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'postfix',
-      image: 'debian:' + debian,
-      commands: [
-        './postfix/build.sh ' + postfix,
-      ],
-    },
-  ] + [
-    {
-      name: 'postfix test ' + distro,
-      image: platform_image(distro),
-      commands: [
-        './postfix/test.sh',
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'redis',
-      image: 'debian:' + debian,
-      commands: [
-        './redis/build.sh',
-      ],
-    },
-  ] + [
-    {
-      name: 'redis test ' + distro,
-      image: platform_image(distro),
-      commands: [
-        './redis/test.sh',
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'rspamd',
-      image: 'debian:' + debian,
-      commands: [
-        './rspamd/build.sh',
-      ],
-    },
-  ] + [
-    {
-      name: 'rspamd test ' + distro,
-      image: platform_image(distro),
-      commands: [
-        './rspamd/test.sh',
-      ],
-    }
-    for distro in distros
-  ] + [
-    {
-      name: 'download',
-      image: 'debian:' + debian,
-      commands: [
-        './download.sh ' + roundcube,
-      ],
-    },
     {
       name: 'cli',
       image: 'golang:' + golang,
@@ -180,8 +88,7 @@ local build(arch, test_ui) = [{
       name: 'redirect faker',
       image: 'golang:' + golang,
       commands: [
-        'cd redirect-faker',
-        'CGO_ENABLED=0 go build -o faker .',
+        './redirect-faker/build.sh',
       ],
     },
     {
@@ -216,7 +123,7 @@ local build(arch, test_ui) = [{
       name: 'test ' + distro,
       image: 'python:' + python,
       commands: [
-        './test/ci-test.sh ' + distro + ' ' + arch,
+        './ci/test.sh test.py ' + distro + ' ' + arch,
       ],
     }
     for distro in distros
@@ -225,21 +132,49 @@ local build(arch, test_ui) = [{
            name: 'e2e',
            image: playwright,
            commands: [
-             './test/e2e/run.sh e2e specs desktop',
+             './test/e2e/run.sh specs/01- desktop',
            ],
          },
          {
            name: 'e2e-mobile',
            image: playwright,
            commands: [
-             './test/e2e/run.sh e2e specs/01-smoke.spec.ts mobile',
+             './test/e2e/run.sh specs/01-smoke.spec.ts mobile',
+           ],
+         },
+         {
+           name: 'test-upgrade-prev',
+           image: 'python:' + python,
+           commands: [
+             './ci/test.sh upgrade_prev.py ' + distro_default + ' ' + arch,
+           ],
+         },
+         {
+           name: 'e2e-before-upgrade',
+           image: playwright,
+           commands: [
+             './test/e2e/run.sh specs/02-pre-upgrade.spec.ts desktop',
            ],
          },
          {
            name: 'test-upgrade',
            image: 'python:' + python,
            commands: [
-             './test/ci-upgrade.sh buster ' + arch,
+             './ci/test.sh upgrade.py ' + distro_default + ' ' + arch,
+           ],
+         },
+         {
+           name: 'e2e-after-upgrade',
+           image: playwright,
+           commands: [
+             './test/e2e/run.sh specs/03-post-upgrade.spec.ts desktop',
+           ],
+         },
+         {
+           name: 'e2e-after-upgrade-mobile',
+           image: playwright,
+           commands: [
+             './test/e2e/run.sh specs/03-post-upgrade.spec.ts mobile',
            ],
          },
        ] else []) + [

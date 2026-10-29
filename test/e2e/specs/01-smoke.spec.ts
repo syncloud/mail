@@ -1,17 +1,21 @@
-import { test } from '@playwright/test'
-import { shoot } from '../helpers/screenshot'
-import { login, expectInbox } from '../helpers/roundcube'
+import { test } from '../fixtures'
+import { capture } from '../helpers/screenshot'
+import { env } from '../helpers/env'
+import { login, compose, expectMessage, openContacts } from '../helpers/bulwark'
 
-const user = process.env.PLAYWRIGHT_DEVICE_USER ?? 'user'
-const password = process.env.PLAYWRIGHT_DEVICE_PASSWORD ?? 'Password1'
+test('log in, send to yourself and open contacts', async ({ page }) => {
+  const user = env('PLAYWRIGHT_DEVICE_USER')
+  const subject = `e2e-send-${env('PLAYWRIGHT_PROJECT')}-${Date.now()}`
 
-test.describe('mail smoke', () => {
-  test('log in and reach inbox', async ({ page }, testInfo) => {
-    await page.goto('/')
-    await shoot(page, testInfo, 'login')
-    await login(page, user, password)
-    await shoot(page, testInfo, 'login-submitted')
-    await expectInbox(page)
-    await shoot(page, testInfo, 'inbox')
-  })
+  await page.goto('/')
+  await capture(page, 'login')
+  await login(page, user, env('PLAYWRIGHT_DEVICE_PASSWORD'))
+  await capture(page, 'inbox')
+
+  await compose(page, `${user}@${env('PLAYWRIGHT_FULL_DOMAIN')}`, subject, 'sent from the web interface')
+  await expectMessage(page, subject)
+  await capture(page, 'received')
+
+  await openContacts(page)
+  await capture(page, 'contacts')
 })

@@ -13,6 +13,7 @@ ARCH=$(dpkg --print-architecture)
 SNAP_DIR=${DIR}/build/snap
 
 echo $VERSION > ${DIR}/version
+echo $VERSION > ${SNAP_DIR}/version
 
 apt update
 apt -y install squashfs-tools
@@ -21,8 +22,6 @@ mkdir -p ${SNAP_DIR}/bin
 cp -r ${DIR}/bin/* ${SNAP_DIR}/bin
 cp -r ${DIR}/config ${SNAP_DIR}
 cp -r ${DIR}/meta ${SNAP_DIR}
-cp ${SNAP_DIR}/roundcubemail/config/defaults.inc.php ${SNAP_DIR}/config/roundcube/
-cp -r ${SNAP_DIR}/postfix/config/postfix/postfix-files ${SNAP_DIR}/config/postfix
 
 echo "version: $VERSION" >> ${SNAP_DIR}/meta/snap.yaml
 echo "architectures:" >> ${SNAP_DIR}/meta/snap.yaml
