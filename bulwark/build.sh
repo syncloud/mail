@@ -14,7 +14,7 @@ rm -rf ${APP_DIR} ${NODE_DIR} ${SOCKET_DIR} ${NATIVE_DIR}
 mkdir -p ${NODE_DIR} ${SOCKET_DIR} ${NATIVE_DIR}
 
 cd ${DIR}
-wget --tries=5 --retry-connrefused --progress=dot:giga https://github.com/bulwarkmail/webmail/releases/download/${VERSION}/bulwark-standalone-${VERSION}-linux-amd64.tar.gz
+${DIR}/../download.sh https://github.com/bulwarkmail/webmail/releases/download/${VERSION}/bulwark-standalone-${VERSION}-linux-amd64.tar.gz bulwark-standalone-${VERSION}-linux-amd64.tar.gz
 tar xf bulwark-standalone-${VERSION}-linux-amd64.tar.gz
 rm bulwark-standalone-${VERSION}-linux-amd64.tar.gz
 mv bulwark-standalone ${APP_DIR}

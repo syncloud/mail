@@ -11,8 +11,14 @@ export async function login(page: Page, user: string, password: string) {
   await page.locator('#username-textfield').fill(user)
   await page.locator('#password-textfield').fill(password)
   await page.locator('#sign-in-button').click()
+  const accountSwitcher = page.getByTestId('account-switcher').first()
+  const passkeySkip = page.getByTestId('passkey-skip')
   try {
-    await expect(page.getByTestId('account-switcher').first()).toBeVisible({ timeout: 60_000 })
+    await expect(passkeySkip.or(accountSwitcher).first()).toBeVisible({ timeout: 60_000 })
+    if (await passkeySkip.isVisible()) {
+      await passkeySkip.click()
+    }
+    await expect(accountSwitcher).toBeVisible({ timeout: 60_000 })
   } catch (e) {
     console.log(`[login] url=${page.url()}`)
     console.log(`[login] responses=\n${responses.join('\n')}`)
