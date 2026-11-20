@@ -11,6 +11,7 @@ from subprocess import check_output
 import pytest
 from syncloudlib.integration.hosts import add_host_alias
 
+from test import snapd
 from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
@@ -39,6 +40,7 @@ def module_setup(request, device, artifact_dir):
 def test_start(module_setup, app, device_host, domain, device):
     add_host_alias(app, device_host, domain)
     device.activated()
+    snapd.settle(device)
     device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
 
 

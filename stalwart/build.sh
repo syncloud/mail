@@ -16,10 +16,10 @@ ${DIR}/../apt.sh wget ca-certificates
 
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
-wget --tries=5 --retry-connrefused --progress=dot:giga https://github.com/cyberb/stalwart/releases/download/${VERSION}/stalwart-${TARGET}.tar.gz
+${DIR}/../download.sh https://github.com/cyberb/stalwart/releases/download/${VERSION}/stalwart-${TARGET}.tar.gz stalwart-${TARGET}.tar.gz
 tar xf stalwart-${TARGET}.tar.gz
 rm stalwart-${TARGET}.tar.gz
 chmod +x stalwart
-wget --tries=5 --retry-connrefused --progress=dot:giga -O webui.zip https://github.com/stalwartlabs/webui/releases/download/${WEBUI_VERSION}/webui.zip
-wget --tries=5 --retry-connrefused --progress=dot:giga -O spam-filter-rules.json.gz https://github.com/stalwartlabs/spam-filter/releases/download/${SPAM_FILTER_VERSION}/spam-filter-rules.json.gz
+${DIR}/../download.sh https://github.com/stalwartlabs/webui/releases/download/${WEBUI_VERSION}/webui.zip webui.zip
+${DIR}/../download.sh https://github.com/stalwartlabs/spam-filter/releases/download/${SPAM_FILTER_VERSION}/spam-filter-rules.json.gz spam-filter-rules.json.gz
 ls -la ${BUILD_DIR}
