@@ -8,6 +8,7 @@ from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 from syncloudlib.integration.ssh import run_scp
 
+from test import snapd
 from test.util.helper import retry_func
 from test.util.mailbox import Mailbox
 
@@ -42,6 +43,7 @@ def mailbox(app_domain, domain):
 def test_start(module_setup, app, device_host, domain, device):
     add_host_alias(app, device_host, domain)
     device.activated()
+    snapd.settle(device)
     device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
 
 

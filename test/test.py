@@ -14,6 +14,7 @@ from syncloudlib.integration.hosts import add_host_alias
 from syncloudlib.integration.installer import local_install
 from syncloudlib.integration.ssh import run_scp
 
+from test import snapd
 from test.util.helper import retry_func
 
 TMP_DIR = '/tmp/syncloud'
@@ -52,7 +53,7 @@ def module_setup(request, device, data_dir, platform_data_dir, artifact_dir):
 def test_start(module_setup, device_host, app, domain, device):
     add_host_alias(app, device_host, domain)
     device.run_ssh('date', retries=100)
-    device.run_ssh('snap watch --last=auto-refresh?', throw=False)
+    snapd.settle(device)
     device.run_ssh('mkdir -p {0}'.format(TMP_DIR), throw=False)
 
 

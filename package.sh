@@ -15,8 +15,7 @@ SNAP_DIR=${DIR}/build/snap
 echo $VERSION > ${DIR}/version
 echo $VERSION > ${SNAP_DIR}/version
 
-apt update
-apt -y install squashfs-tools
+${DIR}/apt.sh squashfs-tools
 
 mkdir -p ${SNAP_DIR}/bin
 cp -r ${DIR}/bin/* ${SNAP_DIR}/bin
