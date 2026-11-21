@@ -25,13 +25,13 @@ SHARP_VERSION=$(node -p "require('${APP_DIR}/node_modules/sharp/package.json').v
 ESBUILD_VERSION=$(node -p "require('${APP_DIR}/node_modules/esbuild/package.json').version")
 cd ${NATIVE_DIR}
 npm init -y > /dev/null
-npm install --no-audit --no-fund sharp@${SHARP_VERSION} esbuild@${ESBUILD_VERSION}
+${DIR}/../retry.sh npm install --no-audit --no-fund sharp@${SHARP_VERSION} esbuild@${ESBUILD_VERSION}
 rm -rf ${APP_DIR}/node_modules/@img ${APP_DIR}/node_modules/sharp ${APP_DIR}/node_modules/@esbuild ${APP_DIR}/node_modules/esbuild
 cp -r node_modules/@img node_modules/sharp node_modules/@esbuild node_modules/esbuild ${APP_DIR}/node_modules/
 
 cd ${SOCKET_DIR}
 npm init -y > /dev/null
-npm install --no-audit --no-fund undici@6
+${DIR}/../retry.sh npm install --no-audit --no-fund undici@6
 cp ${DIR}/syncloud.js ${SOCKET_DIR}/index.js
 
 cp -r /usr ${NODE_DIR}/usr

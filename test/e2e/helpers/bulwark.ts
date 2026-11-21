@@ -63,12 +63,12 @@ export async function compose(page: Page, to: string, subject: string, body: str
 
 export async function openContacts(page: Page) {
   await page.locator('a[href="/contacts"]').first().click()
-  await expect(page.getByTestId('address-book-item').first()).toBeVisible()
+  await expect(page.getByPlaceholder('Search contacts...', { exact: true })).toBeVisible()
 }
 
 export async function createContact(page: Page, firstName: string, lastName: string, email: string) {
-  await page.locator('button:not([title]):has(svg.tabler-icon-plus)').locator('visible=true').first().click()
-  await page.getByRole('button', { name: 'New Contact', exact: true }).first().click()
+  await page.getByRole('button', { name: 'New', exact: true }).locator('visible=true').first().click()
+  await page.getByRole('menuitem', { name: 'New contact', exact: true }).click()
   await page.getByPlaceholder('First name').fill(firstName)
   await page.getByPlaceholder('Last name').fill(lastName)
   await page.getByPlaceholder('email@example.com').fill(email)
@@ -95,7 +95,7 @@ export async function openSettings(page: Page, tab: string) {
 
 export async function createFolder(page: Page, name: string) {
   await openSettings(page, 'organize')
-  await page.getByRole('button', { name: 'Create Folder', exact: true }).click()
+  await page.getByRole('button', { name: 'New folder', exact: true }).click()
   await page.getByPlaceholder('Folder name').fill(name)
   await page.getByRole('button', { name: 'Create', exact: true }).click()
   await expect(page.getByText(name, { exact: true }).first()).toBeVisible()
@@ -103,18 +103,22 @@ export async function createFolder(page: Page, name: string) {
 
 export async function createRule(page: Page, name: string, subjectContains: string, folder: string) {
   await openSettings(page, 'filters')
-  await page.getByRole('button', { name: 'Add Rule', exact: true }).click()
-  await page.getByPlaceholder('e.g., Sort newsletters').fill(name)
-  await page.getByLabel('Conditions').selectOption({ label: 'Subject' })
-  await page.getByPlaceholder('Value (multiple separated by commas)').fill(subjectContains)
-  await page.getByLabel('Actions').selectOption({ label: 'Move to folder' })
-  await page.getByLabel('Select folder').selectOption({ label: folder })
-  await page.getByRole('button', { name: 'Save Rules', exact: true }).click()
+  await page.getByRole('button', { name: 'New rule', exact: true }).click()
+  const editor = page.getByRole('dialog', { name: 'New rule' })
+  await expect(editor).toBeVisible()
+  await editor.getByLabel('Condition 1', { exact: true }).selectOption({ label: 'Subject' })
+  await editor.getByLabel('Condition value', { exact: true }).fill(subjectContains)
+  await editor.getByRole('button', { name: 'Select folder', exact: true }).first().click()
+  await page.getByRole('menuitem').filter({ hasText: folder }).first().click()
+  await expect(editor.getByLabel('Move to folder', { exact: true })).toBeChecked()
+  await editor.getByLabel('Rule name', { exact: true }).fill(name)
+  await editor.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(editor).toBeHidden()
   await expect(page.getByText(name, { exact: true }).first()).toBeVisible()
 }
 
 export async function backToMail(page: Page) {
-  await page.getByRole('button', { name: 'Back to Mail', exact: true }).click()
+  await page.getByRole('button', { name: 'Back to mail', exact: true }).click()
   await expect(page.getByTestId('folder-row').first()).toBeVisible()
 }
 

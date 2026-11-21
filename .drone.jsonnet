@@ -2,7 +2,7 @@ local name = 'mail';
 local stalwart = 'v1.0.1-syncloud.1';
 local webui = 'v2.1.0';
 local spam_filter = 'v3.0.3';
-local bulwark = '1.18.0';
+local bulwark = '1.21.3';
 local node = 'node:22.23.4-bookworm-slim';
 local nginx = '1.30.7';
 local python = '3.12-slim-bookworm';
@@ -16,6 +16,7 @@ local distro_default = 'bookworm';
 
 local platform_image(distro) =
   'syncloud/platform-' + distro + ':' + platform;
+local snapd_hold = "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init";
 
 local build(arch, test_ui) = [{
   kind: 'pipeline',
@@ -84,6 +85,16 @@ local build(arch, test_ui) = [{
         './cli/build.sh',
       ],
     },
+  ] + [
+    {
+      name: 'cli test ' + distro,
+      image: platform_image(distro),
+      commands: [
+        './cli/test.sh',
+      ],
+    }
+    for distro in distros
+  ] + [
     {
       name: 'redirect faker',
       image: 'golang:' + golang,
@@ -224,7 +235,7 @@ local build(arch, test_ui) = [{
       name: name + '.' + distro + '.com',
       image: platform_image(distro),
       privileged: true,
-      entrypoint: ['/bin/sh', '-c', "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
+      entrypoint: ['/bin/sh', '-c', snapd_hold],
       volumes: [
         { name: 'dbus', path: '/var/run/dbus' },
         { name: 'dev', path: '/dev' },
