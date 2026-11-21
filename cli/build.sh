@@ -2,6 +2,7 @@
 DIR=$(cd "$(dirname "$0")" && pwd)
 cd "$DIR"
 
+../retry.sh go mod download
 go test ./...
 
 OUT_HOOKS=../build/snap/meta/hooks
